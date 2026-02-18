@@ -129,7 +129,14 @@
                 </button>
             </div>
 
-            <a href="/" class="text-xs font-bold text-arbitra-emerald hover:underline">View Public Site</a>
+            <div class="flex items-center gap-4">
+                <a href="/" class="text-xs font-bold text-arbitra-emerald hover:underline">View Public Site</a>
+                <button @click="showProfileEdit = true" class="text-xs font-bold text-arbitra-gray hover:text-white transition-all uppercase tracking-widest text-[10px]">Profile</button>
+                <form @submit.prevent="confirmLogout($event)" action="{{ route('logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="text-xs font-bold text-arbitra-gray hover:text-white transition-all uppercase tracking-widest text-[10px]">Logout</button>
+                </form>
+            </div>
         </div>
     </nav>
 
@@ -218,6 +225,11 @@
                         });
                         $watch('modalTabs', () => syncModalDetails(), { deep: true });
                         $watch('techy', (val) => { if(!val) parseModalDetails() });
+                        
+                        // Change Tracking
+                        $watch('form', () => Alpine.store('admin').setUnsaved(true), { deep: true });
+                        $watch('title', () => Alpine.store('admin').setUnsaved(true));
+                        $watch('source', () => Alpine.store('admin').setUnsaved(true));
                     ">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
                         <!-- Hero Content Preview (Match Public Site) -->
@@ -287,7 +299,7 @@
                                             </div>
 
                                             <div class="flex gap-4 mt-10">
-                                                <button @click.stop="editingStat = false" class="flex-1 bg-arbitra-emerald text-arbitra-black py-4 rounded-full font-black text-xs uppercase tracking-widest transition-all hover:scale-105">DONE</button>
+                                                <button @click.stop="save({{ $hero->id }}, {section_title: title, content: form, source: source}); editingStat = false" class="flex-1 bg-arbitra-emerald text-arbitra-black py-4 rounded-full font-black text-xs uppercase tracking-widest transition-all hover:scale-105">SAVE STAT</button>
                                                 <button @click.stop="editingStat = false" class="px-8 border border-white/10 rounded-full font-bold text-xs">CANCEL</button>
                                             </div>
                                         </div>
@@ -546,6 +558,11 @@
                     });
                     $watch('modalTabs', () => syncModalDetails(), { deep: true });
                     $watch('techy', (val) => { if(!val) parseModalDetails() });
+                    
+                    // Change Tracking
+                    $watch('form', () => Alpine.store('admin').setUnsaved(true), { deep: true });
+                    $watch('title', () => Alpine.store('admin').setUnsaved(true));
+                    $watch('source', () => Alpine.store('admin').setUnsaved(true));
                 "
                 class="scroll-mt-32 pb-20 group relative">
                     
@@ -1064,6 +1081,88 @@
         </section>
     </main>
 
+    <div x-init="
+        window.onbeforeunload = function() {
+            if (Alpine.store('admin') && Alpine.store('admin').hasUnsavedChanges) {
+                return 'You have unsaved changes. Are you sure you want to leave?';
+            }
+        };
+    "></div>
+
+    <div x-show="showProfileEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl px-6">
+        <div class="bg-arbitra-dark p-12 rounded-[2.5rem] border border-white/10 max-w-md w-full relative">
+            <button @click="showProfileEdit = false" class="absolute top-8 right-8 text-arbitra-gray hover:text-white transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <h3 class="text-2xl font-black mb-6 italic uppercase tracking-tighter">Profile Settings</h3>
+            
+            <form action="/admin/profile" method="POST" class="space-y-6">
+                @csrf
+                <div>
+                    <label class="admin-label">Full Name</label>
+                    <input type="text" name="name" value="{{ Auth::user()->name }}" required class="admin-input mt-2">
+                </div>
+
+                <div>
+                    <label class="admin-label">Email Address</label>
+                    <input type="email" name="email" value="{{ Auth::user()->email }}" required class="admin-input mt-2">
+                </div>
+
+                <div class="pt-4 border-t border-white/5">
+                    <p class="text-[9px] font-black uppercase text-arbitra-gray tracking-widest mb-4">Change Password (Leave blank to keep current)</p>
+                    
+                    <div class="space-y-4">
+                        <div x-data="{ show: false }">
+                            <label class="admin-label">New Password</label>
+                            <div class="relative">
+                                <input :type="show ? 'text' : 'password'" name="password" class="admin-input mt-2 pr-12">
+                                <button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 mt-1 text-arbitra-gray hover:text-white transition-all">
+                                    <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    <svg x-show="show" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div x-data="{ show: false }">
+                            <label class="admin-label">Confirm New Password</label>
+                            <div class="relative">
+                                <input :type="show ? 'text' : 'password'" name="password_confirmation" class="admin-input mt-2 pr-12">
+                                <button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 mt-1 text-arbitra-gray hover:text-white transition-all">
+                                    <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    <svg x-show="show" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 bg-arbitra-emerald text-arbitra-black py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-[0_0_30px_rgba(16,185,129,0.2)]">Update Profile</button>
+                    <button type="button" @click="showProfileEdit = false" class="flex-1 border border-white/20 py-3 rounded-full font-black text-xs uppercase tracking-widest">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Message Toast -->
+    @if(session('success'))
+    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" 
+         class="fixed bottom-10 right-10 z-[100] bg-arbitra-emerald text-arbitra-black px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-[0_0_50px_rgba(16,185,129,0.3)] animate-fade-in">
+        {{ session('success') }}
+    </div>
+    @endif
+
+    @if($errors->any())
+    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 8000)" 
+         class="fixed bottom-10 right-10 z-[100] bg-red-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-[0_0_50px_rgba(239,68,68,0.3)] animate-fade-in">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
     <div x-show="showAddYear" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl px-6">
         <div class="bg-arbitra-dark p-12 rounded-[2.5rem] border border-white/10 max-w-md w-full">
             <h3 class="text-2xl font-black mb-6 italic uppercase tracking-tighter">Add New Year Profile</h3>
@@ -1084,12 +1183,29 @@
     </div>
 
     <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('admin', {
+                hasUnsavedChanges: false,
+                setUnsaved(val) { this.hasUnsavedChanges = val; }
+            });
+        });
+
         function adminApp() {
             return {
                 showAddYear: false,
+                showProfileEdit: false,
                 newYear: '',
                 duplicateFromCurrent: true,
                 selectedYear: @js($selectedYear),
+
+                confirmLogout(e) {
+                    if (Alpine.store('admin').hasUnsavedChanges) {
+                        if (!confirm('You have unsaved changes. Are you sure you want to logout?')) {
+                            return;
+                        }
+                    }
+                    e.target.submit();
+                },
 
                 renderChart(el, type, series, categories) {
                     if (!el) return;
@@ -1156,6 +1272,7 @@
                             body: JSON.stringify(data)
                         });
                         if (response.ok) {
+                            Alpine.store('admin').setUnsaved(false);
                             alert('Section updated successfully!');
                             window.location.reload();
                         }
@@ -1175,6 +1292,7 @@
                             }
                         });
                         if (response.ok) {
+                            Alpine.store('admin').setUnsaved(false);
                             window.location.reload();
                         }
                     } catch (e) {
@@ -1193,6 +1311,7 @@
                             }
                         });
                         if (response.ok) {
+                            Alpine.store('admin').setUnsaved(false);
                             window.location.href = '/admin';
                         }
                     } catch (e) {
@@ -1217,6 +1336,7 @@
                                 })
                             });
                             if (response.ok) {
+                                Alpine.store('admin').setUnsaved(false);
                                 window.location.href = `?year=${this.newYear}`;
                             } else {
                                 const data = await response.json();
@@ -1227,6 +1347,7 @@
                         }
                     } else {
                         // To simplify, we just redirect and let the "empty skeleton" logic handle the first section creation
+                        Alpine.store('admin').setUnsaved(false);
                         window.location.href = `?year=${this.newYear}`;
                     }
                 },
@@ -1267,6 +1388,7 @@
                             })
                         });
                         if (response.ok) {
+                            Alpine.store('admin').setUnsaved(false);
                             window.location.reload();
                         }
                     } catch (e) {
@@ -1281,7 +1403,10 @@
                             method: 'DELETE',
                             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
                         });
-                        if (response.ok) window.location.reload();
+                        if (response.ok) {
+                            Alpine.store('admin').setUnsaved(false);
+                            window.location.reload();
+                        }
                     } catch (e) { alert('Error deleting inquiry'); }
                 }
             }

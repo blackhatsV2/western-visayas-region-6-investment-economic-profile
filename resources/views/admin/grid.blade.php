@@ -87,6 +87,12 @@
                     </template>
                     <span x-text="saving ? 'SAVING...' : 'SAVE ALL CHANGES'"></span>
                 </button>
+                <form action="{{ route('logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="bg-white/5 border border-white/10 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-white/10 transition-all">
+                        Logout
+                    </button>
+                </form>
             </div>
         </div>
     </nav>
