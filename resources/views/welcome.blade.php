@@ -149,6 +149,8 @@
             Alpine.data('app', () => ({
                 modalOpen: false, 
                 contactOpen: false,
+                policyOpen: false,
+                termsOpen: false,
                 modalTitle: '', 
                 modalContent: {},
                 contactForm: { name: '', email: '', contact: '', message: '' },
@@ -760,6 +762,72 @@
         @endif
     </main>
 
+    <!-- Footer -->
+    <footer class="bg-arbitra-black border-t border-white/5 pt-20 pb-10 px-8">
+        <div class="max-w-[1240px] mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <!-- Brand -->
+                <div class="space-y-6">
+                    <div class="flex items-center gap-3">
+                        <img src="{{ asset('dti-logo.png') }}" class="h-10 w-auto" alt="DTI Logo">
+                        <div class="h-8 w-px bg-white/10"></div>
+                        <span class="text-arbitra-emerald font-black tracking-tighter text-xl italic uppercase">Region 6</span>
+                    </div>
+                    <p class="text-arbitra-gray text-sm leading-relaxed max-w-xs">
+                        Empowering Western Visayas through strategic investments, economic innovation, and global collaboration.
+                    </p>
+                </div>
+
+                <!-- Navigation -->
+                <div>
+                    <h4 class="text-white font-black text-xs uppercase tracking-[0.2em] mb-8">Navigation</h4>
+                    <ul class="space-y-4">
+                        <li><a href="#hero" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Why Invest</a></li>
+                        <li><a href="#economy" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Economic Stats</a></li>
+                        <li><a href="#drivers" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Key Drivers</a></li>
+                        <li><a href="/download-profile/{{ $selectedYear }}" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Download Profile</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h4 class="text-white font-black text-xs uppercase tracking-[0.2em] mb-8">Contact Us</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-arbitra-emerald mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span class="text-arbitra-gray text-sm leading-snug">DTI Building, corner J.M. Basa-Gen. M. Peralta Streets, Iloilo City, 5000 Iloilo</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-arbitra-emerald shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <a href="mailto:r06@dti.gov.ph" class="text-arbitra-gray hover:text-white transition-colors text-sm font-medium">r06@dti.gov.ph</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Connect -->
+                <div>
+                    <h4 class="text-white font-black text-xs uppercase tracking-[0.2em] mb-8">Ready to Invest?</h4>
+                    <p class="text-arbitra-gray text-sm mb-6">Connect with our team to explore opportunities in Western Visayas.</p>
+                    <button @click="contactOpen = true; contactSuccess = false" class="inline-flex items-center gap-2 bg-arbitra-emerald/10 text-arbitra-emerald border border-arbitra-emerald/20 px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-arbitra-emerald hover:text-arbitra-black transition-all">
+                        START INQUIRY
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Footer -->
+            <div class="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-arbitra-gray text-[10px] font-bold uppercase tracking-widest">
+                    &copy; {{ date('Y') }} DTI REGION 6. ALL RIGHTS RESERVED.
+                </p>
+                <div class="flex gap-8">
+                    <button @click="policyOpen = true" class="text-arbitra-gray hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors">Privacy Policy</button>
+                    <button @click="termsOpen = true" class="text-arbitra-gray hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors">Terms of Use</button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <!-- Interactive Modal -->
     <div x-show="modalOpen" 
          x-cloak
@@ -917,6 +985,116 @@
                     <button @click="contactOpen = false" class="bg-white/10 text-white px-8 py-3 rounded-full font-bold hover:bg-white/20 transition uppercase text-xs tracking-widest">Close</button>
                 </div>
             </template>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div x-show="policyOpen" 
+         x-cloak
+         class="fixed inset-0 z-[60] flex items-center justify-center px-6"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        
+        <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="policyOpen = false"></div>
+        
+        <div class="relative bg-arbitra-dark max-w-3xl w-full p-12 lg:p-16 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden"
+             x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
+             x-transition:enter-end="scale-100 opacity-100"
+             x-transition:leave="transition ease-in duration-300 transform scale-95 opacity-0">
+            
+            <button @click="policyOpen = false" class="absolute top-10 right-10 text-arbitra-gray hover:text-white transition-all transform hover:rotate-90">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <h3 class="text-3xl font-extrabold text-white tracking-tighter mb-8 uppercase italic">Privacy Policy</h3>
+            
+            <div class="space-y-6 max-h-[60vh] overflow-y-auto pr-6 custom-scrollbar text-arbitra-gray text-sm leading-relaxed">
+                <section>
+                    <h4 class="text-white font-bold uppercase tracking-widest mb-2">1. Data Collection</h4>
+                    <p>We collect personal information such as name, email address, and contact number when you voluntarily submit an inquiry through our platform. This information is essential for us to respond to your requests and provide investment assistance.</p>
+                </section>
+                <section>
+                    <h4 class="text-white font-bold uppercase tracking-widest mb-2">2. Purpose of Processing</h4>
+                    <p>Your data is processed exclusively for addressing investment inquiries, providing economic data updates, and facilitating communication between potential investors and DTI Region 6. We do not use your data for unrelated marketing purposes.</p>
+                </section>
+                <section>
+                    <h4 class="text-white font-bold uppercase tracking-widest mb-2">3. Data Security</h4>
+                    <p>We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction. Your data is stored on secure servers with restricted access.</p>
+                </section>
+                <section>
+                    <h4 class="text-white font-bold uppercase tracking-widest mb-2">4. Disclosure to Third Parties</h4>
+                    <p>We do not sell, trade, or otherwise transfer your personal information to outside parties. This does not include trusted third parties who assist us in operating our website or conducting our business, so long as those parties agree to keep this information confidential.</p>
+                </section>
+                <section>
+                    <h4 class="text-white font-bold uppercase tracking-widest mb-2">5. Compliance with Data Privacy Act</h4>
+                    <p>Our data collection and processing activities are in strict compliance with the Data Privacy Act of 2012 (Republic Act No. 10173) of the Philippines. You have the right to access, correct, or request the deletion of your personal data at any time.</p>
+                </section>
+            </div>
+            
+            <div class="mt-10 pt-8 border-t border-white/5 flex justify-end">
+                <button @click="policyOpen = false" class="bg-arbitra-emerald text-arbitra-black font-extrabold px-10 py-3 rounded-full hover:brightness-110 transition uppercase text-xs tracking-widest">
+                    CLOSE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Use Modal -->
+    <div x-show="termsOpen" 
+         x-cloak
+         class="fixed inset-0 z-[60] flex items-center justify-center px-6"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        
+        <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="termsOpen = false"></div>
+        
+        <div class="relative bg-arbitra-dark max-w-3xl w-full p-12 lg:p-16 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden"
+             x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
+             x-transition:enter-end="scale-100 opacity-100"
+             x-transition:leave="transition ease-in duration-300 transform scale-95 opacity-0">
+            
+            <button @click="termsOpen = false" class="absolute top-10 right-10 text-arbitra-gray hover:text-white transition-all transform hover:rotate-90">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <h3 class="text-3xl font-extrabold text-white tracking-tighter mb-8 uppercase italic">Terms of Use</h3>
+            
+            <div class="space-y-6 max-h-[60vh] overflow-y-auto pr-6 custom-scrollbar text-arbitra-gray text-sm leading-relaxed">
+                <section>
+                    <h4 class="text-white font-bold uppercase tracking-widest mb-2">1. Acceptance of Terms</h4>
+                    <p>By accessing and using this Western Visayas Investment Profile portal, you acknowledge that you have read, understood, and agree to be bound by these terms and conditions.</p>
+                </section>
+                <section>
+                    <h4 class="text-white font-bold uppercase tracking-widest mb-2">2. Use of Information</h4>
+                    <p>The information provided on this portal is for general informational and investment promotion purposes. While we strive for accuracy, DTI Region 6 does not warrant the completeness or reliability of the data presented.</p>
+                </section>
+                <section>
+                    <h4 class="text-white font-bold uppercase tracking-widest mb-2">3. Intellectual Property</h4>
+                    <p>All content, including text, graphics, logos, and data visualizations, is the property of DTI Region 6 or its content suppliers and is protected by intellectual property laws. Unauthorized reproduction or distribution is prohibited.</p>
+                </section>
+                <section>
+                    <h4 class="text-white font-bold uppercase tracking-widest mb-2">4. User Conduct</h4>
+                    <p>Users agree to use the portal only for lawful purposes. You are prohibited from attempting to breach the security of the portal, submitting false information, or using the contact forms for unsolicited commercial messages (spam).</p>
+                </section>
+                <section>
+                    <h4 class="text-white font-bold uppercase tracking-widest mb-2">5. Limitation of Liability</h4>
+                    <p>DTI Region 6 shall not be liable for any direct, indirect, incidental, or consequential damages arising out of the use or inability to use the portal or any information provided herein.</p>
+                </section>
+            </div>
+            
+            <div class="mt-10 pt-8 border-t border-white/5 flex justify-end">
+                <button @click="termsOpen = false" class="bg-arbitra-emerald text-arbitra-black font-extrabold px-10 py-3 rounded-full hover:brightness-110 transition uppercase text-xs tracking-widest">
+                    CLOSE
+                </button>
+            </div>
         </div>
     </div>
 
