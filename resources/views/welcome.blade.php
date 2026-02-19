@@ -2,10 +2,16 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     @php $meta = $contents->where('type', 'metadata')->first(); @endphp
     <title>{{ $meta->content['browser_tab_title'] ?? 'Western Visayas: Investment and Economic Profile' }}</title>
     <link rel="icon" type="image/png" href="{{ asset('dti-logo.png') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WV Invest">
+    <link rel="apple-touch-icon" href="{{ asset('dti-logo.png') }}">
     
     <!-- Scripts & Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -149,6 +155,129 @@
             color: #FFFFFF;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        /* ===== MOBILE APP EXPERIENCE ===== */
+        @media (max-width: 767px) {
+            html { scroll-behavior: smooth; }
+            body { padding-top: env(safe-area-inset-top); }
+
+            /* Hide old mobile nav triggers */
+            .mobile-top-hide { display: none !important; }
+
+            /* Bottom Navigation Bar */
+            .mobile-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0; left: 0; right: 0;
+                z-index: 50;
+                background: rgba(10, 10, 10, 0.97);
+                backdrop-filter: blur(30px);
+                -webkit-backdrop-filter: blur(30px);
+                border-top: 1px solid rgba(255, 255, 255, 0.06);
+                padding: 0.35rem 0.25rem calc(0.35rem + env(safe-area-inset-bottom));
+                justify-content: space-around;
+                align-items: center;
+            }
+            .mobile-bottom-nav a,
+            .mobile-bottom-nav button {
+                display: flex; flex-direction: column; align-items: center;
+                gap: 2px; color: rgba(255,255,255,0.35);
+                font-size: 9px; font-weight: 800; text-transform: uppercase;
+                letter-spacing: 0.06em; background: none; border: none;
+                cursor: pointer; padding: 0.4rem 0.5rem;
+                border-radius: 0.75rem; position: relative;
+                -webkit-tap-highlight-color: transparent;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .mobile-bottom-nav a.active,
+            .mobile-bottom-nav button.active { color: #10b981; }
+            .mobile-bottom-nav a.active::before {
+                content: ''; position: absolute;
+                top: -0.35rem; left: 50%; transform: translateX(-50%);
+                width: 18px; height: 3px; background: #10b981;
+                border-radius: 3px; box-shadow: 0 0 8px rgba(16,185,129,0.5);
+            }
+            .mobile-bottom-nav svg { width: 22px; height: 22px; stroke-width: 1.8; }
+
+            /* Full-screen hero */
+            .mobile-hero-fullscreen {
+                min-height: calc(100svh - 4rem);
+                display: flex; flex-direction: column; justify-content: center;
+            }
+            .mobile-hero-fullscreen > .grid { flex: 1; align-content: center; }
+
+            /* Hero stats horizontal row */
+            .mobile-hero-stats {
+                flex-direction: row !important;
+                overflow-x: auto; scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch; gap: 0.75rem !important;
+            }
+            .mobile-hero-stats::-webkit-scrollbar { display: none; }
+            .mobile-hero-stats { scrollbar-width: none; }
+            .mobile-hero-stats > div {
+                scroll-snap-align: start; min-width: 44vw; flex-shrink: 0;
+            }
+
+            /* Scroll indicator */
+            .mobile-scroll-hint {
+                display: flex; flex-direction: column; align-items: center;
+                gap: 0.5rem; padding: 1rem 0 0;
+                color: rgba(255,255,255,0.25);
+            }
+            @keyframes mobile-bounce {
+                0%, 100% { transform: translateY(0); opacity: 0.3; }
+                50% { transform: translateY(6px); opacity: 0.8; }
+            }
+            .mobile-scroll-hint svg { animation: mobile-bounce 2s ease-in-out infinite; }
+
+            /* Horizontal scroll cards (stats) */
+            .mobile-scroll-x {
+                display: flex !important; overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 0.75rem !important; padding-bottom: 0.75rem;
+                margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem;
+            }
+            .mobile-scroll-x::-webkit-scrollbar { display: none; }
+            .mobile-scroll-x { scrollbar-width: none; }
+            .mobile-scroll-x > div {
+                scroll-snap-align: start; min-width: 72vw; flex-shrink: 0;
+            }
+
+            /* Compact cards */
+            .bento-card { border-radius: 1.25rem !important; }
+
+            /* Section spacing */
+            .section-header { margin-bottom: 1.25rem; }
+            .section-header h2 { font-size: 1.25rem !important; }
+
+            /* Footer + main padding for bottom nav */
+            footer { padding-bottom: 6rem !important; }
+            main { padding-bottom: 6rem !important; }
+
+            /* Year strip compact */
+            .mobile-year-strip { gap: 0.25rem !important; padding: 0.15rem !important; }
+            .mobile-year-strip a { padding: 0.2rem 0.5rem !important; font-size: 9px !important; }
+
+            /* Scroll-in animations */
+            .mobile-animate {
+                opacity: 0; transform: translateY(24px);
+                transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+                            transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            }
+            .mobile-animate.is-visible { opacity: 1; transform: translateY(0); }
+
+            /* Marquee compact */
+            .animate-marquee span {
+                font-size: 1rem !important;
+                margin-left: 1.5rem !important; margin-right: 1.5rem !important;
+            }
+        }
+
+        /* Desktop: hide mobile-only elements */
+        @media (min-width: 768px) {
+            .mobile-bottom-nav { display: none !important; }
+            .mobile-scroll-hint { display: none !important; }
+        }
     </style>
 </head>
 <body x-data="app()" class="antialiased font-sans">
@@ -277,7 +406,7 @@
             </div>
             
             <!-- Year Selector -->
-            <div class="hidden lg:flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded-full border border-white/5 mx-4">
+            <div class="flex md:hidden lg:flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded-full border border-white/5 mx-0 md:mx-4 overflow-x-auto mobile-year-strip">
                 @foreach($years as $year)
                     <a href="?year={{ $year }}" 
                        class="px-3 py-1 rounded-full text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'text-arbitra-gray hover:text-white' }}">
@@ -286,7 +415,7 @@
                 @endforeach
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="hidden md:flex items-center gap-3">
                 <button @click="contactOpen = true; contactSuccess = false" class="bg-arbitra-emerald text-arbitra-black px-4 md:px-6 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest hover:brightness-110 transition shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                     Connect
                 </button>
@@ -346,7 +475,7 @@
             <!-- STAGE 1: AWARENESS (HERO) -->
             @php $hero = $contents->where('type', 'hero')->first(); @endphp
             @if($hero)
-            <div id="hero" class="scroll-mt-32">
+            <div id="hero" class="scroll-mt-32 mobile-hero-fullscreen">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div @if(isset($hero->content['modal_details'])) 
                             data-content="{{ json_encode($hero->content['modal_details']['Why Invest in Visayas Logistics Cluster?'] ?? $hero->content['modal_details']) }}"
@@ -383,7 +512,7 @@
                         </div>
                     </div>
                     
-                    <div class="flex flex-col gap-6">
+                    <div class="flex flex-row md:flex-col gap-3 md:gap-6 overflow-x-auto mobile-hero-stats">
                         @foreach($hero->content['highlight_stats'] as $index => $stat)
                         <div class="bento-card flex-1 p-6 md:p-10 flex flex-col justify-between">
                             <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest">{{ $stat['label'] }}</span>
@@ -394,6 +523,12 @@
                         </div>
                         @endforeach
                     </div>
+                </div>
+                
+                <!-- Mobile Scroll Indicator -->
+                <div class="mobile-scroll-hint">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.3em]">Scroll to explore</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
                 </div>
             </div>
             @endif
@@ -472,7 +607,7 @@
                             </div>
                         </div>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mobile-scroll-x">
                             @foreach($content->content['stats'] as $stat)
                                 @php
                                     $hasExtra = isset($content->content['modal_details']) || isset($stat['detail']);
@@ -1142,6 +1277,60 @@
             </div>
         </div>
     </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav" x-data="{ activeTab: 'hero' }"
+         @scroll.window.throttle.100ms="
+            const sections = ['hero', 'economy', 'drivers', 'action'];
+            let active = 'hero';
+            for (const id of sections) {
+                const el = document.getElementById(id);
+                if (el && el.getBoundingClientRect().top <= 200) active = id;
+            }
+            activeTab = active;
+         ">
+        <a href="#hero" :class="{ 'active': activeTab === 'hero' }">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <span>Home</span>
+        </a>
+        <a href="#economy" :class="{ 'active': activeTab === 'economy' }">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <span>Stats</span>
+        </a>
+        <a href="#drivers" :class="{ 'active': activeTab === 'drivers' }">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <span>Drivers</span>
+        </a>
+        <a href="/download-profile/{{ $selectedYear }}">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>PDF</span>
+        </a>
+        <button @click="contactOpen = true; contactSuccess = false">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+            <span>Connect</span>
+        </button>
+    </div>
+
+    <!-- Mobile Scroll Animations -->
+    <script>
+        if (window.innerWidth < 768) {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.bento-card').forEach(function(card) {
+                    card.classList.add('mobile-animate');
+                });
+                var observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                        }
+                    });
+                }, { threshold: 0.1, rootMargin: '0px 0px -10% 0px' });
+                document.querySelectorAll('.mobile-animate').forEach(function(el) {
+                    observer.observe(el);
+                });
+            });
+        }
+    </script>
 
 </body>
 </html>
