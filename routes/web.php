@@ -10,6 +10,18 @@ Route::get('/', [PublicController::class, 'index']);
 Route::post('/contact', [PublicController::class, 'submitContactForm']);
 Route::get('/download-profile/{year}', [PublicController::class, 'downloadPdf']);
 
+// Temporary route for visual verification
+Route::get('/test-pdf-view/{year}', function ($year) {
+    $contents = App\Models\ProjectContent::where('year_range', $year)->get();
+    if ($contents->isEmpty()) {
+        return "No profile data found for this year.";
+    }
+    return view('pdf.profile', [
+        'contents' => $contents,
+        'year' => $year
+    ]);
+});
+
 // Hidden Admin Logic
 Route::get('/portal-access-secret', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/portal-access-secret', [AuthController::class, 'login']);
