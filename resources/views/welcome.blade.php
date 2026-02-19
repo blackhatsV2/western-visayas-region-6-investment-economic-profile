@@ -212,7 +212,7 @@
                     points.forEach(point => {
                         L.marker([point.lat, point.lng], {icon: emeraldIcon})
                             .addTo(this.map)
-                            .bindPopup(`<b style="color:#0A0A0A">${point.label}</b>`);
+                            .bindPopup(`<b style="color:#FFFFFF; font-size: 13px; text-transform: uppercase;">${point.label}</b>`);
                         bounds.push([point.lat, point.lng]);
                     });
                     
@@ -621,7 +621,7 @@
                                             @endif
                                         </div>
                                         
-                                        <p class="text-lg text-arbitra-gray/80 font-medium leading-relaxed border-l-2 border-white/10 pl-6 group-hover:border-arbitra-emerald transition-colors">
+                                        <p class="text-xl text-white/90 font-medium leading-relaxed border-l-2 border-white/10 pl-6 group-hover:border-arbitra-emerald transition-colors">
                                             {{ $item['details'] }}
                                         </p>
                                     </div>
@@ -669,7 +669,7 @@
                                          @endif
                                          class="bento-card p-10 flex flex-col justify-between group h-full {{ $poppable ? 'poppable cursor-pointer' : '' }}">
                                         
-                                        <div class="flex justify-between items-start mb-12">
+                                        <div class="flex justify-between items-start mb-8">
                                             <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-arbitra-emerald/50 group-hover:bg-arbitra-emerald/10 transition-all duration-300">
                                                 <svg class="h-6 w-6 text-white group-hover:text-arbitra-emerald transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ $iconPath }}"></path></svg>
                                             </div>
@@ -681,19 +681,19 @@
                                             @endif
                                         </div>
 
-                                        <div>
-                                            <h3 class="text-2xl font-black text-white leading-tight uppercase tracking-tight mb-4">{{ $item['name'] }}</h3>
+                                        <div class="flex-1">
+                                            <h3 class="text-lg font-black text-arbitra-emerald uppercase tracking-wide mb-5">{{ $item['name'] }}</h3>
                                             @if($isCompact)
                                                 <div class="space-y-3">
                                                     @foreach($subItems as $sub)
-                                                    <div class="flex items-start gap-2">
-                                                        <div class="mt-1.5 w-1 h-1 rounded-full bg-arbitra-emerald shrink-0"></div>
-                                                        <p class="text-xs font-medium text-arbitra-gray/80">{{ trim($sub) }}</p>
+                                                    <div class="flex items-start gap-3">
+                                                        <div class="mt-2 w-1.5 h-1.5 rounded-full bg-white/40 shrink-0"></div>
+                                                        <p class="text-base font-medium text-white/85 leading-relaxed">{{ trim($sub) }}</p>
                                                     </div>
                                                     @endforeach
                                                 </div>
                                             @else
-                                                <p class="text-sm text-arbitra-gray leading-relaxed font-medium line-clamp-3">
+                                                <p class="text-lg text-white/85 leading-relaxed font-medium">
                                                     {{ $item['details'] }}
                                                 </p>
                                             @endif
@@ -719,8 +719,9 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             @foreach($content->content['items'] as $item)
-                                <div class="bento-card p-8 flex items-center">
-                                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">{{ $item }}</h3>
+                                <div class="bento-card p-10 flex items-center gap-4 group">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-arbitra-emerald shrink-0"></div>
+                                    <h3 class="text-base font-bold text-white/90 uppercase tracking-wider group-hover:text-white transition-colors">{{ $item }}</h3>
                                 </div>
                             @endforeach
                         </div>

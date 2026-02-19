@@ -41,9 +41,24 @@ class ProjectContentSeeder extends Seeder
                         ['label' => 'GROWING POPULATION', 'value' => '4.9M']
                     ],
                     'modal_details' => [
-                        'Why Invest in Visayas Logistics Cluster?' => [ // Matching blade expectation
+                        'Why Invest in Visayas Logistics Cluster?' => [
                             'title' => 'Why Invest in Visayas Logistics Cluster?',
-                            'description' => 'A strategic gateway in the heart of the Philippines.'
+                            'Points' => [
+                                'Abundant in Natural Resources',
+                                'Agricultural Potential',
+                                'Collaborative Environment',
+                                'Competitive Human Capital',
+                                'Decongestion of other Areas within PH',
+                                'Generally Peaceful and Orderly',
+                                'High Demand for Logistics',
+                                'High Potential for Economic Growth',
+                                'Increasing Population',
+                                'Lack of Logistics Infrastructure',
+                                'Mitigation of Trade & Manufacturing Paralysis',
+                                'Presence of Logistics Infrastructure',
+                                'Strategic Location',
+                                'Sufficient Power Supply'
+                            ]
                         ]
                     ]
                 ]
@@ -55,7 +70,8 @@ class ProjectContentSeeder extends Seeder
                 'type' => 'stats_grid',
                 'year_range' => '2024-2025',
                 'content' => [
-                    'description' => 'Western Visayas or Region VI is located at the center of the Philippine archipelago and lies between two large bodies of water, the Sibuyan Sea and the Visayan Sea. Note: Last June 13, 2024, President Bongbong Marcos signed the Republic Act No. 12000 to established the Negros Island Region (NIR).',
+                    'description' => 'Western Visayas or Region VI is located at the center of the Philippine archipelago and lies between two large bodies of water, the Sibuyan Sea and the Visayan Sea.',
+                    'notable_info' => 'Last June 13, 2024, President Bongbong Marcos signed the Republic Act No. 12000 to established the Negros Island Region (NIR).',
                     'stats' => [
                         ['label' => 'Land Area', 'value' => '20,794 sq. km.'],
                         ['label' => 'Population (2024)', 'value' => '4,861,911'],
@@ -101,7 +117,8 @@ class ProjectContentSeeder extends Seeder
                     'series' => [
                         ['name' => 'Growth Rate %', 'data' => [7.3, 6.9, 6.5, 6.3, 6.2, 6.0, 5.9, 5.59, 5.56, 5.5, 5.3, 4.94, 4.92, 4.8, 4.4, 4.3, 4.2, 2.7]]
                     ],
-                    'modal_text' => 'In 2024, Central Visayas was the fastest growing region (7.3%). Western Visayas grew by 4.3%.'
+                    'modal_text' => 'In 2024, Central Visayas was the fastest growing region (7.3%). Western Visayas grew by 4.3%.',
+                    'notable_info' => 'In 2024, Central Visayas was the fastest growing region in the country with 7.3 percent growth.'
                 ],
                 'source' => 'https://psa.gov.ph/system/files/pad/2024%20GRDP%20Publication.pdf'
             ],
@@ -335,8 +352,41 @@ class ProjectContentSeeder extends Seeder
                 'year_range' => '2024-2025',
                 'content' => [
                     'items' => [
-                        ['name' => '9 Airports', 'details' => '6 CAAP-operated, 3 Private (Sipalay, Sicogon, Semirara).'],
-                        ['name' => '152 Ports', 'details' => '49 Fishing, 69 Private Comm., 23 Public Comm., 11 Feeder.']
+                        [
+                            'name' => '9 Airports', 
+                            'details' => '6 CAAP-operated, 3 Private (Sipalay, Sicogon, Semirara).',
+                            'modal_details' => [
+                                'Map Points' => [
+                                    ['label' => 'Iloilo International Airport', 'lat' => 10.83, 'lng' => 122.54],
+                                    ['label' => 'Bacolod-Silay Airport', 'lat' => 10.77, 'lng' => 123.01],
+                                    ['label' => 'Kalibo International Airport', 'lat' => 11.69, 'lng' => 122.38],
+                                    ['label' => 'Roxas Airport', 'lat' => 11.60, 'lng' => 122.75],
+                                    ['label' => 'Antique Airport', 'lat' => 10.74, 'lng' => 121.93],
+                                    ['label' => 'Godofredo P. Ramos Airport (Caticlan)', 'lat' => 11.92, 'lng' => 121.95],
+                                    ['label' => 'Sipalay Airport', 'lat' => 9.78, 'lng' => 122.46],
+                                    ['label' => 'Sicogon Airport', 'lat' => 11.45, 'lng' => 123.25],
+                                    ['label' => 'Semirara Airport', 'lat' => 12.05, 'lng' => 121.37],
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => '152 Ports', 
+                            'details' => '49 Fishing, 69 Private Commercial, 23 Public, 11 Feeder.',
+                            'modal_details' => [
+                                'Map Points' => [
+                                    ['label' => 'Iloilo Commercial Port Complex', 'lat' => 10.70, 'lng' => 122.57],
+                                    ['label' => 'Port of Dumangas', 'lat' => 10.81, 'lng' => 122.71],
+                                    ['label' => 'Port of Estancia', 'lat' => 11.45, 'lng' => 123.15],
+                                    ['label' => 'Port of Culasi (Roxas)', 'lat' => 11.61, 'lng' => 122.72],
+                                    ['label' => 'Port of Caticlan', 'lat' => 11.93, 'lng' => 121.95],
+                                    ['label' => 'Port of San Jose (Antique)', 'lat' => 10.74, 'lng' => 121.93],
+                                    ['label' => 'Jordan Wharf (Guimaras)', 'lat' => 10.66, 'lng' => 122.58],
+                                    ['label' => 'Bacolod Real Estate Development Corp. (BREDCO) Port', 'lat' => 10.67, 'lng' => 122.94],
+                                    ['label' => 'Banago Port (Bacolod)', 'lat' => 10.69, 'lng' => 122.95],
+                                    ['label' => 'Pulupandan Port', 'lat' => 10.52, 'lng' => 122.79],
+                                ]
+                            ]
+                        ]
                     ]
                 ],
                 'source' => 'CAAP / Wikipedia / WV RSET'

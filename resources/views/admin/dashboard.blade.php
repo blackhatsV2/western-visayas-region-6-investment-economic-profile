@@ -736,6 +736,18 @@
                                         </div>
                                     </template>
                                     <button @click="form.stats.push({label: 'New Label', value: '0'})" class="w-full py-2 border-2 border-dashed border-white/10 rounded-xl text-arbitra-gray hover:border-arbitra-emerald hover:text-white transition-all font-bold text-xs uppercase">+ Add New Stat</button>
+                                    
+                                    <div class="mt-6 pt-6 border-t border-white/5">
+                                        <label class="admin-label text-arbitra-emerald">Notable Info / Highlight Note</label>
+                                        <textarea x-model="form.notable_info" class="admin-input h-24 mt-2 leading-relaxed" placeholder="Enter highlighted note here..."></textarea>
+                                    </div>
+
+                                    <template x-if="form.modal_details && typeof form.modal_details['Map Labels'] !== 'undefined'">
+                                        <div class="mt-6 pt-6 border-t border-white/5">
+                                            <label class="admin-label text-arbitra-emerald">Map Labels (For Static Map)</label>
+                                            <textarea x-model="form.modal_details['Map Labels']" class="admin-input h-24 mt-2 leading-relaxed" placeholder="Sibuyan Sea, Visayan Sea..."></textarea>
+                                        </div>
+                                    </template>
                                 </div>
                             @elseif($content->type === 'grid')
                                 <div class="space-y-4">
@@ -845,6 +857,11 @@
                                             </div>
                                         </template>
                                         <button @click="form.categories.push('New Label'); form.series.forEach(s => s.data.push(0))" class="w-full py-2 border-2 border-dashed border-white/10 rounded-xl text-arbitra-gray hover:border-arbitra-emerald hover:text-white transition-all font-bold text-xs uppercase">+ Add Data Point</button>
+                                    </div>
+                                    
+                                    <div class="mt-6 pt-6 border-t border-white/5">
+                                        <label class="admin-label text-arbitra-emerald">Notable Info / Highlight Note</label>
+                                        <textarea x-model="form.notable_info" class="admin-input h-24 mt-2 leading-relaxed" placeholder="Enter highlighted note here..."></textarea>
                                     </div>
                                     
                                     <div class="mt-6 pt-6 border-t border-white/5">
@@ -990,6 +1007,7 @@
                                             </div>
                                             
                                             <div x-show="modalTabs[activeTab].type === 'text'">
+                                                <textarea x-model="modalTabs[activeTab].data" class="admin-input h-32 leading-relaxed" placeholder="Type plain text info here..."></textarea>
                                             </div>
                                         </div>
                                     </template>
