@@ -5,7 +5,7 @@ FROM node:20-alpine AS frontend
 
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm install --production=false
 COPY . .
 RUN npm run build
 
