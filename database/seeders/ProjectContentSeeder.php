@@ -423,12 +423,17 @@ class ProjectContentSeeder extends Seeder
             [
                 'page_number' => 26,
                 'section_title' => 'DTI 6 Priority Industries',
-                'type' => 'list',
+                'type' => 'grid',
                 'year_range' => '2024-2025',
                 'content' => [
                     'items' => [
-                        'Coffee', 'Cacao', 'Processed Fruits & Nuts', 'Coconut', 
-                        'Bamboo', 'Wearables & Homestyle', 'IT-BPM'
+                        ['name' => 'Coffee', 'details' => '9,914 ha Area Planted, 2,090 MT Production'],
+                        ['name' => 'Cacao', 'details' => '1,048 ha Farm Area, 21,988 kg Avg Production'],
+                        ['name' => 'Processed Fruits & Nuts', 'details' => 'Mango, Banana, Pineapple, Peanut, Papaya, Calamansi'],
+                        ['name' => 'Coconut', 'details' => 'Food (VCO, Vinegar) & Non-Food (Lumber, Copra) Products'],
+                        ['name' => 'Bamboo', 'details' => '25,535 ha Planted, 9 SSFs, 5 Anchor Firms'],
+                        ['name' => 'Wearables & Homestyle', 'details' => 'Piña, Abaca, Raffia (Aklan, Iloilo)'],
+                        ['name' => 'IT-BPM', 'details' => '200+ Companies, 50 Assisted Startups']
                     ]
                 ],
                 'source' => 'DTI Region VI'
