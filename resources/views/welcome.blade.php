@@ -53,17 +53,25 @@
             background: rgba(28, 28, 30, 0.6);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-radius: 2rem;
+            border-radius: 1.5rem;
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .bento-card { border-radius: 2rem; }
         }
         
         .bento-card:hover {
             border-color: rgba(16, 185, 129, 0.6);
             transform: translateY(-4px);
             box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Mobile touch - no hover transform */
+        @media (hover: none) {
+            .bento-card:hover { transform: none; }
         }
 
         .pop-indicator {
@@ -252,15 +260,16 @@
     </script>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-40 bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-4">
-        <div class="max-w-[1240px] mx-auto px-8 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <img src="{{ asset('dti-logo.png') }}" class="h-8 w-auto" alt="DTI Logo">
+    <nav x-data="{ mobileNav: false }" class="fixed top-0 w-full z-40 bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-3 md:py-4">
+        <div class="max-w-[1240px] mx-auto px-4 md:px-8 flex items-center justify-between">
+            <div class="flex items-center gap-3 md:gap-4">
+                <img src="{{ asset('dti-logo.png') }}" class="h-7 md:h-8 w-auto" alt="DTI Logo">
                 <div class="h-6 w-px bg-white/10 hidden md:block"></div>
-                <h1 class="text-sm font-black tracking-tight uppercase hidden md:block">{{ $meta->content['site_title'] ?? 'Western Visayas: Investment and Economic Profile' }}</h1>
+                <h1 class="text-xs md:text-sm font-black tracking-tight uppercase hidden md:block">{{ $meta->content['site_title'] ?? 'Western Visayas: Investment and Economic Profile' }}</h1>
             </div>
             
-            <div class="flex items-center gap-6 bg-white/5 px-6 py-2 rounded-full border border-white/5">
+            <!-- Desktop Nav -->
+            <div class="hidden md:flex items-center gap-6 bg-white/5 px-6 py-2 rounded-full border border-white/5">
                 <a href="#hero" class="nav-link text-xs uppercase tracking-widest">WHY</a>
                 <a href="#economy" class="nav-link text-xs uppercase tracking-widest">STATS</a>
                 <a href="#drivers" class="nav-link text-xs uppercase tracking-widest">DRIVERS</a>
@@ -277,16 +286,51 @@
                 @endforeach
             </div>
 
-            <button @click="contactOpen = true; contactSuccess = false" class="bg-arbitra-emerald text-arbitra-black px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest hover:brightness-110 transition shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-                Connect Now
-            </button>
+            <div class="flex items-center gap-3">
+                <button @click="contactOpen = true; contactSuccess = false" class="bg-arbitra-emerald text-arbitra-black px-4 md:px-6 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest hover:brightness-110 transition shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                    Connect
+                </button>
+                
+                <!-- Mobile Hamburger -->
+                <button @click="mobileNav = !mobileNav" class="md:hidden flex flex-col items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10">
+                    <span class="block w-4 h-0.5 bg-white mb-1 transition-all" :class="mobileNav ? 'rotate-45 translate-y-[3px]' : ''"></span>
+                    <span class="block w-4 h-0.5 bg-white transition-all" :class="mobileNav ? '-rotate-45 -translate-y-[3px]' : ''"></span>
+                </button>
+            </div>
         </div>
+        
+        <!-- Mobile Menu -->
+        <div x-show="mobileNav" x-cloak 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             class="md:hidden bg-arbitra-dark/95 backdrop-blur-xl border-t border-white/5 mt-3">
+            <div class="px-4 py-4 space-y-1">
+                <a href="#hero" @click="mobileNav = false" class="block px-4 py-3 text-sm font-bold uppercase tracking-widest text-white/70 hover:text-arbitra-emerald rounded-xl hover:bg-white/5 transition-all">Why Invest</a>
+                <a href="#economy" @click="mobileNav = false" class="block px-4 py-3 text-sm font-bold uppercase tracking-widest text-white/70 hover:text-arbitra-emerald rounded-xl hover:bg-white/5 transition-all">Economic Stats</a>
+                <a href="#drivers" @click="mobileNav = false" class="block px-4 py-3 text-sm font-bold uppercase tracking-widest text-white/70 hover:text-arbitra-emerald rounded-xl hover:bg-white/5 transition-all">Key Drivers</a>
+                <a href="#action" @click="mobileNav = false" class="block px-4 py-3 text-sm font-bold uppercase tracking-widest text-white/70 hover:text-arbitra-emerald rounded-xl hover:bg-white/5 transition-all">Take Action</a>
+            </div>
+            <!-- Mobile Year Selector -->
+            <div class="lg:hidden flex items-center gap-2 px-4 pb-4 overflow-x-auto">
+                @foreach($years as $year)
+                    <a href="?year={{ $year }}" 
+                       class="px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'bg-white/5 text-arbitra-gray border border-white/10' }}">
+                        {{ $year }}
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        
         <!-- Progress Bar -->
         <div class="absolute bottom-0 left-0 h-[2px] bg-arbitra-emerald transition-all duration-300" id="scroll-progress" style="width: 0%"></div>
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-28 pb-20 px-8">
+    <main class="pt-24 md:pt-28 pb-12 md:pb-20 px-4 md:px-8">
         @if(isset($noContent) && $noContent)
             <div class="min-h-[60vh] flex flex-col items-center justify-center text-center">
                 <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-8 animate-pulse">
@@ -308,9 +352,9 @@
                             data-content="{{ json_encode($hero->content['modal_details']['Why Invest in Visayas Logistics Cluster?'] ?? $hero->content['modal_details']) }}"
                             data-title="{{ $hero->content['modal_details']['Why Invest in Visayas Logistics Cluster?']['title'] ?? 'Why Invest in Visayas Logistics Cluster?' }}"
                             @click="openFromEl($el)" 
-                            class="lg:col-span-2 bento-card p-12 flex flex-col justify-center bg-gradient-to-br from-arbitra-dark to-arbitra-black cursor-pointer group hover:border-arbitra-emerald/60 transition-all relative overflow-hidden"
+                            class="lg:col-span-2 bento-card p-6 md:p-12 flex flex-col justify-center bg-gradient-to-br from-arbitra-dark to-arbitra-black cursor-pointer group hover:border-arbitra-emerald/60 transition-all relative overflow-hidden"
                          @else
-                            class="lg:col-span-2 bento-card p-12 flex flex-col justify-center bg-gradient-to-br from-arbitra-dark to-arbitra-black"
+                            class="lg:col-span-2 bento-card p-6 md:p-12 flex flex-col justify-center bg-gradient-to-br from-arbitra-dark to-arbitra-black"
                          @endif>
                          
                         <!-- Hover Effect BG -->
@@ -326,7 +370,7 @@
                                 </div>
                                 @endif
                             </div>
-                            <h2 class="text-6xl md:text-7xl font-black mb-10 leading-[1] tracking-tighter uppercase italic group-hover:text-white transition-colors">
+                            <h2 class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 md:mb-10 leading-[1] tracking-tighter uppercase italic group-hover:text-white transition-colors">
                                 {!! nl2br(e($hero->content['title'] ?? 'Why Invest in Western Visayas?')) !!}
                             </h2>
                             <p class="text-lg text-arbitra-gray max-w-xl leading-relaxed font-medium group-hover:text-white/80 transition-colors">
@@ -341,10 +385,10 @@
                     
                     <div class="flex flex-col gap-6">
                         @foreach($hero->content['highlight_stats'] as $index => $stat)
-                        <div class="bento-card flex-1 p-10 flex flex-col justify-between">
+                        <div class="bento-card flex-1 p-6 md:p-10 flex flex-col justify-between">
                             <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest">{{ $stat['label'] }}</span>
                             <div class="mt-4">
-                                <h3 class="text-5xl font-black emerald-text tracking-tighter">{{ $stat['value'] }}</h3>
+                                <h3 class="text-3xl md:text-5xl font-black emerald-text tracking-tighter">{{ $stat['value'] }}</h3>
                                 <span class="text-[10px] font-black text-arbitra-gray uppercase tracking-widest mt-2 block opacity-40">{{ $stat['label'] }}</span>
                             </div>
                         </div>
@@ -447,7 +491,7 @@
                                      data-title="{{ $stat['label'] }}"
                                      @click="openFromEl($el)" 
                                      @endif
-                                     class="bento-card p-8 flex flex-col justify-between {{ $hasExtra ? 'poppable cursor-pointer group' : '' }}">
+                                     class="bento-card p-5 md:p-8 flex flex-col justify-between {{ $hasExtra ? 'poppable cursor-pointer group' : '' }}">
                                     
                                     @if($hasExtra)
                                     <div class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold text-white/30 group-hover:text-white group-hover:bg-arbitra-emerald/20 transition-all flex items-center gap-1.5 absolute top-6 right-6">
@@ -485,7 +529,7 @@
 
                 @elseif($content->type === 'chart')
                     <section id="{{ $sectionId }}" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-20 border-b border-white/5 pb-20 scroll-mt-32">
-                        <div class="lg:col-span-2 bento-card p-12">
+                        <div class="lg:col-span-2 bento-card p-6 md:p-12">
                             <div class="flex items-center justify-between mb-12">
                                 <div>
                                     <h2 class="text-2xl font-extrabold text-white">{{ $content->section_title }}</h2>
@@ -499,7 +543,7 @@
                             <div id="chart-{{ $content->id }}" class="w-full"></div>
                         </div>
 
-                        <div class="bento-card p-10 flex flex-col justify-between bg-gradient-to-br from-arbitra-dark to-[#151515]">
+                        <div class="bento-card p-6 md:p-10 flex flex-col justify-between bg-gradient-to-br from-arbitra-dark to-[#151515]">
                             <div>
                                 <h3 class="text-sm font-bold text-arbitra-gray uppercase tracking-[0.2em] mb-8">INSIGHTS</h3>
                                 <p class="text-base text-white/80 leading-relaxed font-medium">
@@ -647,7 +691,7 @@
                                 </div>
                             </div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                                 @foreach($content->content['items'] as $item)
                                     @php
                                         $details = $item['details'] ?? '';
@@ -667,7 +711,7 @@
                                          data-title="{{ $item['name'] }}"
                                          @click="openFromEl($el)" 
                                          @endif
-                                         class="bento-card p-10 flex flex-col justify-between group h-full {{ $poppable ? 'poppable cursor-pointer' : '' }}">
+                                         class="bento-card p-5 md:p-10 flex flex-col justify-between group h-full {{ $poppable ? 'poppable cursor-pointer' : '' }}">
                                         
                                         <div class="flex justify-between items-start mb-8">
                                             <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-arbitra-emerald/50 group-hover:bg-arbitra-emerald/10 transition-all duration-300">
@@ -719,7 +763,7 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             @foreach($content->content['items'] as $item)
-                                <div class="bento-card p-10 flex items-center gap-4 group">
+                                <div class="bento-card p-5 md:p-10 flex items-center gap-4 group">
                                     <div class="w-1.5 h-1.5 rounded-full bg-arbitra-emerald shrink-0"></div>
                                     <h3 class="text-base font-bold text-white/90 uppercase tracking-wider group-hover:text-white transition-colors">{{ $item }}</h3>
                                 </div>
@@ -740,18 +784,18 @@
             @php $cta = $contents->where('type', 'cta')->first(); @endphp
             @if($cta)
             <section id="action" class="py-20">
-                <div class="bento-card p-20 text-center bg-gradient-to-br from-arbitra-emerald/10 to-transparent border-arbitra-emerald/20">
-                    <h2 class="text-5xl md:text-6xl font-black mb-8 tracking-tighter uppercase italic">
+                <div class="bento-card p-8 md:p-20 text-center bg-gradient-to-br from-arbitra-emerald/10 to-transparent border-arbitra-emerald/20">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 md:mb-8 tracking-tighter uppercase italic">
                         {!! nl2br(e($cta->content['title'])) !!}
                     </h2>
-                    <p class="text-xl text-arbitra-gray max-w-2xl mx-auto mb-12 font-medium">
+                    <p class="text-base md:text-xl text-arbitra-gray max-w-2xl mx-auto mb-8 md:mb-12 font-medium">
                         {{ $cta->content['description'] }}
                     </p>
-                    <div class="flex flex-col md:flex-row items-center justify-center gap-6">
-                        <button @click="contactOpen = true; contactSuccess = false" class="bg-arbitra-emerald text-arbitra-black px-12 py-5 rounded-full font-black text-lg uppercase tracking-widest hover:scale-105 transition shadow-[0_0_50px_rgba(16,185,129,0.3)]">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
+                        <button @click="contactOpen = true; contactSuccess = false" class="w-full sm:w-auto bg-arbitra-emerald text-arbitra-black px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-sm md:text-lg uppercase tracking-widest hover:scale-105 transition shadow-[0_0_50px_rgba(16,185,129,0.3)]">
                             Contact DTI Region 6
                         </button>
-                        <a href="/download-profile/{{ $selectedYear }}" class="bg-white/5 text-white border border-white/10 px-12 py-5 rounded-full font-black text-lg uppercase tracking-widest hover:bg-white/10 transition inline-block">
+                        <a href="/download-profile/{{ $selectedYear }}" class="w-full sm:w-auto text-center bg-white/5 text-white border border-white/10 px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-sm md:text-lg uppercase tracking-widest hover:bg-white/10 transition inline-block">
                             Download Profile PDF
                         </a>
                     </div>
@@ -764,7 +808,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-arbitra-black border-t border-white/5 pt-20 pb-10 px-8">
+    <footer class="bg-arbitra-black border-t border-white/5 pt-12 md:pt-20 pb-10 px-4 md:px-8">
         <div class="max-w-[1240px] mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
                 <!-- Brand -->
@@ -832,7 +876,7 @@
     <!-- Interactive Modal -->
     <div x-show="modalOpen" 
          x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center px-6"
+         class="fixed inset-0 z-50 flex items-end md:items-center justify-center px-0 md:px-6"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -842,16 +886,16 @@
         
         <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="modalOpen = false"></div>
         
-        <div class="relative bg-arbitra-dark max-w-2xl w-full p-16 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden"
+        <div class="relative bg-arbitra-dark max-w-2xl w-full p-6 md:p-16 rounded-t-[2rem] md:rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden max-h-[90vh] md:max-h-auto"
              x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
              x-transition:enter-end="scale-100 opacity-100"
              x-transition:leave="transition ease-in duration-300 transform scale-95 opacity-0">
             
-            <button @click="modalOpen = false" class="absolute top-10 right-10 text-arbitra-gray hover:text-white transition-all transform hover:rotate-90">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <button @click="modalOpen = false" class="absolute top-5 right-5 md:top-10 md:right-10 text-arbitra-gray hover:text-white transition-all transform hover:rotate-90 z-20">
+                <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
 
-            <h3 class="text-3xl font-extrabold text-white tracking-tighter mb-12 uppercase italic" x-text="modalTitle"></h3>
+            <h3 class="text-xl md:text-3xl font-extrabold text-white tracking-tighter mb-6 md:mb-12 uppercase italic pr-8" x-text="modalTitle"></h3>
             
             <div class="space-y-12 max-h-[60vh] overflow-y-auto pr-6 custom-scrollbar">
                 
