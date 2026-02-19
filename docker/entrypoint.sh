@@ -3,15 +3,20 @@ set -e
 
 echo "🚀 Starting application..."
 
-# Cache config & routes for performance
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+# Ensure storage directories exist with correct permissions
+mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
 
-# Run migrations (safe for production with --force)
-php artisan migrate --force
+# Cache config & routes (skip if it fails)
+php artisan config:cache || echo "⚠️  Config cache skipped"
+php artisan route:cache || echo "⚠️  Route cache skipped"
+php artisan view:cache || echo "⚠️  View cache skipped"
 
-echo "✅ Application ready!"
+# Run migrations (don't crash if DB isn't ready yet)
+php artisan migrate --force || echo "⚠️  Migration skipped — database may not be ready"
+
+echo "✅ Application ready! Starting Apache..."
 
 # Start Apache
 exec "$@"
