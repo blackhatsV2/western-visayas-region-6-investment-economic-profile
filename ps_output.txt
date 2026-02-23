@@ -1,5 +1,0 @@
-CONTAINER ID   IMAGE                    COMMAND                  CREATED          STATUS                    PORTS                                                                              NAMES
-77b1fcf9dd8f   redis:alpine             "docker-entrypoint.s…"   5 minutes ago    Up 55 seconds (healthy)   6379/tcp                                                                           new-app-redis-1
-fbfe5193a170   sail-8.2/app             "start-container"        12 minutes ago   Up 12 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:5173->5173/tcp, [::]:5173->5173/tcp   western-visayas-region-6-investment-economic-profile-laravel.test-1
-505547a7962c   mysql/mysql-server:8.0   "/entrypoint.sh mysq…"   12 minutes ago   Up 12 minutes (healthy)   0.0.0.0:3306->3306/tcp, [::]:3306->3306/tcp                                        western-visayas-region-6-investment-economic-profile-mysql-1
-bdefc46cd1c8   redis:alpine             "docker-entrypoint.s…"   12 minutes ago   Up 12 minutes (healthy)   0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp                                        western-visayas-region-6-investment-economic-profile-redis-1

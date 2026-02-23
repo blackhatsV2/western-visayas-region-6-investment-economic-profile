@@ -1,5 +1,0 @@
-PHP 8.4.17 (cli) (built: Jan 13 2026 17:17:10) (NTS gcc x86_64)
-Copyright (c) The PHP Group
-Built by Fedora Project
-Zend Engine v4.4.17, Copyright (c) Zend Technologies
-    with Zend OPcache v8.4.17, Copyright (c), by Zend Technologies

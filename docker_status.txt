@@ -1,9 +1,0 @@
-NAMES                                                                 STATUS                          PORTS
-new-app-laravel.test-1                                                Created                         
-new-app-redis-1                                                       Up About a minute (healthy)     6379/tcp
-new-app-mysql-1                                                       Exited (1) About a minute ago   
-western-visayas-region-6-investment-economic-profile-laravel.test-1   Up 12 minutes                   0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:5173->5173/tcp, [::]:5173->5173/tcp
-western-visayas-region-6-investment-economic-profile-mysql-1          Up 12 minutes (healthy)         0.0.0.0:3306->3306/tcp, [::]:3306->3306/tcp
-western-visayas-region-6-investment-economic-profile-redis-1          Up 12 minutes (healthy)         0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
-funnel-app-app-1                                                      Exited (255) 57 minutes ago     0.0.0.0:9000->80/tcp
-funnel-app-db-1                                                       Exited (0) 56 minutes ago       
