@@ -780,8 +780,8 @@
                                                             <template x-for="(pt, ptIdx) in item.modal_details['Map Points']" :key="ptIdx">
                                                                 <div class="flex gap-2">
                                                                     <input type="text" x-model="pt.label" placeholder="Label" class="admin-input text-[10px] flex-1">
-                                                                    <input type="number" step="0.0001" x-model.number="pt.lat" placeholder="Lat" class="admin-input text-[10px] w-16">
-                                                                    <input type="number" step="0.0001" x-model.number="pt.lng" placeholder="Lng" class="admin-input text-[10px] w-16">
+                                                                    <input type="number" step="0.0001" x-model.number="pt.lat" placeholder="Lat" class="admin-input text-[10px] w-24">
+                                                                    <input type="number" step="0.0001" x-model.number="pt.lng" placeholder="Lng" class="admin-input text-[10px] w-24">
                                                                     <button @click="item.modal_details['Map Points'].splice(ptIdx, 1)" class="text-red-500">×</button>
                                                                 </div>
                                                             </template>
@@ -997,9 +997,9 @@
                                             <div x-show="modalTabs[activeTab].type === 'map'" class="space-y-4">
                                                 <template x-for="(pt, ptIdx) in modalTabs[activeTab].data" :key="ptIdx">
                                                     <div class="grid grid-cols-12 gap-3 items-center">
-                                                        <div class="col-span-6"><label class="text-[8px] font-black uppercase mb-1 block">Location Label</label><input type="text" x-model="pt.label" class="admin-input text-xs"></div>
-                                                        <div class="col-span-2"><label class="text-[8px] font-black uppercase mb-1 block">LAT</label><input type="number" step="0.0001" x-model.number="pt.lat" class="admin-input text-xs"></div>
-                                                        <div class="col-span-2"><label class="text-[8px] font-black uppercase mb-1 block">LNG</label><input type="number" step="0.0001" x-model.number="pt.lng" class="admin-input text-xs"></div>
+                                                        <div class="col-span-4"><label class="text-[8px] font-black uppercase mb-1 block">Location Label</label><input type="text" x-model="pt.label" class="admin-input text-xs"></div>
+                                                        <div class="col-span-3"><label class="text-[8px] font-black uppercase mb-1 block">LAT</label><input type="number" step="0.0001" x-model.number="pt.lat" class="admin-input text-xs"></div>
+                                                        <div class="col-span-3"><label class="text-[8px] font-black uppercase mb-1 block">LNG</label><input type="number" step="0.0001" x-model.number="pt.lng" class="admin-input text-xs"></div>
                                                         <div class="col-span-2 flex justify-end"><button @click="modalTabs[activeTab].data.splice(ptIdx, 1)" class="text-red-500 mt-4">×</button></div>
                                                     </div>
                                                 </template>
