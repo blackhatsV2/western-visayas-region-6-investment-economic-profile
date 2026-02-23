@@ -503,12 +503,12 @@
                                 {!! nl2br(e($hero->content['title'] ?? 'Why Invest in Western Visayas?')) !!}
                             </h2>
                             <p class="text-lg text-arbitra-gray max-w-xl leading-relaxed font-medium group-hover:text-white/80 transition-colors">
-                                A strategic gateway in the heart of the Philippines, offering a collaborative environment, abundant natural resources, and a rapidly industrializing economy ready for global expansion.
+                                {{ $hero->content['description'] ?? 'A strategic gateway in the heart of the Philippines, offering a collaborative environment, abundant natural resources, and a rapidly industrializing economy ready for global expansion.' }}
                             </p>
                         </div>
                         <div class="pt-8 mt-auto border-t border-white/5">
                             <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block mb-1">Source</span>
-                            <p class="text-xs text-arbitra-emerald font-bold">DTI Region 6</p>
+                            <p class="text-xs text-arbitra-emerald font-bold">{{ $hero->source ?? 'DTI Region 6' }}</p>
                         </div>
                     </div>
                     
