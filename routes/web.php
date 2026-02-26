@@ -6,9 +6,11 @@ use App\Http\Controllers\PublicController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 
-Route::get('/', [PublicController::class, 'index']);
-Route::post('/contact', [PublicController::class, 'submitContactForm']);
-Route::get('/download-profile/{year}', [PublicController::class, 'downloadPdf']);
+Route::middleware(['throttle:global'])->group(function () {
+    Route::get('/', [PublicController::class, 'index']);
+    Route::post('/contact', [PublicController::class, 'submitContactForm'])->middleware('throttle:contact');
+    Route::get('/download-profile/{year}', [PublicController::class, 'downloadPdf']);
+});
 
 // Temporary route for visual verification
 Route::get('/test-pdf-view/{year}', function ($year) {
