@@ -252,8 +252,8 @@
             .section-header h2 { font-size: 1.25rem !important; }
 
             /* Footer + main padding for bottom nav */
-            footer { padding-bottom: 6rem !important; }
-            main { padding-bottom: 6rem !important; }
+            footer { padding-bottom: 8rem !important; }
+            main { padding-bottom: 8rem !important; }
 
             /* Year strip compact */
             .mobile-year-strip { gap: 0.25rem !important; padding: 0.15rem !important; }
@@ -282,14 +282,18 @@
         /* Floating Sidebar Styles */
         .sidebar-container {
             position: fixed;
-            left: 1.5rem;
+            left: 1rem; /* Closer to edge on mobile */
             top: 50%;
             transform: translateY(-50%);
-            z-index: 100;
+            z-index: 200; /* Higher than other overlays */
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
             pointer-events: none;
+        }
+        
+        @media (min-width: 1024px) {
+            .sidebar-container { left: 1.5rem; }
         }
         
         .sidebar-btn {
@@ -512,13 +516,37 @@
             </div>
             
             <!-- Year Selector -->
-            <div class="flex md:hidden lg:flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded-full border border-white/5 mx-0 md:mx-4 overflow-x-auto mobile-year-strip">
-                @foreach($years as $year)
+            @php 
+                $shownYears = collect($years)->take(3); 
+                $otherYears = collect($years)->slice(3);
+            @endphp
+            <div class="hidden md:flex lg:flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded-full border border-white/5 mx-0 md:mx-4 mobile-year-strip" x-data="{ moreOpen: false }">
+                @foreach($shownYears as $year)
                     <a href="?year={{ $year }}" 
                        class="px-3 py-1 rounded-full text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'text-arbitra-gray hover:text-white' }}">
                         {{ $year }}
                     </a>
                 @endforeach
+                
+                @if($otherYears->count() > 0)
+                <div class="relative">
+                    <button @click="moreOpen = !moreOpen" 
+                            class="px-2 py-1 text-arbitra-gray hover:text-white transition-all text-xs font-bold flex items-center gap-1 group"
+                            title="More years available">
+                        <span class="text-[10px]" :class="moreOpen ? 'rotate-90' : ''">›</span>
+                    </button>
+                    <!-- Tooltip Style Dropdown -->
+                    <div x-show="moreOpen" @click.away="moreOpen = false" x-cloak
+                         class="absolute top-10 left-0 bg-arbitra-dark border border-white/10 rounded-xl p-2 min-w-[100px] z-50 shadow-2xl">
+                        @foreach($otherYears as $year)
+                            <a href="?year={{ $year }}" 
+                               class="block px-4 py-2 rounded-lg text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'text-arbitra-gray hover:text-white hover:bg-white/5' }}">
+                                {{ $year }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
 
             <div class="hidden md:flex items-center gap-3">
@@ -564,14 +592,31 @@
                 <a href="#drivers" @click="mobileNav = false" class="block px-4 py-3 text-sm font-bold uppercase tracking-widest text-white/70 hover:text-arbitra-emerald rounded-xl hover:bg-white/5 transition-all">Key Drivers</a>
                 <a href="#action" @click="mobileNav = false" class="block px-4 py-3 text-sm font-bold uppercase tracking-widest text-white/70 hover:text-arbitra-emerald rounded-xl hover:bg-white/5 transition-all">Take Action</a>
             </div>
-            <!-- Mobile Year Selector -->
-            <div class="lg:hidden flex items-center gap-2 px-4 pb-4 overflow-x-auto">
-                @foreach($years as $year)
+            <!-- Mobile Year Selector Refined -->
+            <div class="lg:hidden flex items-center gap-2 px-4 pb-4 overflow-x-auto" x-data="{ moreOpen: false }">
+                @foreach($shownYears as $year)
                     <a href="?year={{ $year }}" 
                        class="px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'bg-white/5 text-arbitra-gray border border-white/10' }}">
                         {{ $year }}
                     </a>
                 @endforeach
+                @if($otherYears->count() > 0)
+                <div class="relative">
+                    <button @click="moreOpen = !moreOpen" 
+                            class="px-4 py-2 rounded-full bg-white/5 text-arbitra-gray border border-white/10 text-xs font-bold flex items-center gap-1">
+                        <span :class="moreOpen ? 'rotate-90' : ''">›</span>
+                    </button>
+                    <div x-show="moreOpen" @click.away="moreOpen = false" x-cloak
+                         class="absolute bottom-12 left-0 bg-arbitra-dark border border-white/10 rounded-xl p-2 min-w-[120px] z-50 shadow-2xl origin-bottom-left">
+                        @foreach($otherYears as $year)
+                            <a href="?year={{ $year }}" 
+                               class="block px-4 py-3 rounded-lg text-xs font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'text-arbitra-gray hover:text-white' }}">
+                                {{ $year }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
         
@@ -580,7 +625,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-24 md:pt-28 pb-12 md:pb-20 px-4 md:px-8">
+    <main class="pt-24 md:pt-28 pb-32 md:pb-20 px-4 pl-16 md:px-8 md:pl-8">
         @if(isset($noContent) && $noContent)
             <div class="min-h-[60vh] flex flex-col items-center justify-center text-center">
                 <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-8 animate-pulse">
@@ -1458,23 +1503,31 @@
         @endphp
 
         @foreach($sidebarNav as $nav)
-            <div class="sidebar-btn" :class="{ 'active': activeSection === '{{ $nav['id'] }}' }">
-                <a href="#{{ $nav['id'] }}" 
-                   class="sidebar-icon"
-                   @click="activeTooltip = (activeTooltip === '{{ $nav['name'] }}' ? null : '{{ $nav['name'] }}')">
+            <a href="#{{ $nav['id'] }}" 
+               class="sidebar-btn group" 
+               :class="{ 'active': activeSection === '{{ $nav['id'] }}' }"
+               @click="if(window.innerWidth < 1024) { 
+                           if(activeTooltip !== '{{ $nav['name'] }}') { 
+                               $event.preventDefault(); 
+                               activeTooltip = '{{ $nav['name'] }}'; 
+                           } else {
+                               activeTooltip = null;
+                           }
+                       }">
+                <div class="sidebar-icon">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $nav['icon'] }}"></path>
                     </svg>
-                </a>
+                </div>
                 <span class="sidebar-label">{{ $nav['name'] }}</span>
-                <!-- Mobile/Tablet Tooltip (visible on click) -->
+                <!-- Mobile/Tablet Tooltip (visible on 1st click) -->
                 <div x-show="activeTooltip === '{{ $nav['name'] }}'" 
                      @click.away="activeTooltip = null"
                      x-cloak
                      class="mobile-tooltip lg:hidden">
                     {{ $nav['name'] }}
                 </div>
-            </div>
+            </a>
         @endforeach
     </div>
 
