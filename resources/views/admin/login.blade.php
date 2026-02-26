@@ -9,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
     
     <script>
         tailwind.config = {
@@ -52,8 +53,9 @@
         </div>
 
         <div class="glass-card p-10 shadow-2xl border border-white/10">
-            <form action="{{ url()->current() }}" method="POST" class="space-y-6">
+            <form id="loginForm" action="{{ url()->current() }}" method="POST" class="space-y-6">
                 @csrf
+                <input type="hidden" name="captcha_token" id="captchaToken">
                 <div>
                     <label class="block text-[10px] font-black uppercase text-arbitra-emerald tracking-widest mb-2">Email Address</label>
                     <input type="email" name="email" value="{{ old('email') }}" required autofocus
@@ -98,5 +100,18 @@
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            
+            grecaptcha.ready(function() {
+                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'login'}).then(function(token) {
+                    document.getElementById('captchaToken').value = token;
+                    form.submit();
+                });
+            });
+        });
+    </script>
 </body>
 </html>

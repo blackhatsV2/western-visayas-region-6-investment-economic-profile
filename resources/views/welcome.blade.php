@@ -22,6 +22,7 @@
     <!-- Leaflet Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
     
     <script>
         tailwind.config = {
@@ -360,13 +361,19 @@
                 async submitInquiry() {
                     this.contactLoading = true;
                     try {
+                        const token = await new Promise((resolve, reject) => {
+                            grecaptcha.ready(() => {
+                                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'contact'}).then(resolve).catch(reject);
+                            });
+                        });
+
                         const response = await fetch('/contact', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
-                            body: JSON.stringify(this.contactForm)
+                            body: JSON.stringify({ ...this.contactForm, captcha_token: token })
                         });
                         const data = await response.json();
                         if (data.success) {

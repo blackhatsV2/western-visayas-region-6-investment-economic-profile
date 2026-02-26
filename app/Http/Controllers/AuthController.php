@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\RecaptchaService;
 
 class AuthController extends Controller
 {
@@ -15,8 +16,14 @@ class AuthController extends Controller
         return view('admin.login');
     }
 
-    public function login(Request $request)
+    public function login(Request $request, RecaptchaService $recaptcha)
     {
+        if (!$recaptcha->verify($request->input('captcha_token'))) {
+            return back()->withErrors([
+                'email' => 'reCAPTCHA verification failed. Please try again.',
+            ])->onlyInput('email');
+        }
+
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],

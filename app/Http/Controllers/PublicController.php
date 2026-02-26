@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\ProjectContent;
 use App\Models\Inquiry;
+use App\Services\RecaptchaService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PublicController extends Controller
@@ -24,8 +25,12 @@ class PublicController extends Controller
         return view('welcome', compact('contents', 'selectedYear', 'years', 'noContent'));
     }
 
-    public function submitContactForm(Request $request)
+    public function submitContactForm(Request $request, RecaptchaService $recaptcha)
     {
+        if (!$recaptcha->verify($request->input('captcha_token'))) {
+            return response()->json(['success' => false, 'message' => 'reCAPTCHA verification failed. Please try again.'], 422);
+        }
+
         $validated = $request->validate([
             'name'    => 'required|string|max:255',
             'email'   => 'required|email|max:255',
