@@ -279,7 +279,100 @@
             .mobile-bottom-nav { display: none !important; }
             .mobile-scroll-hint { display: none !important; }
         }
+        /* Floating Sidebar Styles */
+        .sidebar-container {
+            position: fixed;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            pointer-events: none;
+        }
+        
+        .sidebar-btn {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            position: relative;
+        }
+        
+        .sidebar-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .sidebar-btn:hover .sidebar-icon,
+        .sidebar-btn.active .sidebar-icon {
+            background: #10b981;
+            color: #000000;
+            border-color: #10b981;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .sidebar-label {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        
+        @media (min-width: 1024px) {
+            .sidebar-btn:hover .sidebar-label {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Mobile Tooltip */
+        .mobile-tooltip {
+            position: absolute;
+            left: 4rem;
+            background: #10b981;
+            color: #000000;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-weight: 800;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 101;
+        }
+        
+        @media (max-width: 1023px) {
+            .sidebar-container { left: 1rem; }
+            .sidebar-icon { width: 2.5rem; height: 2.5rem; }
+        }
     </style>
+
 </head>
 <body x-data="app()" class="antialiased font-sans">
     <script>
@@ -423,6 +516,21 @@
             </div>
 
             <div class="hidden md:flex items-center gap-3">
+                <!-- PDF Shortcut -->
+                <div class="relative group">
+                    <a href="/download-profile/{{ $selectedYear }}" 
+                       class="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-arbitra-gray hover:text-arbitra-emerald hover:border-arbitra-emerald/50 transition-all"
+                       title="Download Profile PDF">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </a>
+                    <!-- Tooltip -->
+                    <div class="absolute top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-arbitra-dark border border-white/10 rounded-lg text-[10px] font-bold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                        DOWNLOAD PDF
+                    </div>
+                </div>
+
                 <button @click="contactOpen = true; contactSuccess = false" class="bg-arbitra-emerald text-arbitra-black px-4 md:px-6 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest hover:brightness-110 transition shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                     Connect
                 </button>
@@ -583,11 +691,14 @@
             @foreach($contents->whereIn('type', ['stats_grid', 'chart', 'grid', 'list'])->sortBy('page_number') as $content)
                 {{-- Dynamic ID for navigation --}}
                 @php
+                    $title = strtolower($content->section_title);
                     $sectionId = match(true) {
-                        str_contains(strtolower($content->section_title), 'overview') => 'economy',
-                        str_contains(strtolower($content->section_title), 'infrastructure') => 'infrastructure',
-                        str_contains(strtolower($content->section_title), 'driver') => 'drivers',
-                        str_contains(strtolower($content->section_title), 'industry') => 'industries',
+                        str_contains($title, 'overview') => 'profile',
+                        str_contains($title, 'gdp') || str_contains($title, 'registration') || str_contains($title, 'distribution') => 'economy',
+                        str_contains($title, 'driver') => 'drivers',
+                        str_contains($title, 'airport') || str_contains($title, 'port') || str_contains($title, 'telecom') || str_contains($title, 'infrastructure') => 'infrastructure',
+                        str_contains($title, 'peza') || str_contains($title, 'logistics') => 'logistics',
+                        str_contains($title, 'industry') || str_contains($title, 'fruit') || str_contains($title, 'wearable') || str_contains($title, 'strategy') => 'industries',
                         default => 'section-' . $content->id
                     };
                 @endphp
@@ -1318,7 +1429,49 @@
         </button>
     </div>
 
-    <!-- Mobile Scroll Animations -->
+    <!-- Floating Sidebar Navigation -->
+    <div class="sidebar-container hidden md:flex" x-data="{ activeTooltip: null, activeSection: 'hero' }"
+         @scroll.window.throttle.100ms="
+            const sections = ['hero', 'profile', 'economy', 'drivers', 'infrastructure', 'logistics', 'industries', 'action'];
+            for (const id of sections) {
+                const el = document.getElementById(id);
+                if (el && el.getBoundingClientRect().top <= 200) activeSection = id;
+            }
+         ">
+        
+        @php
+            $sidebarNav = [
+                ['id' => 'hero', 'name' => 'Profile', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+                ['id' => 'economy', 'name' => 'Economy', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+                ['id' => 'drivers', 'name' => 'Drivers', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
+                ['id' => 'infrastructure', 'name' => 'Infra', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+                ['id' => 'logistics', 'name' => 'Logistics', 'icon' => 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9'],
+                ['id' => 'industries', 'name' => 'Industries', 'icon' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.282a2 2 0 01-1.808 0l-.628-.282a6 6 0 00-3.86-.517l-2.387.477a2 2 0 00-1.022.547l-1.159 1.159a2 2 0 00-.547 1.022l-.477 2.387a2 2 0 00.547 1.022l1.159 1.159a2 2 0 001.022.547l2.387.477a6 6 0 003.86-.517l.628-.282a2 2 0 011.808 0l.628.282a6 6 0 003.86.517l2.387-.477a2 2 0 001.022-.547l1.159-1.159a2 2 0 00.547-1.022l.477-2.387a2 2 0 00-.547-1.022l-1.159-1.159z'],
+                ['id' => 'action', 'name' => 'Connect', 'icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z']
+            ];
+        @endphp
+
+        @foreach($sidebarNav as $nav)
+            <div class="sidebar-btn" :class="{ 'active': activeSection === '{{ $nav['id'] }}' }">
+                <a href="#{{ $nav['id'] }}" 
+                   class="sidebar-icon"
+                   @click="activeTooltip = (activeTooltip === '{{ $nav['name'] }}' ? null : '{{ $nav['name'] }}')">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $nav['icon'] }}"></path>
+                    </svg>
+                </a>
+                <span class="sidebar-label">{{ $nav['name'] }}</span>
+                <!-- Mobile/Tablet Tooltip (visible on click) -->
+                <div x-show="activeTooltip === '{{ $nav['name'] }}'" 
+                     @click.away="activeTooltip = null"
+                     x-cloak
+                     class="mobile-tooltip lg:hidden">
+                    {{ $nav['name'] }}
+                </div>
+            </div>
+        @endforeach
+    </div>
+
     <script>
         if (window.innerWidth < 768) {
             document.addEventListener('DOMContentLoaded', function() {
