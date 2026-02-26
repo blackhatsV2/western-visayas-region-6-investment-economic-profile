@@ -338,16 +338,22 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             white-space: nowrap;
-            opacity: 0;
-            transform: translateX(-10px);
+            display: none; /* Mobile */
             transition: all 0.3s ease;
             pointer-events: none;
         }
         
         @media (min-width: 1024px) {
-            .sidebar-btn:hover .sidebar-label {
+            .sidebar-label {
+                display: block; /* Desktop */
                 opacity: 1;
                 transform: translateX(0);
+            }
+            .sidebar-btn:hover .sidebar-icon {
+                background: #10b981;
+                color: #000000;
+                border-color: #10b981;
+                transform: scale(1.1);
             }
         }
         
@@ -1430,7 +1436,7 @@
     </div>
 
     <!-- Floating Sidebar Navigation -->
-    <div class="sidebar-container hidden md:flex" x-data="{ activeTooltip: null, activeSection: 'hero' }"
+    <div class="sidebar-container flex" x-data="{ activeTooltip: null, activeSection: 'hero' }"
          @scroll.window.throttle.100ms="
             const sections = ['hero', 'profile', 'economy', 'drivers', 'infrastructure', 'logistics', 'industries', 'action'];
             for (const id of sections) {
