@@ -15,6 +15,12 @@ class RecaptchaService
      */
     public function verify(?string $token): bool
     {
+        if (app()->environment('local')) {
+            if (empty(config('services.recaptcha.secret_key')) || $token === 'local_fallback') {
+                return true;
+            }
+        }
+
         if (empty($token)) {
             return false;
         }

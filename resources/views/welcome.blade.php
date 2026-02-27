@@ -450,17 +450,24 @@
                 map: null,
                 init() {
                     this.$watch('modalOpen', value => {
+                        this.updateScrollLock();
                         if (value) {
-                            document.body.classList.add('overflow-hidden');
                             setTimeout(() => { this.initMap(); }, 100); 
-                        } else {
-                            document.body.classList.remove('overflow-hidden');
-                            if (this.map) {
-                                this.map.remove();
-                                this.map = null;
-                            }
+                        } else if (this.map) {
+                            this.map.remove();
+                            this.map = null;
                         }
                     });
+                    this.$watch('contactOpen', () => this.updateScrollLock());
+                    this.$watch('policyOpen', () => this.updateScrollLock());
+                    this.$watch('termsOpen', () => this.updateScrollLock());
+                },
+                updateScrollLock() {
+                    if (this.modalOpen || this.contactOpen || this.policyOpen || this.termsOpen) {
+                        document.body.classList.add('overflow-hidden');
+                    } else {
+                        document.body.classList.remove('overflow-hidden');
+                    }
                 },
                 openModal(title, content) {
                     this.modalTitle = title;
@@ -1204,7 +1211,7 @@
     <!-- Interactive Modal -->
     <div x-show="modalOpen" 
          x-cloak
-         class="fixed inset-0 z-50 flex items-end md:items-center justify-center px-0 md:px-6"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -1292,7 +1299,7 @@
     <!-- Connect with Us Modal -->
     <div x-show="contactOpen" 
          x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center px-6"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -1302,7 +1309,7 @@
         
         <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="contactOpen = false"></div>
         
-        <div class="relative bg-arbitra-dark max-w-lg w-full p-12 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)]"
+        <div class="relative bg-arbitra-dark max-w-lg w-full p-8 md:p-12 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] max-h-[90vh] overflow-y-auto"
              x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
              x-transition:enter-end="scale-100 opacity-100"
              x-transition:leave="transition ease-in duration-300 transform scale-95 opacity-0">
@@ -1364,7 +1371,7 @@
     <!-- Privacy Policy Modal -->
     <div x-show="policyOpen" 
          x-cloak
-         class="fixed inset-0 z-[60] flex items-center justify-center px-6"
+         class="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -1374,7 +1381,7 @@
         
         <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="policyOpen = false"></div>
         
-        <div class="relative bg-arbitra-dark max-w-3xl w-full p-12 lg:p-16 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden"
+        <div class="relative bg-arbitra-dark max-w-3xl w-full p-8 md:p-12 lg:p-16 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] max-h-[90vh] overflow-y-auto"
              x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
              x-transition:enter-end="scale-100 opacity-100"
              x-transition:leave="transition ease-in duration-300 transform scale-95 opacity-0">
@@ -1419,7 +1426,7 @@
     <!-- Terms of Use Modal -->
     <div x-show="termsOpen" 
          x-cloak
-         class="fixed inset-0 z-[60] flex items-center justify-center px-6"
+         class="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -1429,7 +1436,7 @@
         
         <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="termsOpen = false"></div>
         
-        <div class="relative bg-arbitra-dark max-w-3xl w-full p-12 lg:p-16 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden"
+        <div class="relative bg-arbitra-dark max-w-3xl w-full p-8 md:p-12 lg:p-16 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] max-h-[90vh] overflow-y-auto"
              x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
              x-transition:enter-end="scale-100 opacity-100"
              x-transition:leave="transition ease-in duration-300 transform scale-95 opacity-0">
