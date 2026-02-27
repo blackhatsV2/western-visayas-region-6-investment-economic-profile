@@ -282,14 +282,51 @@
         /* Floating Sidebar Styles */
         .sidebar-container {
             position: fixed;
-            left: 1rem; /* Closer to edge on mobile */
+            left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 200; /* Higher than other overlays */
+            z-index: 200;
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
             pointer-events: none;
+        }
+
+        /* Mobile Sidebar Drawer */
+        .mobile-sidebar-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 280px;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            z-index: 300;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mobile-sidebar-drawer.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 299;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .sidebar-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
         }
         
         @media (min-width: 1024px) {
@@ -385,11 +422,24 @@
 
 </head>
 <body x-data="app()" class="antialiased font-sans">
+    @php
+        $sidebarNav = [
+            ['id' => 'hero', 'name' => 'Profile', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+            ['id' => 'economy', 'name' => 'Economy', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+            ['id' => 'drivers', 'name' => 'Drivers', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
+            ['id' => 'infrastructure', 'name' => 'Infra', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+            ['id' => 'logistics', 'name' => 'Logistics', 'icon' => 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9'],
+            ['id' => 'industries', 'name' => 'Industries', 'icon' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.282a2 2 0 01-1.808 0l-.628-.282a6 6 0 00-3.86-.517l-2.387.477a2 2 0 00-1.022.547l-1.159 1.159a2 2 0 00-.547 1.022l-.477 2.387a2 2 0 00.547 1.022l1.159 1.159a2 2 0 001.022.547l2.159-.432-.628.282a2 2 0 011.808 0l.628.282a6 6 0 003.86.517z'],
+            ['id' => 'action', 'name' => 'Connect', 'icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z']
+        ];
+    @endphp
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('app', () => ({
-                modalOpen: false, 
+                mobileSidebarOpen: false,
+                modalOpen: false,
                 contactOpen: false,
+                selectedYear: '{{ $selectedYear }}',
                 policyOpen: false,
                 termsOpen: false,
                 modalTitle: '', 
@@ -499,12 +549,17 @@
     </script>
 
     <!-- Navigation -->
-    <nav x-data="{ mobileNav: false }" class="fixed top-0 w-full z-40 bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-3 md:py-4">
+    <nav class="fixed top-0 w-full z-[400] bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-3 md:py-4">
         <div class="max-w-[1240px] mx-auto px-4 md:px-8 flex items-center justify-between">
             <div class="flex items-center gap-3 md:gap-4">
+                <!-- Sidebar Burger (Mobile Only) -->
+                <button @click="mobileSidebarOpen = !mobileSidebarOpen" class="flex lg:hidden flex-col items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl transition-all active:scale-95">
+                    <svg x-show="!mobileSidebarOpen" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <svg x-show="mobileSidebarOpen" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
                 <img src="{{ asset('dti-logo.png') }}" class="h-7 md:h-8 w-auto" alt="DTI Logo">
                 <div class="h-6 w-px bg-white/10 hidden md:block"></div>
-                <h1 class="text-xs md:text-sm font-black tracking-tight uppercase hidden md:block">{{ $meta->content['site_title'] ?? 'Western Visayas: Investment and Economic Profile' }}</h1>
+                <h1 class="text-[9px] md:text-sm font-black tracking-tight uppercase block max-w-[120px] md:max-w-none leading-tight">{{ $meta->content['site_title'] ?? 'Western Visayas: Investment and Economic Profile' }}</h1>
             </div>
             
             <!-- Desktop Nav -->
@@ -515,108 +570,77 @@
                 <a href="#action" class="nav-link text-xs uppercase tracking-widest">ACT</a>
             </div>
             
-            <!-- Year Selector -->
-            @php 
-                $shownYears = collect($years)->take(3); 
-                $otherYears = collect($years)->slice(3);
-            @endphp
-            <div class="hidden md:flex lg:flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded-full border border-white/5 mx-0 md:mx-4 mobile-year-strip" x-data="{ moreOpen: false }">
-                @foreach($shownYears as $year)
-                    <a href="?year={{ $year }}" 
-                       class="px-3 py-1 rounded-full text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'text-arbitra-gray hover:text-white' }}">
-                        {{ $year }}
-                    </a>
-                @endforeach
-                
-                @if($otherYears->count() > 0)
-                <div class="relative">
-                    <button @click="moreOpen = !moreOpen" 
-                            class="px-2 py-1 text-arbitra-gray hover:text-white transition-all text-xs font-bold flex items-center gap-1 group"
-                            title="More years available">
-                        <span class="text-[10px]" :class="moreOpen ? 'rotate-90' : ''">›</span>
-                    </button>
-                    <!-- Tooltip Style Dropdown -->
-                    <div x-show="moreOpen" @click.away="moreOpen = false" x-cloak
-                         class="absolute top-10 left-0 bg-arbitra-dark border border-white/10 rounded-xl p-2 min-w-[100px] z-50 shadow-2xl">
-                        @foreach($otherYears as $year)
-                            <a href="?year={{ $year }}" 
-                               class="block px-4 py-2 rounded-lg text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'text-arbitra-gray hover:text-white hover:bg-white/5' }}">
-                                {{ $year }}
-                            </a>
-                        @endforeach
+            <!-- Right Side Actions -->
+            <div class="flex items-center gap-2 md:gap-3">
+                @php 
+                    $yearsList = collect($years);
+                    $shownYears = $yearsList->take(3); 
+                    $otherYears = $yearsList->slice(3);
+                    
+                    // On mobile we show 1, so the 2nd year onwards should be in the dropdown
+                    $mobileDropYears = $yearsList->slice(1);
+                @endphp
+                <div class="flex items-center gap-1.5 md:gap-2 bg-white/5 px-1.5 md:px-2 py-1 md:py-1.5 rounded-full border border-white/5" x-data="{ moreOpen: false }">
+                    @foreach($shownYears as $index => $year)
+                        <a href="?year={{ $year }}" 
+                           class="px-2 md:px-3 py-1 rounded-full text-[9px] md:text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'text-arbitra-gray hover:text-white' }} {{ $index >= 1 ? 'hidden md:block' : '' }}">
+                            {{ $year }}
+                        </a>
+                    @endforeach
+                    
+                    @if($mobileDropYears->count() > 0)
+                    <div class="relative">
+                        <button @click="moreOpen = !moreOpen" 
+                                class="px-1.5 md:px-2 py-1 text-arbitra-gray hover:text-white transition-all text-xs font-bold flex items-center gap-1 group"
+                                title="More years available">
+                            <span class="text-[10px]" :class="moreOpen ? 'rotate-90' : ''">›</span>
+                        </button>
+                        <div x-show="moreOpen" @click.away="moreOpen = false" x-cloak
+                             class="absolute top-10 right-0 bg-arbitra-dark border border-white/10 rounded-xl p-2 min-w-[100px] z-50 shadow-2xl">
+                            {{-- Desktop Dropdown (from 4th year onwards) --}}
+                            <div class="hidden md:block">
+                                @foreach($otherYears as $year)
+                                    <a href="?year={{ $year }}" 
+                                       class="block px-4 py-2 rounded-lg text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'text-arbitra-gray hover:text-white hover:bg-white/5' }}">
+                                        {{ $year }}
+                                    </a>
+                                @endforeach
+                            </div>
+                            {{-- Mobile Dropdown (from 2nd year onwards) --}}
+                            <div class="md:hidden">
+                                @foreach($mobileDropYears as $year)
+                                    <a href="?year={{ $year }}" 
+                                       class="block px-4 py-2 rounded-lg text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'text-arbitra-gray hover:text-white hover:bg-white/5' }}">
+                                        {{ $year }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
+                    @endif
                 </div>
-                @endif
-            </div>
 
-            <div class="hidden md:flex items-center gap-3">
-                <!-- PDF Shortcut -->
-                <div class="relative group">
-                    <a href="/download-profile/{{ $selectedYear }}" 
-                       class="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-arbitra-gray hover:text-arbitra-emerald hover:border-arbitra-emerald/50 transition-all"
-                       title="Download Profile PDF">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </a>
-                    <!-- Tooltip -->
-                    <div class="absolute top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-arbitra-dark border border-white/10 rounded-lg text-[10px] font-bold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                        DOWNLOAD PDF
+                <!-- Desktop Tools -->
+                <div class="hidden md:flex items-center gap-3">
+                    <!-- PDF Shortcut -->
+                    <div class="relative group">
+                        <a href="/download-profile/{{ $selectedYear }}" 
+                           class="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-arbitra-gray hover:text-arbitra-emerald hover:border-arbitra-emerald/50 transition-all"
+                           title="Download Profile PDF">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </a>
+                        <div class="absolute top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-arbitra-dark border border-white/10 rounded-lg text-[10px] font-bold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                            DOWNLOAD PDF
+                        </div>
                     </div>
+
+                    <button @click="contactOpen = true; contactSuccess = false" class="bg-arbitra-emerald text-arbitra-black px-4 md:px-6 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest hover:brightness-110 transition shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                        Connect
+                    </button>
                 </div>
 
-                <button @click="contactOpen = true; contactSuccess = false" class="bg-arbitra-emerald text-arbitra-black px-4 md:px-6 py-2 md:py-2.5 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest hover:brightness-110 transition shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-                    Connect
-                </button>
-                
-                <!-- Mobile Hamburger -->
-                <button @click="mobileNav = !mobileNav" class="md:hidden flex flex-col items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10">
-                    <span class="block w-4 h-0.5 bg-white mb-1 transition-all" :class="mobileNav ? 'rotate-45 translate-y-[3px]' : ''"></span>
-                    <span class="block w-4 h-0.5 bg-white transition-all" :class="mobileNav ? '-rotate-45 -translate-y-[3px]' : ''"></span>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Mobile Menu -->
-        <div x-show="mobileNav" x-cloak 
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-2"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-2"
-             class="md:hidden bg-arbitra-dark/95 backdrop-blur-xl border-t border-white/5 mt-3">
-            <div class="px-4 py-4 space-y-1">
-                <a href="#hero" @click="mobileNav = false" class="block px-4 py-3 text-sm font-bold uppercase tracking-widest text-white/70 hover:text-arbitra-emerald rounded-xl hover:bg-white/5 transition-all">Why Invest</a>
-                <a href="#economy" @click="mobileNav = false" class="block px-4 py-3 text-sm font-bold uppercase tracking-widest text-white/70 hover:text-arbitra-emerald rounded-xl hover:bg-white/5 transition-all">Economic Stats</a>
-                <a href="#drivers" @click="mobileNav = false" class="block px-4 py-3 text-sm font-bold uppercase tracking-widest text-white/70 hover:text-arbitra-emerald rounded-xl hover:bg-white/5 transition-all">Key Drivers</a>
-                <a href="#action" @click="mobileNav = false" class="block px-4 py-3 text-sm font-bold uppercase tracking-widest text-white/70 hover:text-arbitra-emerald rounded-xl hover:bg-white/5 transition-all">Take Action</a>
-            </div>
-            <!-- Mobile Year Selector Refined -->
-            <div class="lg:hidden flex items-center gap-2 px-4 pb-4 overflow-x-auto" x-data="{ moreOpen: false }">
-                @foreach($shownYears as $year)
-                    <a href="?year={{ $year }}" 
-                       class="px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'bg-white/5 text-arbitra-gray border border-white/10' }}">
-                        {{ $year }}
-                    </a>
-                @endforeach
-                @if($otherYears->count() > 0)
-                <div class="relative">
-                    <button @click="moreOpen = !moreOpen" 
-                            class="px-4 py-2 rounded-full bg-white/5 text-arbitra-gray border border-white/10 text-xs font-bold flex items-center gap-1">
-                        <span :class="moreOpen ? 'rotate-90' : ''">›</span>
-                    </button>
-                    <div x-show="moreOpen" @click.away="moreOpen = false" x-cloak
-                         class="absolute bottom-12 left-0 bg-arbitra-dark border border-white/10 rounded-xl p-2 min-w-[120px] z-50 shadow-2xl origin-bottom-left">
-                        @foreach($otherYears as $year)
-                            <a href="?year={{ $year }}" 
-                               class="block px-4 py-3 rounded-lg text-xs font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'text-arbitra-gray hover:text-white' }}">
-                                {{ $year }}
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
             </div>
         </div>
         
@@ -625,7 +649,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-24 md:pt-28 pb-32 md:pb-20 px-4 pl-16 md:px-8 md:pl-8">
+    <main class="pt-24 md:pt-28 pb-32 md:pb-20 px-4 md:px-8 md:pl-8">
         @if(isset($noContent) && $noContent)
             <div class="min-h-[60vh] flex flex-col items-center justify-center text-center">
                 <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-8 animate-pulse">
@@ -1480,8 +1504,8 @@
         </button>
     </div>
 
-    <!-- Floating Sidebar Navigation -->
-    <div class="sidebar-container flex" x-data="{ activeTooltip: null, activeSection: 'hero' }"
+    <!-- Desktop Sidebar Navigation -->
+    <div class="sidebar-container hidden lg:flex" x-data="{ activeTooltip: null, activeSection: 'hero' }"
          @scroll.window.throttle.100ms="
             const sections = ['hero', 'profile', 'economy', 'drivers', 'infrastructure', 'logistics', 'industries', 'action'];
             for (const id of sections) {
@@ -1489,46 +1513,38 @@
                 if (el && el.getBoundingClientRect().top <= 200) activeSection = id;
             }
          ">
-        
-        @php
-            $sidebarNav = [
-                ['id' => 'hero', 'name' => 'Profile', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
-                ['id' => 'economy', 'name' => 'Economy', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
-                ['id' => 'drivers', 'name' => 'Drivers', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
-                ['id' => 'infrastructure', 'name' => 'Infra', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
-                ['id' => 'logistics', 'name' => 'Logistics', 'icon' => 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9'],
-                ['id' => 'industries', 'name' => 'Industries', 'icon' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.282a2 2 0 01-1.808 0l-.628-.282a6 6 0 00-3.86-.517l-2.387.477a2 2 0 00-1.022.547l-1.159 1.159a2 2 0 00-.547 1.022l-.477 2.387a2 2 0 00.547 1.022l1.159 1.159a2 2 0 001.022.547l2.387.477a6 6 0 003.86-.517l.628-.282a2 2 0 011.808 0l.628.282a6 6 0 003.86.517l2.387-.477a2 2 0 001.022-.547l1.159-1.159a2 2 0 00.547-1.022l.477-2.387a2 2 0 00-.547-1.022l-1.159-1.159z'],
-                ['id' => 'action', 'name' => 'Connect', 'icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z']
-            ];
-        @endphp
-
         @foreach($sidebarNav as $nav)
             <a href="#{{ $nav['id'] }}" 
                class="sidebar-btn group" 
-               :class="{ 'active': activeSection === '{{ $nav['id'] }}' }"
-               @click="if(window.innerWidth < 1024) { 
-                           if(activeTooltip !== '{{ $nav['name'] }}') { 
-                               $event.preventDefault(); 
-                               activeTooltip = '{{ $nav['name'] }}'; 
-                           } else {
-                               activeTooltip = null;
-                           }
-                       }">
+               :class="{ 'active': activeSection === '{{ $nav['id'] }}' }">
                 <div class="sidebar-icon">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $nav['icon'] }}"></path>
                     </svg>
                 </div>
                 <span class="sidebar-label">{{ $nav['name'] }}</span>
-                <!-- Mobile/Tablet Tooltip (visible on 1st click) -->
-                <div x-show="activeTooltip === '{{ $nav['name'] }}'" 
-                     @click.away="activeTooltip = null"
-                     x-cloak
-                     class="mobile-tooltip lg:hidden">
-                    {{ $nav['name'] }}
-                </div>
             </a>
         @endforeach
+    </div>
+
+    <!-- Mobile Retractable Sidebar -->
+    <div class="sidebar-overlay lg:hidden" :class="{ 'open': mobileSidebarOpen }" @click="mobileSidebarOpen = false"></div>
+    <div class="mobile-sidebar-drawer lg:hidden p-8 flex flex-col gap-6" :class="{ 'open': mobileSidebarOpen }">
+        <h3 class="text-2xl font-black text-white uppercase italic mb-4 tracking-tighter">Navigate</h3>
+        <div class="flex flex-col gap-2">
+            @foreach($sidebarNav as $nav)
+                <a href="#{{ $nav['id'] }}" 
+                   @click="mobileSidebarOpen = false"
+                   class="flex items-center gap-4 p-4 rounded-2xl border border-white/5 transition-all text-arbitra-gray hover:text-white hover:bg-white/5 hover:border-arbitra-emerald/30 group">
+                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-arbitra-emerald group-hover:text-arbitra-black transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $nav['icon'] }}"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-widest">{{ $nav['name'] }}</span>
+                </a>
+            @endforeach
+        </div>
     </div>
 
     <script>
