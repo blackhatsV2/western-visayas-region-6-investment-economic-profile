@@ -737,6 +737,7 @@
                     }
                 },
                 buildSearchIndex() {
+                    this.searchIndex = [];
                     // Index Sections
                     const sections = document.querySelectorAll('section[id], div[id="hero"]');
                     sections.forEach(s => {
@@ -754,6 +755,7 @@
                     cards.forEach((card, idx) => {
                         const title = card.querySelector('h3')?.innerText || card.querySelector('span')?.innerText;
                         const subtitle = card.querySelector('p')?.innerText;
+                        
                         if (title && title.length > 2) {
                             this.searchIndex.push({
                                 type: 'Card/Stat',
@@ -764,7 +766,72 @@
                                 icon: 'M13 10V3L4 14h7v7l9-11h-7z'
                             });
                         }
+
+                        // Recursively index modal content if present
+                        if (card.dataset.content) {
+                            try {
+                                const content = JSON.parse(card.dataset.content);
+                                this.indexRecursive(content, card, title || 'Details');
+                            } catch (e) {
+                                console.error('Index Error:', e);
+                            }
+                        }
                     });
+                },
+                indexRecursive(obj, el, parentTitle) {
+                    if (!obj) return;
+                    
+                    if (Array.isArray(obj)) {
+                        obj.forEach(item => {
+                            if (typeof item === 'string') {
+                                this.searchIndex.push({
+                                    type: 'Detail',
+                                    title: item,
+                                    subtitle: `in ${parentTitle}`,
+                                    el: el,
+                                    isModalItem: true,
+                                    icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z'
+                                });
+                            } else {
+                                this.indexRecursive(item, el, parentTitle);
+                            }
+                        });
+                    } else if (typeof obj === 'object') {
+                        // Special Handling for Map Points
+                        if (obj['Map Points'] && Array.isArray(obj['Map Points'])) {
+                            obj['Map Points'].forEach(point => {
+                                if (point.label) {
+                                    this.searchIndex.push({
+                                        type: 'Location',
+                                        title: point.label,
+                                        subtitle: `Map Point in ${parentTitle}`,
+                                        el: el,
+                                        isModalItem: true,
+                                        icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
+                                    });
+                                }
+                            });
+                        }
+
+                        for (const [key, value] of Object.entries(obj)) {
+                            if (key === 'Map Points') continue;
+
+                            if (typeof value === 'string') {
+                                // Index both key and value if it's a stats-like object
+                                const title = isNaN(parseInt(key)) ? `${key}: ${value}` : value;
+                                this.searchIndex.push({
+                                    type: 'Detail',
+                                    title: title,
+                                    subtitle: `in ${parentTitle}`,
+                                    el: el,
+                                    isModalItem: true,
+                                    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                                });
+                            } else {
+                                this.indexRecursive(value, el, parentTitle);
+                            }
+                        }
+                    }
                 },
                 performSearch() {
                     if (!this.searchQuery.trim()) {
@@ -782,8 +849,16 @@
                     this.searchOpen = false;
                     if (result.el) {
                         result.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        result.el.classList.add('ring-4', 'ring-arbitra-emerald/50');
-                        setTimeout(() => result.el.classList.remove('ring-4', 'ring-arbitra-emerald/50'), 2000);
+                        
+                        if (result.isModalItem) {
+                            // Delay slightly for smooth scroll to finish
+                            setTimeout(() => {
+                                this.openFromEl(result.el);
+                            }, 500);
+                        } else {
+                            result.el.classList.add('ring-4', 'ring-arbitra-emerald/50');
+                            setTimeout(() => result.el.classList.remove('ring-4', 'ring-arbitra-emerald/50'), 2000);
+                        }
                     } else if (result.id) {
                         const el = document.getElementById(result.id);
                         if (el) el.scrollIntoView({ behavior: 'smooth' });
