@@ -4,69 +4,91 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Western Visayas Regional Economic Profile - {{ $year }}</title>
     <style>
-        @page { margin: 0.5in; }
-        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1a1a1a; font-size: 10px; line-height: 1.3; }
+        @page { margin: 0.6in; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1e293b; font-size: 10px; line-height: 1.4; }
         
-        .header { text-align: center; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 20px; }
-        .header h1 { color: #10b981; margin: 0; font-size: 18px; text-transform: uppercase; font-weight: 800; }
-        .header p { color: #555; font-size: 10px; margin-top: 5px; font-weight: bold; letter-spacing: 0.05em; }
+        .header { text-align: left; border-bottom: 3px solid #334155; padding-bottom: 15px; margin-bottom: 25px; }
+        .header h1 { color: #334155; margin: 0; font-size: 22px; text-transform: uppercase; font-weight: 900; letter-spacing: -0.02em; }
+        .header p { color: #64748b; font-size: 10px; margin-top: 4px; font-weight: bold; letter-spacing: 0.1em; }
         
-        .c-section { margin-bottom: 25px; page-break-inside: avoid; }
+        .c-section { margin-bottom: 30px; page-break-inside: avoid; }
         .c-section-title { 
-            font-size: 14px; 
-            font-weight: bold; 
-            color: #fff; 
-            background-color: #10b981; 
-            padding: 5px 10px; 
-            margin-bottom: 10px; 
+            font-size: 12px; 
+            font-weight: 900; 
+            color: #1e293b; 
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+            margin-bottom: 12px; 
             text-transform: uppercase; 
-            border-radius: 4px;
+            letter-spacing: 0.05em;
         }
 
         .c-desc { 
             background: #f8fafc; 
-            padding: 8px; 
-            border-radius: 4px; 
-            margin-bottom: 10px; 
-            border-left: 3px solid #64748b; 
+            padding: 10px 12px; 
+            border-radius: 6px; 
+            margin-bottom: 15px; 
+            border-left: 4px solid #334155; 
             font-size: 10px; 
             color: #334155; 
-            text-align: justify;
+            line-height: 1.5;
         }
 
         /* Standard Table Styling */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 9px; }
-        th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: left; vertical-align: top; }
-        th { background-color: #e2e8f0; color: #1e293b; font-weight: bold; text-transform: uppercase; font-size: 8px; }
-        tr:nth-child(even) { background-color: #f8fafc; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 9px; }
+        th, td { border: 1px solid #f1f5f9; padding: 8px; text-align: left; vertical-align: top; }
+        th { background-color: #f8fafc; color: #475569; font-weight: 800; text-transform: uppercase; font-size: 8px; letter-spacing: 0.02em; }
+        tr:nth-child(even) { background-color: #fbfcff; }
 
         /* KPI/Stats Matrix */
-        .kpi-table th { width: 30%; background-color: #f1f5f9; color: #0f172a; }
-        .kpi-table td { width: 70%; font-weight: bold; color: #10b981; font-size: 10px; }
+        .kpi-table th { width: 30%; background-color: #ffffff; color: #64748b; border: none; border-bottom: 1px solid #f1f5f9; }
+        .kpi-table td { width: 70%; font-weight: 900; color: #065f46; font-size: 12px; border: none; border-bottom: 1px solid #f1f5f9; }
         
-        /* Dense Data Matrix (For Economic Drivers, etc) */
-        .matrix-table th.col-name { width: 20%; }
-        .matrix-table th.col-details { width: 45%; }
+        /* Dense Data Matrix */
+        .matrix-table th.col-name { width: 22%; }
+        .matrix-table th.col-details { width: 43%; }
         .matrix-table th.col-extra { width: 35%; }
-        .matrix-name { font-weight: bold; color: #0f172a; }
+        .matrix-name { font-weight: 800; color: #1e293b; text-transform: uppercase; font-size: 8px; }
         .matrix-details { color: #334155; }
         
         /* Chart Table Representation */
-        .chart-table th { text-align: center; }
-        .chart-table td { text-align: center; }
-        .chart-table td:first-child { text-align: left; font-weight: bold; background-color: #f8fafc; }
+        .chart-table th { text-align: left; background-color: transparent; border-bottom: 2px solid #f1f5f9; }
+        .chart-table td { border: none; border-bottom: 1px solid #f8fafc; padding: 10px 8px; }
+        .chart-table td:first-child { font-weight: 800; color: #475569; text-transform: uppercase; font-size: 8px; }
         
         /* Bar Graph in Table */
-        .bar-container { width: 100%; background-color: #e2e8f0; height: 10px; border-radius: 2px; overflow: hidden; display: inline-block; vertical-align: middle; }
-        .bar-fill { height: 100%; background-color: #10b981; }
+        .bar-container { 
+            width: 100%; 
+            background-color: #f1f5f9; 
+            height: 12px; 
+            border-radius: 2px; 
+            overflow: hidden; 
+            display: inline-block; 
+            vertical-align: middle; 
+        }
+        .bar-fill { 
+            height: 100%; 
+            background-color: #334155; 
+            border-radius: 0;
+        }
         .bar-negative { background-color: #ef4444; }
-        .bar-text { display: inline-block; width: 35px; text-align: right; font-size: 8px; font-weight: bold; vertical-align: middle; margin-left: 5px; }
+        .bar-text { 
+            display: inline-block; 
+            min-width: 40px; 
+            text-align: right; 
+            font-size: 9px; 
+            font-weight: 900; 
+            vertical-align: middle; 
+            margin-left: 8px;
+            color: #0f172a;
+        }
 
-        .sub-list { margin: 0; padding-left: 15px; list-style-type: square; }
-        .sub-list li { margin-bottom: 2px; }
+        .sub-list { margin: 0; padding-left: 12px; list-style-type: none; }
+        .sub-list li { margin-bottom: 4px; position: relative; padding-left: 12px; }
+        .sub-list li:before { content: "•"; color: #10b981; position: absolute; left: 0; font-weight: bold; }
 
-        .source { font-size: 8px; color: #94a3b8; font-style: italic; margin-top: 5px; text-align: right; }
-        .footer { position: fixed; bottom: -0.3in; width: 100%; text-align: center; font-size: 8px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 5px; }
+        .source { font-size: 8px; color: #94a3b8; font-weight: bold; text-transform: uppercase; margin-top: 10px; text-align: right; }
+        .footer { position: fixed; bottom: -0.4in; width: 100%; text-align: center; font-size: 8px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 8px; }
     </style>
 </head>
 <body>
@@ -228,8 +250,8 @@
                 @endif
                 
                 @if(isset($content->content['modal_text']))
-                    <div style="font-size: 9px; color: #64748b; font-style: italic; margin-top: 5px;">
-                        Analysis: {{ $content->content['modal_text'] }}
+                    <div style="font-size: 10px; color: #0f172a; font-weight: 800; margin-top: 12px; padding: 10px; background: #f8fafc; border-radius: 6px; border: 1px solid #f1f5f9;">
+                        EXECUTIVE SUMMARY: <span style="font-weight: 500; color: #475569;">{{ $content->content['modal_text'] }}</span>
                     </div>
                 @endif
             @endif

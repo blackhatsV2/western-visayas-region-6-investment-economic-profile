@@ -1227,6 +1227,7 @@
 
                 renderChart(el, type, series, categories) {
                     if (!el) return;
+                    const isDistributed = (series || []).length <= 1;
                     const options = {
                         series: JSON.parse(JSON.stringify(series || [])),
                         chart: { 
@@ -1234,21 +1235,52 @@
                             height: 450, 
                             animations: {enabled: true}, 
                             toolbar: {show: false}, 
-                            background: 'transparent' 
+                            background: 'transparent',
+                            fontFamily: 'Inter, sans-serif'
                         },
                         theme: { mode: 'dark' },
+                        plotOptions: {
+                            bar: { 
+                                borderRadius: 2, 
+                                columnWidth: '50%',
+                                distributed: isDistributed
+                            }
+                        },
+                        grid: { 
+                            show: true,
+                            borderColor: 'rgba(255,255,255,0.05)',
+                            strokeDashArray: 0,
+                            xaxis: { lines: { show: false } },
+                            yaxis: { lines: { show: true } }
+                        },
+                        xaxis: { 
+                            categories: JSON.parse(JSON.stringify(categories || [])), 
+                            labels: {
+                                style: {colors: '#94a3b8', fontWeight: 500, fontSize: '11px'}
+                            },
+                            axisBorder: { show: true, color: 'rgba(255,255,255,0.1)' },
+                            axisTicks: { show: true, color: 'rgba(255,255,255,0.1)' }
+                        },
+                        yaxis: { 
+                            labels: {
+                                style: {colors: '#94a3b8', fontWeight: 500, fontSize: '11px'}
+                            },
+                            axisBorder: { show: true, color: 'rgba(255,255,255,0.1)' },
+                            axisTicks: { show: false }
+                        },
+                        colors: ['#334155', '#065f46', '#475569', '#1e293b', '#64748b'],
                         stroke: { 
                             show: true, 
-                            width: (type || 'bar') === 'bar' ? 0 : 3, 
-                            curve: 'smooth' 
+                            width: (type || 'bar') === 'bar' ? 0 : 2, 
+                            curve: 'straight',
+                            lineCap: 'square'
                         },
                         fill: {
-                            opacity: (type || 'bar') === 'area' ? 0.3 : 1
+                            type: 'solid',
+                            opacity: (type || 'bar') === 'area' ? 0.2 : 0.9
                         },
-                        xaxis: { categories: JSON.parse(JSON.stringify(categories || [])), labels: {style: {colors: '#888'}} },
-                        yaxis: { labels: {style: {colors: '#888'}} },
-                        colors: ['#10b981'],
-                        plotOptions: { bar: { borderRadius: 4, distributed: (series || []).length <= 1 } }
+                        dataLabels: { enabled: false },
+                        tooltip: { theme: 'dark' }
                     };
                     const chart = new ApexCharts(el, options);
                     chart.render();

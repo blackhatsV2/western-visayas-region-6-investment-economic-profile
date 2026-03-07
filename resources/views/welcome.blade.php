@@ -282,17 +282,31 @@
         /* Floating Sidebar Styles */
         .sidebar-container {
             position: fixed;
-            left: 1rem;
+            left: 1.5rem;
             top: 50%;
-            transform: translateY(-50%);
+            transform: translateY(-50%) translateX(-120%);
             z-index: 200;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.5rem;
             pointer-events: none;
+            padding: 0.5rem;
+            background: rgba(10, 10, 10, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+            opacity: 0;
         }
 
-        /* Mobile Sidebar Drawer */
+        .sidebar-container.is-visible {
+            transform: translateY(-50%) translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         .mobile-sidebar-drawer {
             position: fixed;
             top: 0;
@@ -343,19 +357,15 @@
         }
         
         .sidebar-icon {
-            width: 3rem;
-            height: 3rem;
+            width: 2.75rem;
+            height: 2.75rem;
             border-radius: 50%;
-            background: rgba(10, 10, 10, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         
         .sidebar-btn:hover .sidebar-icon,
@@ -368,11 +378,11 @@
         }
         
         .sidebar-label {
-            background: rgba(10, 10, 10, 0.9);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
+            padding: 0.5rem 1rem 0.5rem 0;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
             color: white;
             font-size: 0.75rem;
             font-weight: 800;
@@ -418,6 +428,130 @@
             .sidebar-container { left: 1rem; }
             .sidebar-icon { width: 2.5rem; height: 2.5rem; }
         }
+
+        /* Desktop Sidebar Toggle (Integrated) */
+        .desktop-sidebar-toggle {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .desktop-sidebar-toggle:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .desktop-sidebar-toggle.sidebar-hidden {
+            background: #10b981;
+            border-color: #10b981;
+            color: #000000;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+        /* Power Search Styles */
+        .search-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(15, 15, 15, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+        }
+
+        .search-input-wrapper {
+            padding: 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            color: #FFFFFF;
+            width: 100%;
+            font-size: 1.125rem;
+            outline: none;
+            font-weight: 500;
+        }
+
+        .search-results {
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-result-item:hover, .search-result-item.selected {
+            background: rgba(16, 185, 129, 0.1);
+            color: #FFFFFF;
+        }
+
+        .search-result-item.selected {
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .search-category {
+            padding: 0.75rem 1rem 0.25rem;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(16, 185, 129, 0.8);
+        }
+
+        .search-shortcut-hint {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .kbd {
+            padding: 0.1rem 0.4rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.25rem;
+            font-family: sans-serif;
+        }
     </style>
 
 </head>
@@ -437,6 +571,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('app', () => ({
                 mobileSidebarOpen: false,
+                desktopSidebarOpen: true,
                 modalOpen: false,
                 contactOpen: false,
                 selectedYear: '{{ $selectedYear }}',
@@ -447,8 +582,58 @@
                 contactForm: { name: '', email: '', contact: '', message: '' },
                 contactLoading: false,
                 contactSuccess: false,
+                searchOpen: false,
+                searchQuery: localStorage.getItem('power_search_query') || '',
+                searchResults: [],
+                searchIndex: [],
+                selectedIndex: 0,
                 map: null,
                 init() {
+                    this.buildSearchIndex();
+                    
+                    if (this.searchQuery) {
+                        this.performSearch();
+                    }
+
+                    window.addEventListener('keydown', (e) => {
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                            e.preventDefault();
+                            this.searchOpen = !this.searchOpen;
+                        }
+                        if (this.searchOpen) {
+                            if (e.key === 'Escape') this.searchOpen = false;
+                            if (e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                this.selectedIndex = (this.selectedIndex + 1) % this.searchResults.length;
+                            }
+                            if (e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                this.selectedIndex = (this.selectedIndex - 1 + this.searchResults.length) % this.searchResults.length;
+                            }
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (this.searchResults[this.selectedIndex]) {
+                                    this.navigateToResult(this.searchResults[this.selectedIndex]);
+                                }
+                            }
+                        }
+                    });
+
+                    this.$watch('searchOpen', value => {
+                        this.updateScrollLock();
+                        if (value) {
+                            setTimeout(() => {
+                                this.$refs.searchInput?.focus();
+                                this.$refs.searchInput?.select();
+                            }, 50);
+                        }
+                    });
+
+                    this.$watch('searchQuery', value => {
+                        localStorage.setItem('power_search_query', value);
+                        this.performSearch();
+                    });
+
                     this.$watch('modalOpen', value => {
                         this.updateScrollLock();
                         if (value) {
@@ -550,6 +735,59 @@
                     } finally {
                         this.contactLoading = false;
                     }
+                },
+                buildSearchIndex() {
+                    // Index Sections
+                    const sections = document.querySelectorAll('section[id], div[id="hero"]');
+                    sections.forEach(s => {
+                        const title = s.querySelector('h2')?.innerText || s.id;
+                        this.searchIndex.push({
+                            type: 'Section',
+                            title: title,
+                            id: s.id,
+                            icon: 'M4 6h16M4 12h16M4 18h7'
+                        });
+                    });
+
+                    // Index Stats and Cards
+                    const cards = document.querySelectorAll('.bento-card');
+                    cards.forEach((card, idx) => {
+                        const title = card.querySelector('h3')?.innerText || card.querySelector('span')?.innerText;
+                        const subtitle = card.querySelector('p')?.innerText;
+                        if (title && title.length > 2) {
+                            this.searchIndex.push({
+                                type: 'Card/Stat',
+                                title: title,
+                                subtitle: subtitle,
+                                id: card.closest('section')?.id || 'hero',
+                                el: card,
+                                icon: 'M13 10V3L4 14h7v7l9-11h-7z'
+                            });
+                        }
+                    });
+                },
+                performSearch() {
+                    if (!this.searchQuery.trim()) {
+                        this.searchResults = [];
+                        return;
+                    }
+                    const q = this.searchQuery.toLowerCase();
+                    this.searchResults = this.searchIndex.filter(item => 
+                        item.title.toLowerCase().includes(q) || 
+                        (item.subtitle && item.subtitle.toLowerCase().includes(q))
+                    );
+                    this.selectedIndex = 0;
+                },
+                navigateToResult(result) {
+                    this.searchOpen = false;
+                    if (result.el) {
+                        result.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        result.el.classList.add('ring-4', 'ring-arbitra-emerald/50');
+                        setTimeout(() => result.el.classList.remove('ring-4', 'ring-arbitra-emerald/50'), 2000);
+                    } else if (result.id) {
+                        const el = document.getElementById(result.id);
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }
                 }
             }));
         });
@@ -559,11 +797,25 @@
     <nav class="fixed top-0 w-full z-[400] bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-3 md:py-4">
         <div class="max-w-[1240px] mx-auto px-4 md:px-8 flex items-center justify-between">
             <div class="flex items-center gap-3 md:gap-4">
+                <!-- Desktop Sidebar Toggle -->
+                <button class="desktop-sidebar-toggle hidden md:flex" 
+                        :class="{ 'sidebar-hidden': !desktopSidebarOpen }"
+                        @click="desktopSidebarOpen = !desktopSidebarOpen"
+                        title="Toggle Navigation">
+                    <svg x-show="desktopSidebarOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h7"></path>
+                    </svg>
+                    <svg x-show="!desktopSidebarOpen" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+
                 <!-- Sidebar Burger (Mobile Only) -->
-                <button @click="mobileSidebarOpen = !mobileSidebarOpen" class="flex lg:hidden flex-col items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl transition-all active:scale-95">
+                <button @click="mobileSidebarOpen = !mobileSidebarOpen" class="flex md:hidden flex-col items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl transition-all active:scale-95">
                     <svg x-show="!mobileSidebarOpen" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     <svg x-show="mobileSidebarOpen" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
+
                 <img src="{{ asset('dti-logo.png') }}" class="h-7 md:h-8 w-auto" alt="DTI Logo">
                 <div class="h-6 w-px bg-white/10 hidden md:block"></div>
                 <h1 class="text-[9px] md:text-sm font-black tracking-tight uppercase block max-w-[120px] md:max-w-none leading-tight">{{ $meta->content['site_title'] ?? 'Western Visayas: Investment and Economic Profile' }}</h1>
@@ -588,6 +840,15 @@
                     $mobileDropYears = $yearsList->slice(1);
                 @endphp
                 <div class="flex items-center gap-1.5 md:gap-2 bg-white/5 px-1.5 md:px-2 py-1 md:py-1.5 rounded-full border border-white/5" x-data="{ moreOpen: false }">
+                    <!-- Search Trigger -->
+                    <button @click="searchOpen = true" 
+                            class="hidden md:flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/5 border border-white/10 text-arbitra-gray hover:text-arbitra-emerald hover:border-arbitra-emerald/50 transition-all mr-1"
+                            title="Power Search (Ctrl+K)">
+                        <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                    
                     @foreach($shownYears as $index => $year)
                         <a href="?year={{ $year }}" 
                            class="px-2 md:px-3 py-1 rounded-full text-[9px] md:text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'text-arbitra-gray hover:text-white' }} {{ $index >= 1 ? 'hidden md:block' : '' }}">
@@ -930,34 +1191,79 @@
                                         height: 400,
                                         fontFamily: 'Inter, sans-serif',
                                         toolbar: { show: false },
-                                        background: 'transparent'
+                                        background: 'transparent',
+                                        sparkline: { enabled: false }
                                     },
                                     theme: { mode: 'dark' },
                                     plotOptions: {
                                         bar: {
                                             horizontal: {{ isset($content->content['horizontal']) && $content->content['horizontal'] ? 'true' : 'false' }},
-                                            borderRadius: 4,
-                                            columnWidth: '30%',
+                                            borderRadius: 2,
+                                            columnWidth: '50%',
                                             distributed: {{ $isDistributed ? 'true' : 'false' }},
+                                            dataLabels: { position: 'top' }
                                         }
                                     },
-                                    grid: { borderColor: 'rgba(255,255,255,0.02)' },
+                                    grid: { 
+                                        show: true,
+                                        borderColor: 'rgba(255,255,255,0.05)',
+                                        strokeDashArray: 0,
+                                        xaxis: { lines: { show: false } },
+                                        yaxis: { lines: { show: true } },
+                                        padding: { top: 0, right: 0, bottom: 0, left: 10 }
+                                    },
                                     xaxis: {
                                         categories: @json($categories),
-                                        labels: { style: { colors: '#888888', fontWeight: 600, fontSize: '14px' } }
+                                        labels: { 
+                                            style: { colors: '#94a3b8', fontWeight: 500, fontSize: '11px' },
+                                            offsetY: 5
+                                        },
+                                        axisBorder: { show: true, color: 'rgba(255,255,255,0.1)' },
+                                        axisTicks: { show: true, color: 'rgba(255,255,255,0.1)' },
+                                        crosshairs: { show: true }
                                     },
-                                    yaxis: { labels: { style: { colors: '#888888', fontWeight: 600, fontSize: '14px' } } },
-                                    colors: {!! $isDistributed && count($colorArray) > 0 ? json_encode($colorArray) : "['#10b981', '#888888', '#555555']" !!},
+                                    yaxis: { 
+                                        labels: { 
+                                            style: { colors: '#94a3b8', fontWeight: 500, fontSize: '11px' } 
+                                        },
+                                        axisBorder: { show: true, color: 'rgba(255,255,255,0.1)' },
+                                        axisTicks: { show: false }
+                                    },
+                                    colors: {!! $isDistributed && count($colorArray) > 0 ? json_encode($colorArray) : "['#334155', '#065f46', '#475569', '#1e293b', '#64748b']" !!},
                                     stroke: { 
                                         show: true, 
-                                        width: {{ ($content->content['chart_type'] ?? 'bar') === 'bar' ? 0 : 3 }},
-                                        curve: 'smooth' 
+                                        width: {{ ($content->content['chart_type'] ?? 'bar') === 'bar' ? 0 : 2 }},
+                                        curve: 'straight',
+                                        lineCap: 'square'
                                     },
                                     fill: {
-                                        opacity: {{ ($content->content['chart_type'] ?? 'bar') === 'area' ? 0.3 : 1 }}
+                                        type: 'solid',
+                                        opacity: {{ ($content->content['chart_type'] ?? 'bar') === 'area' ? 0.2 : 0.9 }}
                                     },
                                     dataLabels: { enabled: false },
-                                    tooltip: { theme: 'dark' }
+                                    tooltip: { 
+                                        theme: 'dark',
+                                        x: { show: true },
+                                        y: { formatter: (val) => val + (typeof @js($content->content['unit'] ?? '') !== 'undefined' ? ' ' + @js($content->content['unit'] ?? '') : '') },
+                                        style: { fontSize: '12px', fontFamily: 'Inter, sans-serif' },
+                                        marker: { show: true }
+                                    },
+                                    markers: {
+                                        size: {{ ($content->content['chart_type'] ?? 'bar') === 'bar' ? 0 : 4 }},
+                                        colors: ['#065f46'],
+                                        strokeColors: '#fff',
+                                        strokeWidth: 1,
+                                        hover: { size: 6 }
+                                    },
+                                    legend: {
+                                        show: {{ count($content->content['series'] ?? []) > 1 ? 'true' : 'false' }},
+                                        position: 'top',
+                                        horizontalAlign: 'right',
+                                        fontSize: '11px',
+                                        fontWeight: 500,
+                                        labels: { colors: '#94a3b8' },
+                                        markers: { radius: 2 }
+                                    }
                                 };
                                 var chart = new ApexCharts(document.querySelector("#chart-{{ $content->id }}"), options);
                                 chart.render();
@@ -1207,6 +1513,94 @@
             </div>
         </div>
     </footer>
+
+    <!-- Power Search Modal -->
+    <div x-show="searchOpen" 
+         x-cloak
+         class="search-modal-backdrop"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        
+        <div class="absolute inset-0" @click="searchOpen = false"></div>
+        
+        <div class="search-container relative"
+             x-transition:enter="transition ease-out duration-300 transform scale-95"
+             x-transition:enter-end="scale-100"
+             x-transition:leave="transition ease-in duration-200 transform scale-95">
+            
+            <div class="search-input-wrapper">
+                <svg class="w-6 h-6 text-arbitra-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" 
+                       x-model="searchQuery" 
+                       x-ref="searchInput"
+                       class="search-input" 
+                       placeholder="Search sections, stats, cards..."
+                       @keydown.escape="searchOpen = false">
+                <button @click="searchQuery = ''" x-show="searchQuery" class="text-arbitra-gray hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="search-results custom-scrollbar">
+                <template x-if="searchResults.length === 0 && searchQuery.length > 0">
+                    <div class="p-8 text-center text-arbitra-gray">
+                        No results found for "<span class="text-white" x-text="searchQuery"></span>"
+                    </div>
+                </template>
+
+                <template x-if="searchQuery.length === 0">
+                    <div class="p-8 text-center text-arbitra-gray">
+                        Type something to start searching...
+                    </div>
+                </template>
+
+                <template x-for="(result, index) in searchResults" :key="index">
+                    <div>
+                        <!-- Category Header (Show if first of its type) -->
+                        <template x-if="index === 0 || searchResults[index-1].type !== result.type">
+                            <div class="search-category" x-text="result.type"></div>
+                        </template>
+
+                        <div class="search-result-item" 
+                             :class="{ 'selected': selectedIndex === index }"
+                             @click="navigateToResult(result)"
+                             @mouseenter="selectedIndex = index">
+                            <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-arbitra-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="result.icon"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-bold truncate" x-text="result.title"></div>
+                                <template x-if="result.subtitle">
+                                    <div class="text-xs opacity-50 truncate" x-text="result.subtitle"></div>
+                                </template>
+                            </div>
+                            <div class="text-[10px] font-black uppercase tracking-widest opacity-30">Jump to</div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="search-shortcut-hint">
+                <div class="flex items-center gap-1.5">
+                    <span class="kbd">↑↓</span> to navigate
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="kbd">Enter</span> to select
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="kbd">Esc</span> to close
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Interactive Modal -->
     <div x-show="modalOpen" 
@@ -1512,7 +1906,8 @@
     </div>
 
     <!-- Desktop Sidebar Navigation -->
-    <div class="sidebar-container hidden lg:flex" x-data="{ activeTooltip: null, activeSection: 'hero' }"
+    <div class="sidebar-container hidden md:flex" :class="{ 'is-visible': desktopSidebarOpen }"
+         x-data="{ activeTooltip: null, activeSection: 'hero' }"
          @scroll.window.throttle.100ms="
             const sections = ['hero', 'profile', 'economy', 'drivers', 'infrastructure', 'logistics', 'industries', 'action'];
             for (const id of sections) {
