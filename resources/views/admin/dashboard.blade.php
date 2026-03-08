@@ -227,9 +227,9 @@
                         $watch('techy', (val) => { if(!val) parseModalDetails() });
                         
                         // Change Tracking
-                        $watch('form', () => Alpine.store('admin').setUnsaved(true), { deep: true });
-                        $watch('title', () => Alpine.store('admin').setUnsaved(true));
-                        $watch('source', () => Alpine.store('admin').setUnsaved(true));
+                        $watch('form', () => Alpine.store('admin').setSectionDirty(id, title), { deep: true });
+                        $watch('title', (newTitle) => Alpine.store('admin').setSectionDirty(id, newTitle));
+                        $watch('source', () => Alpine.store('admin').setSectionDirty(id, title));
                     ">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
                         <!-- Hero Content Preview (Match Public Site) -->
@@ -560,9 +560,9 @@
                     $watch('techy', (val) => { if(!val) parseModalDetails() });
                     
                     // Change Tracking
-                    $watch('form', () => Alpine.store('admin').setUnsaved(true), { deep: true });
-                    $watch('title', () => Alpine.store('admin').setUnsaved(true));
-                    $watch('source', () => Alpine.store('admin').setUnsaved(true));
+                    $watch('form', () => Alpine.store('admin').setSectionDirty({{ $content->id }}, title), { deep: true });
+                    $watch('title', (newTitle) => Alpine.store('admin').setSectionDirty({{ $content->id }}, newTitle));
+                    $watch('source', () => Alpine.store('admin').setSectionDirty({{ $content->id }}, title));
                 "
                 class="scroll-mt-32 pb-20 group relative">
                     
@@ -1204,8 +1204,46 @@
         document.addEventListener('alpine:init', () => {
             Alpine.store('admin', {
                 hasUnsavedChanges: false,
-                setUnsaved(val) { this.hasUnsavedChanges = val; }
+                dirtySections: {}, // ID -> Title
+                setUnsaved(val) { 
+                    this.hasUnsavedChanges = val;
+                    if (!val) this.dirtySections = {};
+                },
+                setSectionDirty(id, title) {
+                    this.hasUnsavedChanges = true;
+                    this.dirtySections[id] = title || 'Unnamed Section';
+                },
+                getUnsavedMessage() {
+                    const sections = Object.values(this.dirtySections);
+                    if (sections.length === 0) return 'You have unsaved changes.';
+                    const uniqueSections = [...new Set(sections)];
+                    return 'You have unsaved changes in: \n• ' + uniqueSections.join('\n• ');
+                }
             });
+
+            // Browser-level navigation warning
+            window.addEventListener('beforeunload', (e) => {
+                if (Alpine.store('admin').hasUnsavedChanges) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+
+            // Intercept internal navigation
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('a');
+                if (link && !link.hasAttribute('download') && link.hostname === window.location.hostname) {
+                    // Check if it's a real navigation or just a modal trigger/anchor
+                    const href = link.getAttribute('href');
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                        if (Alpine.store('admin').hasUnsavedChanges) {
+                            if (!confirm(Alpine.store('admin').getUnsavedMessage() + '\n\nAre you sure you want to leave?')) {
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                }
+            }, true);
         });
 
         function adminApp() {

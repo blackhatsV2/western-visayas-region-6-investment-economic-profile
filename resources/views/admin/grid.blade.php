@@ -144,6 +144,49 @@
     </div>
 
     <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('admin', {
+                hasUnsavedChanges: false,
+                dirtyRows: new Set(),
+                setUnsaved(val) { 
+                    this.hasUnsavedChanges = val;
+                    if (!val) this.dirtyRows.clear();
+                },
+                setRowDirty(id) {
+                    this.hasUnsavedChanges = true;
+                    this.dirtyRows.add(id);
+                },
+                getUnsavedMessage() {
+                    if (this.dirtyRows.size === 0) return 'You have unsaved changes.';
+                    const rowIds = Array.from(this.dirtyRows).sort((a,b) => a-b);
+                    return 'You have unsaved changes in row(s): #' + rowIds.join(', #');
+                }
+            });
+
+            // Browser-level navigation warning
+            window.addEventListener('beforeunload', (e) => {
+                if (Alpine.store('admin').hasUnsavedChanges) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+
+            // Intercept internal navigation
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('a');
+                if (link && !link.hasAttribute('download') && link.hostname === window.location.hostname) {
+                    const href = link.getAttribute('href');
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                        if (Alpine.store('admin').hasUnsavedChanges) {
+                            if (!confirm(Alpine.store('admin').getUnsavedMessage() + '\n\nAre you sure you want to leave?')) {
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                }
+            }, true);
+        });
+
         function spreadsheetApp() {
             return {
                 saving: false,
@@ -152,6 +195,7 @@
                 handleChange(id, field, value) {
                     if (!this.updates[id]) this.updates[id] = {};
                     this.updates[id][field] = value;
+                    Alpine.store('admin').setRowDirty(id);
                 },
 
                 handleJsonChange(id, value) {
@@ -159,6 +203,7 @@
                         const parsed = JSON.parse(value);
                         if (!this.updates[id]) this.updates[id] = {};
                         this.updates[id]['content'] = parsed;
+                        Alpine.store('admin').setRowDirty(id);
                     } catch (e) {
                         alert('Invalid JSON in row #' + id);
                     }
@@ -188,6 +233,7 @@
                         }
                         
                         this.updates = {};
+                        Alpine.store('admin').setUnsaved(false);
                         alert('All changes saved successfully!');
                         window.location.reload();
                     } catch (e) {
