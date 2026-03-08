@@ -227,10 +227,23 @@
                         $watch('modalTabs', () => syncModalDetails(), { deep: true });
                         $watch('techy', (val) => { if(!val) parseModalDetails() });
                         
-                        // Change Tracking
-                        $watch('form', () => Alpine.store('admin').setSectionDirty(id, title), { deep: true });
-                        $watch('title', (newTitle) => Alpine.store('admin').setSectionDirty(id, newTitle));
-                        $watch('source', () => Alpine.store('admin').setSectionDirty(id, title));
+                        // Change Tracking: snapshot initial state, then detect real changes
+                        _initialFormSnapshots[id] = { form: JSON.stringify(form), title: title, source: source };
+                        $watch('form', () => {
+                            if (JSON.stringify(form) !== _initialFormSnapshots[id].form) {
+                                Alpine.store('admin').setSectionDirty(id, title);
+                            }
+                        }, { deep: true });
+                        $watch('title', (newTitle) => {
+                            if (newTitle !== _initialFormSnapshots[id].title) {
+                                Alpine.store('admin').setSectionDirty(id, newTitle);
+                            }
+                        });
+                        $watch('source', () => {
+                            if (source !== _initialFormSnapshots[id].source) {
+                                Alpine.store('admin').setSectionDirty(id, title);
+                            }
+                        });
                     ">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
                         <!-- Hero Content Preview (Match Public Site) -->
@@ -276,7 +289,7 @@
                                          x-transition:leave-end="opacity-0"
                                          x-cloak 
                                          class="admin-overlay"
-                                         @click.stop="if(confirmClose(id)) editingStat = false">
+                                         @click.stop="tryClose(id, () => editingStat = false)">
                                         
                                         <div class="admin-modal max-w-lg" @click.stop
                                              x-transition:enter="transition ease-out duration-300 transform"
@@ -301,7 +314,7 @@
 
                                             <div class="flex gap-4 mt-10">
                                                 <button @click.stop="save({{ $hero->id }}, {section_title: title, content: form, source: source}); editingStat = false" class="flex-1 bg-arbitra-emerald text-arbitra-black py-4 rounded-full font-black text-xs uppercase tracking-widest transition-all hover:scale-105">SAVE STAT</button>
-                                                <button @click.stop="if(confirmClose(id)) editingStat = false" class="px-8 border border-white/10 rounded-full font-bold text-xs">CANCEL</button>
+                                                <button @click.stop="tryClose(id, () => editingStat = false)" class="px-8 border border-white/10 rounded-full font-bold text-xs">CANCEL</button>
                                             </div>
                                         </div>
                                     </div>
@@ -320,7 +333,7 @@
                              x-transition:leave-end="opacity-0"
                              x-cloak 
                              class="admin-overlay" 
-                             @click="if(confirmClose(id)) editing = false">
+                             @click="tryClose(id, () => editing = false)">
                             
                             <div class="admin-modal" @click.stop
                                  x-transition:enter="transition ease-out duration-300 transform"
@@ -337,7 +350,7 @@
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <button @click="techy = !techy" class="text-[10px] font-black uppercase text-white/40 hover:text-white border border-white/10 px-4 py-2 rounded-full transition-all" x-text="techy ? 'Standard Mode' : 'JSON Mode'"></button>
-                                         <button @click="if(confirmClose(id)) editing = false" class="text-arbitra-gray hover:text-white p-2">
+                                         <button @click="tryClose(id, () => editing = false)" class="text-arbitra-gray hover:text-white p-2">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                         </button>
                                     </div>
@@ -463,7 +476,7 @@
                                 <div class="flex gap-4 mt-12 pt-8 border-t border-white/10 sticky bottom-0 bg-[#0A0A0A] pb-4">
                                     <button @click.stop="save({{ $hero->id }}, {section_title: title, content: form, source: source}); editing = false" class="bg-arbitra-emerald text-arbitra-black px-10 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-arbitra-emerald/20">SAVE HERO</button>
                                     <div class="flex-1"></div>
-                                    <button @click.stop="if(confirmClose(id)) editing = false" class="text-white/60 px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:text-white transition-all border border-white/10">CANCEL</button>
+                                    <button @click.stop="tryClose(id, () => editing = false)" class="text-white/60 px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:text-white transition-all border border-white/10">CANCEL</button>
                                 </div>
                             </div>
                         </div>
@@ -561,10 +574,23 @@
                     $watch('modalTabs', () => syncModalDetails(), { deep: true });
                     $watch('techy', (val) => { if(!val) parseModalDetails() });
                     
-                    // Change Tracking
-                    $watch('form', () => Alpine.store('admin').setSectionDirty({{ $content->id }}, title), { deep: true });
-                    $watch('title', (newTitle) => Alpine.store('admin').setSectionDirty({{ $content->id }}, newTitle));
-                    $watch('source', () => Alpine.store('admin').setSectionDirty({{ $content->id }}, title));
+                    // Change Tracking: snapshot initial state, then detect real changes
+                    _initialFormSnapshots[id] = { form: JSON.stringify(form), title: title, source: source };
+                    $watch('form', () => {
+                        if (JSON.stringify(form) !== _initialFormSnapshots[id].form) {
+                            Alpine.store('admin').setSectionDirty(id, title);
+                        }
+                    }, { deep: true });
+                    $watch('title', (newTitle) => {
+                        if (newTitle !== _initialFormSnapshots[id].title) {
+                            Alpine.store('admin').setSectionDirty(id, newTitle);
+                        }
+                    });
+                    $watch('source', () => {
+                        if (source !== _initialFormSnapshots[id].source) {
+                            Alpine.store('admin').setSectionDirty(id, title);
+                        }
+                    });
                 "
                 class="scroll-mt-32 pb-20 group relative">
                     
@@ -686,7 +712,7 @@
                          x-transition:leave-end="opacity-0"
                          x-cloak 
                          class="admin-overlay" 
-                         @click="editing = false">
+                         @click="tryClose(id, () => editing = false)">
                         
                         <div class="admin-modal" @click.stop
                              x-transition:enter="transition ease-out duration-300 transform"
@@ -703,7 +729,7 @@
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <button @click="techy = !techy" class="text-[10px] font-black uppercase text-white/40 hover:text-white border border-white/10 px-4 py-2 rounded-full transition-all" x-text="techy ? 'Standard Mode' : 'JSON Mode'"></button>
-                                    <button @click="if(confirmClose(id)) editing = false" class="text-arbitra-gray hover:text-white p-2">
+                                    <button @click="tryClose(id, () => editing = false)" class="text-arbitra-gray hover:text-white p-2">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                     </button>
                                 </div>
@@ -1024,7 +1050,7 @@
                             <button @click.stop="save({{ $content->id }}, {section_title: title, content: form, source: source}); editing = false" class="bg-arbitra-emerald text-arbitra-black px-6 py-2 rounded-full font-black text-xs">SAVE SECTION</button>
                             <div class="flex-1"></div>
                             <button @click.stop="deleteSection({{ $content->id }})" class="text-red-500 px-6 py-2 rounded-full font-black text-xs border border-red-500/20 hover:bg-red-500/10">DELETE SECTION</button>
-                            <button @click.stop="if(confirmClose(id)) editing = false" class="text-white px-6 py-2 rounded-full font-black text-xs border border-white/20">CANCEL</button>
+                            <button @click.stop="tryClose(id, () => editing = false)" class="text-white px-6 py-2 rounded-full font-black text-xs border border-white/20">CANCEL</button>
                         </div>
                     </div>
                 </section>
@@ -1202,8 +1228,68 @@
         </div>
     </div>
 
+    <!-- Custom Unsaved Changes Warning Modal -->
+    <div x-data x-show="Alpine.store('unsavedWarning').visible" x-cloak
+         class="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-xl px-6"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="bg-arbitra-dark p-10 rounded-[2rem] border border-yellow-500/30 max-w-md w-full shadow-2xl shadow-yellow-500/10"
+             x-transition:enter="transition ease-out duration-200 transform"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-yellow-500/20 flex items-center justify-center border border-yellow-500/30 flex-shrink-0">
+                    <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-black uppercase text-yellow-500">Unsaved Changes</h3>
+                    <p class="text-[10px] text-arbitra-gray font-bold uppercase tracking-widest mt-0.5">Your edits will be lost</p>
+                </div>
+            </div>
+            <p class="text-sm text-white/70 leading-relaxed mb-8">You have unsaved changes in this section. Are you sure you want to discard them?</p>
+            <div class="flex gap-3">
+                <button @click="Alpine.store('unsavedWarning').executeDiscard()" class="flex-1 bg-red-500/20 text-red-400 border border-red-500/30 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Discard Changes</button>
+                <button @click="Alpine.store('unsavedWarning').hide()" class="flex-1 bg-arbitra-emerald text-arbitra-black py-3 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-all">Go Back & Save</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Global: store initial form snapshots to detect real changes
+        const _initialFormSnapshots = {};
+
+        // Global tryClose: shows custom warning if dirty, otherwise closes directly
+        function tryClose(id, closeCallback) {
+            if (Alpine.store('admin').dirtySections[id]) {
+                Alpine.store('unsavedWarning').show(closeCallback);
+            } else {
+                closeCallback();
+            }
+        }
+
         document.addEventListener('alpine:init', () => {
+            // Unsaved warning modal store
+            Alpine.store('unsavedWarning', {
+                visible: false,
+                _discardCallback: null,
+                show(callback) {
+                    this._discardCallback = callback;
+                    this.visible = true;
+                },
+                hide() {
+                    this.visible = false;
+                    this._discardCallback = null;
+                },
+                executeDiscard() {
+                    if (this._discardCallback) this._discardCallback();
+                    this.visible = false;
+                    this._discardCallback = null;
+                }
+            });
             Alpine.store('admin', {
                 hasUnsavedChanges: false,
                 dirtySections: {}, // ID -> Title
@@ -1235,7 +1321,6 @@
             document.addEventListener('click', (e) => {
                 const link = e.target.closest('a');
                 if (link && !link.hasAttribute('download') && link.hostname === window.location.hostname) {
-                    // Check if it's a real navigation or just a modal trigger/anchor
                     const href = link.getAttribute('href');
                     if (href && href !== '#' && !href.startsWith('javascript:')) {
                         if (Alpine.store('admin').hasUnsavedChanges) {
@@ -1255,13 +1340,6 @@
                 newYear: '',
                 duplicateFromCurrent: true,
                 selectedYear: @js($selectedYear),
-
-                confirmClose(id) {
-                    if (Alpine.store('admin').dirtySections[id]) {
-                        return confirm('You have unsaved changes in this section. Are you sure you want to discard them?');
-                    }
-                    return true;
-                },
 
                 confirmLogout(e) {
                     if (Alpine.store('admin').hasUnsavedChanges) {
