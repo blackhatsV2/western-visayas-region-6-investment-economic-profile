@@ -917,10 +917,10 @@
                 <div class="flex items-center gap-1.5 md:gap-2 bg-white/5 px-1.5 md:px-2 py-1 md:py-1.5 rounded-full border border-white/5" x-data="{ moreOpen: false }">
                     <!-- Search Trigger -->
                     <button @click="searchOpen = true" 
-                            class="hidden md:flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/5 border border-white/10 text-arbitra-gray hover:text-arbitra-emerald hover:border-arbitra-emerald/50 transition-all mr-1"
+                            class="hidden md:flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-arbitra-emerald text-arbitra-black border border-arbitra-emerald/50 shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:scale-110 transition-all mr-2"
                             title="Power Search (Ctrl+K)">
-                        <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </button>
                     
