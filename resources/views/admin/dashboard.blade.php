@@ -150,6 +150,7 @@
                         editing: false, 
                         techy: false,
                         editingModal: false,
+                        id: {{ $hero->id }},
                         form: JSON.parse($el.dataset.form), 
                         title: $el.dataset.title, 
                         source: $el.dataset.source,
@@ -275,7 +276,7 @@
                                          x-transition:leave-end="opacity-0"
                                          x-cloak 
                                          class="admin-overlay"
-                                         @click.stop="editingStat = false">
+                                         @click.stop="if(confirmClose(id)) editingStat = false">
                                         
                                         <div class="admin-modal max-w-lg" @click.stop
                                              x-transition:enter="transition ease-out duration-300 transform"
@@ -300,7 +301,7 @@
 
                                             <div class="flex gap-4 mt-10">
                                                 <button @click.stop="save({{ $hero->id }}, {section_title: title, content: form, source: source}); editingStat = false" class="flex-1 bg-arbitra-emerald text-arbitra-black py-4 rounded-full font-black text-xs uppercase tracking-widest transition-all hover:scale-105">SAVE STAT</button>
-                                                <button @click.stop="editingStat = false" class="px-8 border border-white/10 rounded-full font-bold text-xs">CANCEL</button>
+                                                <button @click.stop="if(confirmClose(id)) editingStat = false" class="px-8 border border-white/10 rounded-full font-bold text-xs">CANCEL</button>
                                             </div>
                                         </div>
                                     </div>
@@ -319,7 +320,7 @@
                              x-transition:leave-end="opacity-0"
                              x-cloak 
                              class="admin-overlay" 
-                             @click="editing = false">
+                             @click="if(confirmClose(id)) editing = false">
                             
                             <div class="admin-modal" @click.stop
                                  x-transition:enter="transition ease-out duration-300 transform"
@@ -336,7 +337,7 @@
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <button @click="techy = !techy" class="text-[10px] font-black uppercase text-white/40 hover:text-white border border-white/10 px-4 py-2 rounded-full transition-all" x-text="techy ? 'Standard Mode' : 'JSON Mode'"></button>
-                                        <button @click="editing = false" class="text-arbitra-gray hover:text-white p-2">
+                                         <button @click="if(confirmClose(id)) editing = false" class="text-arbitra-gray hover:text-white p-2">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                         </button>
                                     </div>
@@ -462,7 +463,7 @@
                                 <div class="flex gap-4 mt-12 pt-8 border-t border-white/10 sticky bottom-0 bg-[#0A0A0A] pb-4">
                                     <button @click.stop="save({{ $hero->id }}, {section_title: title, content: form, source: source}); editing = false" class="bg-arbitra-emerald text-arbitra-black px-10 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-arbitra-emerald/20">SAVE HERO</button>
                                     <div class="flex-1"></div>
-                                    <button @click.stop="editing = false" class="text-white/60 px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:text-white transition-all border border-white/10">CANCEL</button>
+                                    <button @click.stop="if(confirmClose(id)) editing = false" class="text-white/60 px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:text-white transition-all border border-white/10">CANCEL</button>
                                 </div>
                             </div>
                         </div>
@@ -481,6 +482,7 @@
                     editing: false, 
                     techy: false,
                     editingModal: false,
+                    id: {{ $content->id }},
                     form: JSON.parse($el.dataset.form), 
                     title: $el.dataset.title, 
                     source: $el.dataset.source,
@@ -701,7 +703,7 @@
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <button @click="techy = !techy" class="text-[10px] font-black uppercase text-white/40 hover:text-white border border-white/10 px-4 py-2 rounded-full transition-all" x-text="techy ? 'Standard Mode' : 'JSON Mode'"></button>
-                                    <button @click="editing = false" class="text-arbitra-gray hover:text-white p-2">
+                                    <button @click="if(confirmClose(id)) editing = false" class="text-arbitra-gray hover:text-white p-2">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                     </button>
                                 </div>
@@ -1022,7 +1024,7 @@
                             <button @click.stop="save({{ $content->id }}, {section_title: title, content: form, source: source}); editing = false" class="bg-arbitra-emerald text-arbitra-black px-6 py-2 rounded-full font-black text-xs">SAVE SECTION</button>
                             <div class="flex-1"></div>
                             <button @click.stop="deleteSection({{ $content->id }})" class="text-red-500 px-6 py-2 rounded-full font-black text-xs border border-red-500/20 hover:bg-red-500/10">DELETE SECTION</button>
-                            <button @click.stop="editing = false" class="text-white px-6 py-2 rounded-full font-black text-xs border border-white/20">CANCEL</button>
+                            <button @click.stop="if(confirmClose(id)) editing = false" class="text-white px-6 py-2 rounded-full font-black text-xs border border-white/20">CANCEL</button>
                         </div>
                     </div>
                 </section>
@@ -1253,6 +1255,13 @@
                 newYear: '',
                 duplicateFromCurrent: true,
                 selectedYear: @js($selectedYear),
+
+                confirmClose(id) {
+                    if (Alpine.store('admin').dirtySections[id]) {
+                        return confirm('You have unsaved changes in this section. Are you sure you want to discard them?');
+                    }
+                    return true;
+                },
 
                 confirmLogout(e) {
                     if (Alpine.store('admin').hasUnsavedChanges) {
