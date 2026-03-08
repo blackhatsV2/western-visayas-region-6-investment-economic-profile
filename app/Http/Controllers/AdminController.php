@@ -12,14 +12,14 @@ class AdminController extends Controller
 {
     public function index(Request $request)
     {
-        $selectedYear = $request->query('year', '2024-2025');
-        $contents = ProjectContent::where('year_range', $selectedYear)->orderBy('page_number')->get();
-        
         $years = ProjectContent::distinct()->pluck('year_range')->toArray();
         if (empty($years)) {
             $years = ['2024-2025'];
         }
-        sort($years);
+        rsort($years);
+
+        $selectedYear = $request->query('year', $years[0]);
+        $contents = ProjectContent::where('year_range', $selectedYear)->orderBy('page_number')->get();
 
         $inquiries = Inquiry::latest()->get();
 
@@ -62,14 +62,14 @@ class AdminController extends Controller
 
     public function gridView(Request $request)
     {
-        $selectedYear = $request->query('year', '2024-2025');
-        $contents = ProjectContent::where('year_range', $selectedYear)->orderBy('page_number')->get();
-        
         $years = ProjectContent::distinct()->pluck('year_range')->toArray();
         if (empty($years)) {
             $years = ['2024-2025'];
         }
-        sort($years);
+        rsort($years);
+
+        $selectedYear = $request->query('year', $years[0]);
+        $contents = ProjectContent::where('year_range', $selectedYear)->orderBy('page_number')->get();
 
         return view('admin.grid', compact('contents', 'selectedYear', 'years'));
     }
