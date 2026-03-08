@@ -587,6 +587,7 @@
                 searchResults: [],
                 searchIndex: [],
                 selectedIndex: 0,
+                highlightMarker: null,
                 map: null,
                 init() {
                     this.buildSearchIndex();
@@ -654,17 +655,18 @@
                         document.body.classList.remove('overflow-hidden');
                     }
                 },
-                openModal(title, content) {
+                openModal(title, content, highlight = null) {
                     this.modalTitle = title;
                     this.modalContent = content;
+                    this.highlightMarker = highlight;
                     this.modalOpen = true;
                 },
-                openFromEl(el) {
+                openFromEl(el, highlight = null) {
                     if (!el.dataset.content) return;
                     try {
                         const content = JSON.parse(el.dataset.content);
                         const title = el.dataset.title || 'Details';
-                        this.openModal(title, content);
+                        this.openModal(title, content, highlight);
                     } catch (e) {
                         console.error('Modal Error:', e, el.dataset.content);
                     }
@@ -693,9 +695,20 @@
 
                     const bounds = [];
                     points.forEach(point => {
-                        L.marker([point.lat, point.lng], {icon: emeraldIcon})
+                        const m = L.marker([point.lat, point.lng], {icon: emeraldIcon})
                             .addTo(this.map)
                             .bindPopup(`<b style="color:#FFFFFF; font-size: 13px; text-transform: uppercase;">${point.label}</b>`);
+                        
+                        // Auto-open popup if this is the highlighted marker
+                        if (this.highlightMarker && point.label.toLowerCase().includes(this.highlightMarker.toLowerCase())) {
+                            setTimeout(() => {
+                                if (this.map) {
+                                    m.openPopup();
+                                    this.map.setView([point.lat, point.lng], 12);
+                                }
+                            }, 800);
+                        }
+                        
                         bounds.push([point.lat, point.lng]);
                     });
                     
@@ -807,6 +820,7 @@
                                         subtitle: `Map Point in ${parentTitle}`,
                                         el: el,
                                         isModalItem: true,
+                                        markerLabel: point.label,
                                         icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
                                     });
                                 }
@@ -853,7 +867,7 @@
                         if (result.isModalItem) {
                             // Delay slightly for smooth scroll to finish
                             setTimeout(() => {
-                                this.openFromEl(result.el);
+                                this.openFromEl(result.el, result.markerLabel);
                             }, 500);
                         } else {
                             result.el.classList.add('ring-4', 'ring-arbitra-emerald/50');
