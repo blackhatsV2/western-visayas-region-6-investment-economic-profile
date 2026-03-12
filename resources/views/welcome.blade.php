@@ -759,7 +759,25 @@
                             type: 'Section',
                             title: title,
                             id: s.id,
-                            icon: 'M4 6h16M4 12h16M4 18h7'
+                            icon: 'M4 6h16M4 12h16M4 18h7',
+                            searchableText: (s.innerText || '').toLowerCase()
+                        });
+                        
+                        // Index plain paragraphs inside the section
+                        const paragraphs = s.querySelectorAll('p, span:not(.bento-card span)');
+                        paragraphs.forEach(p => {
+                            const text = p.innerText?.trim();
+                            if (text && text.length > 5) {
+                                this.searchIndex.push({
+                                    type: 'Text',
+                                    title: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
+                                    subtitle: `in ${title}`,
+                                    id: s.id,
+                                    el: p,
+                                    searchableText: text.toLowerCase(),
+                                    icon: 'M4 6h16M4 12h16M4 18h7'
+                                });
+                            }
                         });
                     });
 
@@ -768,14 +786,16 @@
                     cards.forEach((card, idx) => {
                         const title = card.querySelector('h3')?.innerText || card.querySelector('span')?.innerText;
                         const subtitle = card.querySelector('p')?.innerText;
+                        const cardText = card.innerText || '';
                         
-                        if (title && title.length > 2) {
+                        if (cardText && cardText.length > 2) {
                             this.searchIndex.push({
                                 type: 'Card/Stat',
-                                title: title,
+                                title: title || 'Card Info',
                                 subtitle: subtitle,
                                 id: card.closest('section')?.id || 'hero',
                                 el: card,
+                                searchableText: cardText.toLowerCase(),
                                 icon: 'M13 10V3L4 14h7v7l9-11h-7z'
                             });
                         }
@@ -799,9 +819,10 @@
                             if (typeof item === 'string') {
                                 this.searchIndex.push({
                                     type: 'Detail',
-                                    title: item,
+                                    title: item.substring(0, 50) + (item.length > 50 ? '...' : ''),
                                     subtitle: `in ${parentTitle}`,
                                     el: el,
+                                    searchableText: item.toLowerCase(),
                                     isModalItem: true,
                                     icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z'
                                 });
@@ -819,6 +840,7 @@
                                         title: point.label,
                                         subtitle: `Map Point in ${parentTitle}`,
                                         el: el,
+                                        searchableText: point.label.toLowerCase(),
                                         isModalItem: true,
                                         markerLabel: point.label,
                                         icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
@@ -835,9 +857,10 @@
                                 const title = isNaN(parseInt(key)) ? `${key}: ${value}` : value;
                                 this.searchIndex.push({
                                     type: 'Detail',
-                                    title: title,
+                                    title: title.substring(0, 50) + (title.length > 50 ? '...' : ''),
                                     subtitle: `in ${parentTitle}`,
                                     el: el,
+                                    searchableText: `${key} ${value}`.toLowerCase(),
                                     isModalItem: true,
                                     icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
                                 });
@@ -852,11 +875,22 @@
                         this.searchResults = [];
                         return;
                     }
-                    const q = this.searchQuery.toLowerCase();
-                    this.searchResults = this.searchIndex.filter(item => 
-                        item.title.toLowerCase().includes(q) || 
-                        (item.subtitle && item.subtitle.toLowerCase().includes(q))
-                    );
+                    
+                    const queryWords = this.searchQuery.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+                    
+                    this.searchResults = this.searchIndex.filter(item => {
+                        const searchText = item.searchableText || '';
+                        const titleText = item.title ? item.title.toLowerCase() : '';
+                        const subtitleText = item.subtitle ? item.subtitle.toLowerCase() : '';
+                        
+                        // Match ALL words in the query against the searchable text, title or subtitle
+                        return queryWords.every(word => 
+                            searchText.includes(word) || 
+                            titleText.includes(word) || 
+                            subtitleText.includes(word)
+                        );
+                    }).slice(0, 50); // limit to top 50 matches for performance
+                    
                     this.selectedIndex = 0;
                 },
                 navigateToResult(result) {
@@ -865,7 +899,7 @@
                         result.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         
                         if (result.isModalItem) {
-                            // Delay slightly for smooth scroll to finish
+                            // Delay slightly for smooth scroll to finish, then open modal
                             setTimeout(() => {
                                 this.openFromEl(result.el, result.markerLabel);
                             }, 500);
