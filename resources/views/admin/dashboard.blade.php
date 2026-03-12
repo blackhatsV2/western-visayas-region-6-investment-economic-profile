@@ -1238,8 +1238,8 @@
         <div class="bg-arbitra-dark p-12 rounded-[2.5rem] border border-white/10 max-w-md w-full">
             <h3 class="text-2xl font-black mb-6 italic uppercase tracking-tighter">Add New Profile Period</h3>
             
-            <label class="admin-label">Profile Period (e.g., As of 2024-2025, Q1 2024)</label>
-            <input type="text" x-model="newYear" class="admin-input mt-2 mb-6">
+            <label class="admin-label">Profile Year (e.g., 2024, 2025) - "As of" will be included automatically</label>
+            <input type="text" x-model="newYear" class="admin-input mt-2 mb-6" placeholder="2024">
             
             <div class="flex items-center gap-3 mb-8 bg-white/5 p-4 rounded-2xl border border-white/5">
                 <input type="checkbox" x-model="duplicateFromCurrent" id="dupCheck" class="w-4 h-4 accent-arbitra-emerald">
@@ -1522,6 +1522,11 @@
                 async createYear() {
                     if (!this.newYear) return;
                     
+                    let finalYear = this.newYear;
+                    if (!finalYear.startsWith('As of ')) {
+                        finalYear = 'As of ' + finalYear;
+                    }
+                    
                     if (this.duplicateFromCurrent) {
                         try {
                             const response = await fetch('/admin/year/duplicate', {
@@ -1532,12 +1537,12 @@
                                 },
                                 body: JSON.stringify({
                                     source_year: this.selectedYear,
-                                    target_year: this.newYear
+                                    target_year: finalYear
                                 })
                             });
                             if (response.ok) {
                                 Alpine.store('admin').setUnsaved(false);
-                                window.location.href = `?year=${this.newYear}`;
+                                window.location.href = `?year=${encodeURIComponent(finalYear)}`;
                             } else {
                                 const data = await response.json();
                                 alert(data.message || 'Error duplicating year');
@@ -1548,7 +1553,7 @@
                     } else {
                         // To simplify, we just redirect and let the "empty skeleton" logic handle the first section creation
                         Alpine.store('admin').setUnsaved(false);
-                        window.location.href = `?year=${this.newYear}`;
+                        window.location.href = `?year=${encodeURIComponent(finalYear)}`;
                     }
                 },
 

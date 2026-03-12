@@ -1014,7 +1014,7 @@
                 </div>
                 <h2 class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">Coming Soon :)</h2>
                 <p class="text-arbitra-gray max-w-md mx-auto text-lg">Data for <span class="text-arbitra-emerald font-bold">{{ $selectedYear }}</span> is currently being collated. Please check back later.</p>
-                <a href="?year=2024-2025" class="mt-8 px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white font-bold text-sm hover:bg-white/10 transition">Return to 2024-2025</a>
+                <a href="?year=As of 2024" class="mt-8 px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white font-bold text-sm hover:bg-white/10 transition">Return to As of 2024</a>
             </div>
         @else
         <div class="max-w-[1240px] mx-auto space-y-16">

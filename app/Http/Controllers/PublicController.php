@@ -15,7 +15,7 @@ class PublicController extends Controller
     {
         $years = ProjectContent::distinct()->pluck('year_range')->toArray();
         if (empty($years)) {
-            $years = ['2024-2025'];
+            $years = ['As of 2024'];
         }
         rsort($years);
 

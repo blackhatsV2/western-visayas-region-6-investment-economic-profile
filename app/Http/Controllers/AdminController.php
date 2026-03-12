@@ -14,7 +14,7 @@ class AdminController extends Controller
     {
         $years = ProjectContent::distinct()->pluck('year_range')->toArray();
         if (empty($years)) {
-            $years = ['2024-2025'];
+            $years = ['As of 2024'];
         }
         rsort($years);
 
@@ -56,7 +56,7 @@ class AdminController extends Controller
 
     public function export(Request $request)
     {
-        $year = $request->query('year', '2024-2025');
+        $year = $request->query('year', 'As of 2024');
         return Excel::download(new ProjectContentExport($year), "economic-profile-{$year}.xlsx");
     }
 
@@ -64,7 +64,7 @@ class AdminController extends Controller
     {
         $years = ProjectContent::distinct()->pluck('year_range')->toArray();
         if (empty($years)) {
-            $years = ['2024-2025'];
+            $years = ['As of 2024'];
         }
         rsort($years);
 
