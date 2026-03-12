@@ -265,22 +265,24 @@
                         $watch('techy', (val) => { if(!val) parseModalDetails() });
                         
                         // Change Tracking: snapshot initial state, then detect real changes
-                        _initialFormSnapshots[id] = { form: JSON.stringify(form), title: title, source: source };
-                        $watch('form', () => {
-                            if (JSON.stringify(form) !== _initialFormSnapshots[id].form) {
-                                Alpine.store('admin').setSectionDirty(id, title);
-                            }
-                        }, { deep: true });
-                        $watch('title', (newTitle) => {
-                            if (newTitle !== _initialFormSnapshots[id].title) {
-                                Alpine.store('admin').setSectionDirty(id, newTitle);
-                            }
-                        });
-                        $watch('source', () => {
-                            if (source !== _initialFormSnapshots[id].source) {
-                                Alpine.store('admin').setSectionDirty(id, title);
-                            }
-                        });
+                        setTimeout(() => {
+                            _initialFormSnapshots[id] = { form: JSON.stringify(form), title: title, source: source };
+                            $watch('form', () => {
+                                if (JSON.stringify(form) !== _initialFormSnapshots[id].form) {
+                                    Alpine.store('admin').setSectionDirty(id, title);
+                                }
+                            }, { deep: true });
+                            $watch('title', (newTitle) => {
+                                if (newTitle !== _initialFormSnapshots[id].title) {
+                                    Alpine.store('admin').setSectionDirty(id, newTitle);
+                                }
+                            });
+                            $watch('source', () => {
+                                if (source !== _initialFormSnapshots[id].source) {
+                                    Alpine.store('admin').setSectionDirty(id, title);
+                                }
+                            });
+                        }, 500);
                     ">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
                         <!-- Hero Content Preview (Match Public Site) -->
@@ -659,22 +661,25 @@
                     $watch('techy', (val) => { if(!val) parseModalDetails() });
                     
                     // Change Tracking: snapshot initial state, then detect real changes
-                    _initialFormSnapshots[id] = { form: JSON.stringify(form), title: title, source: source };
-                    $watch('form', () => {
-                        if (JSON.stringify(form) !== _initialFormSnapshots[id].form) {
-                            Alpine.store('admin').setSectionDirty(id, title);
-                        }
-                    }, { deep: true });
-                    $watch('title', (newTitle) => {
-                        if (newTitle !== _initialFormSnapshots[id].title) {
-                            Alpine.store('admin').setSectionDirty(id, newTitle);
-                        }
-                    });
-                    $watch('source', () => {
-                        if (source !== _initialFormSnapshots[id].source) {
-                            Alpine.store('admin').setSectionDirty(id, title);
-                        }
-                    });
+                    // Use setTimeout to defer tracking until after initial conversions finish
+                    setTimeout(() => {
+                        _initialFormSnapshots[id] = { form: JSON.stringify(form), title: title, source: source };
+                        $watch('form', () => {
+                            if (JSON.stringify(form) !== _initialFormSnapshots[id].form) {
+                                Alpine.store('admin').setSectionDirty(id, title);
+                            }
+                        }, { deep: true });
+                        $watch('title', (newTitle) => {
+                            if (newTitle !== _initialFormSnapshots[id].title) {
+                                Alpine.store('admin').setSectionDirty(id, newTitle);
+                            }
+                        });
+                        $watch('source', () => {
+                            if (source !== _initialFormSnapshots[id].source) {
+                                Alpine.store('admin').setSectionDirty(id, title);
+                            }
+                        });
+                    }, 500);
                 "
                 class="scroll-mt-32 pb-20 group relative">
                     
@@ -1100,7 +1105,8 @@
                                 </div>
                             @endif
 
-                            {{-- Dynamic Popup (Modal) Editor --}}
+                            {{-- Dynamic Popup (Modal) Editor - Hidden for sections with per-item builders --}}
+                            @if(!in_array($content->type, ['grid', 'stats_grid']))
                             <div class="mt-12 pt-12 border-t border-white/10">
                                 <div class="flex items-center justify-between mb-8">
                                     <div>
