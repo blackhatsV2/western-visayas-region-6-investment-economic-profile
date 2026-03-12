@@ -1,3 +1,7 @@
+[⏮️ Previous: User Manual](7_User_Manual.md) &nbsp; | &nbsp; [🏠 Home / README](README.md) &nbsp; | &nbsp; [⏭️ Next: Presentation](9_Presentation.md)
+
+---
+
 # Vulnerability Assessment and Penetration Testing (VAPT) Report
 
 ## 1. Executive Summary

@@ -1,3 +1,7 @@
+[⏮️ Previous: Functional Requirements](3_Functional_Requirements.md) &nbsp; | &nbsp; [🏠 Home / README](README.md) &nbsp; | &nbsp; [⏭️ Next: Database Documentation](5_Database_Documentation.md)
+
+---
+
 # System Architecture
 
 ## 1. Architectural Pattern

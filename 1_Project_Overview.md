@@ -1,3 +1,7 @@
+[🏠 Home / README](README.md) &nbsp; | &nbsp; [⏭️ Next: Process Workflow](2_Process_Workflow.md)
+
+---
+
 # Project Overview: Western Visayas Region 6 Investment Economic Profile
 
 ## 1. Introduction

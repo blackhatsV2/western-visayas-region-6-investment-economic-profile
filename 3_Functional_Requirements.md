@@ -1,3 +1,7 @@
+[⏮️ Previous: Process Workflow](2_Process_Workflow.md) &nbsp; | &nbsp; [🏠 Home / README](README.md) &nbsp; | &nbsp; [⏭️ Next: System Architecture](4_System_Architecture.md)
+
+---
+
 # Functional Requirements
 
 ## 1. Frontend / Public Interface

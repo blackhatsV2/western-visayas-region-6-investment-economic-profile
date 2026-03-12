@@ -1,3 +1,7 @@
+[⏮️ Previous: Project Overview](1_Project_Overview.md) &nbsp; | &nbsp; [🏠 Home / README](README.md) &nbsp; | &nbsp; [⏭️ Next: Functional Requirements](3_Functional_Requirements.md)
+
+---
+
 # Process Workflow
 
 ## 1. Administrator Workflow
