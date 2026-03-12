@@ -1197,9 +1197,10 @@
                                                 <span>📝 Text / Paragraph</span>
                                             </button>
                                         </div>
-                                    </div>
                                 </div>
                             </div>
+                            </div>
+                            @endif
                         </div>
                         
                         <label class="admin-label mt-4">Source</label>
