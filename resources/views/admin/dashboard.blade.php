@@ -182,59 +182,73 @@
                         activeTab: 0,
                         parseModalDetails() {
                             const details = this.form.modal_details || {};
-                            this.modalTabs = Object.entries(details).map(([name, value]) => {
-                                let type = 'text';
-                                let data = value;
-                                
-                                if (value && typeof value === 'object') {
-                                    if (value.Points && Array.isArray(value.Points)) {
-                                        type = 'points';
-                                        data = [...value.Points];
-                                    } else if (value['Map Points'] && Array.isArray(value['Map Points'])) {
-                                        type = 'map';
-                                        data = value['Map Points'].map(p => ({...p}));
-                                    } else if (Array.isArray(value)) {
-                                        if (value.length > 0 && typeof value[0] === 'object' && value[0].lat !== undefined) {
-                                            type = 'map';
-                                            data = value.map(p => ({...p}));
+                            this.modalTabs = [];
+                            
+                            // Check for new block array structure
+                            if (Array.isArray(details.blocks)) {
+                                this.modalTabs = JSON.parse(JSON.stringify(details.blocks));
+                                return;
+                            }
+
+                            // Backward compatibility: Convert legacy object to blocks
+                            if (Object.keys(details).length > 0) {
+                                Object.entries(details).forEach(([name, value]) => {
+                                    if (name === 'Map Labels') return; // Skip old static map labels
+                                    
+                                    if (value && typeof value === 'object') {
+                                        if (value['Map Points'] && Array.isArray(value['Map Points'])) {
+                                            this.modalTabs.push({ type: 'map', data: [...value['Map Points']] });
+                                        } else if (value.Points && Array.isArray(value.Points)) {
+                                            // Convert legacy hero points to Text Card (Border) blocks
+                                            this.modalTabs.push({ type: 'border_card', data: { title: name, items: [...value.Points] } });
+                                        } else if (Array.isArray(value)) {
+                                            // generic array
+                                            if (value.length > 0 && typeof value[0] === 'object' && value[0].lat !== undefined) {
+                                                this.modalTabs.push({ type: 'map', data: [...value] });
+                                            } else {
+                                                this.modalTabs.push({ type: 'border_card', data: { title: name, items: [...value] } });
+                                            }
                                         } else {
-                                            type = 'points';
-                                            data = [...value];
+                                            // Convert table to text card
+                                            let text = `**${name}**\n`;
+                                            Object.entries(value).forEach(([k, v]) => { text += `${k}: ${v}\n`; });
+                                            this.modalTabs.push({ type: 'text_card', data: { text: text.trim() } });
                                         }
-                                    } else {
-                                        type = 'table';
-                                        data = Object.entries(value).map(([k, v]) => ({key: k, value: v}));
+                                    } else if (typeof value === 'string') {
+                                        this.modalTabs.push({ type: 'text_card', data: { text: `**${name}**\n${value}` } });
                                     }
-                                }
-                                return { name, type, data };
-                            });
+                                });
+                            }
                         },
                         syncModalDetails() {
-                            const details = {};
-                            this.modalTabs.forEach(tab => {
-                                if (tab.type === 'points') {
-                                    details[tab.name] = { Points: tab.data };
-                                } else if (tab.type === 'table') {
-                                    const tableObj = {};
-                                    tab.data.forEach(row => { if(row.key) tableObj[row.key] = row.value });
-                                    details[tab.name] = tableObj;
-                                } else if (tab.type === 'map') {
-                                    details[tab.name] = { 'Map Points': tab.data };
-                                } else {
-                                    details[tab.name] = tab.data;
-                                }
-                            });
-                            this.form.modal_details = details;
-                            this.modalJson = JSON.stringify(details, null, 4);
+                            this.form.modal_details = { blocks: this.modalTabs };
+                            this.modalJson = JSON.stringify(this.form.modal_details, null, 4);
                         },
-                        addModalTab() {
-                            this.modalTabs.push({ name: 'New Section', type: 'points', data: [] });
-                            this.activeTab = this.modalTabs.length - 1;
+                        addBlock(type) {
+                            let newBlock = { type: type, data: null };
+                            if (type === 'map') {
+                                newBlock.data = [{ label: 'New Infrastructure', lat: 10.7, lng: 122.5 }];
+                            } else if (type === 'border_card') {
+                                newBlock.data = { title: 'New Card Title', items: ['Detail Point 1', 'Detail Point 2'] };
+                            } else if (type === 'text_card') {
+                                newBlock.data = { text: 'Enter paragraph text here...' };
+                            }
+                            this.modalTabs.push(newBlock);
                         },
-                        removeModalTab(index) {
-                            if(confirm('Remove this entire popup section?')) {
+                        removeBlock(index) {
+                            if(confirm('Remove this block?')) {
                                 this.modalTabs.splice(index, 1);
-                                if(this.activeTab >= this.modalTabs.length) this.activeTab = Math.max(0, this.modalTabs.length - 1);
+                            }
+                        },
+                        moveBlock(index, direction) {
+                            if (direction === 'up' && index > 0) {
+                                const temp = this.modalTabs[index];
+                                this.modalTabs[index] = this.modalTabs[index - 1];
+                                this.modalTabs[index - 1] = temp;
+                            } else if (direction === 'down' && index < this.modalTabs.length - 1) {
+                                const temp = this.modalTabs[index];
+                                this.modalTabs[index] = this.modalTabs[index + 1];
+                                this.modalTabs[index + 1] = temp;
                             }
                         }
                     }"
@@ -415,83 +429,87 @@
                                         </div>
 
                                         <div x-show="editingModal" x-transition class="space-y-8 bg-black/40 p-8 rounded-3xl border border-white/5">
-                                            <!-- Same Category Tab logic for Hero -->
-                                            <div class="flex flex-wrap gap-2 border-b border-white/10 pb-6">
-                                                <template x-for="(tab, index) in modalTabs" :key="index">
-                                                    <div class="flex items-center gap-1 group">
-                                                        <button @click="activeTab = index" 
-                                                                class="text-[10px] font-black uppercase px-5 py-2.5 rounded-xl border transition-all"
-                                                                :class="activeTab === index ? 'bg-arbitra-emerald/10 border-arbitra-emerald text-arbitra-emerald' : 'bg-white/5 border-white/10 text-arbitra-gray hover:text-white'">
-                                                            <span x-text="tab.name"></span>
-                                                        </button>
-                                                    </div>
-                                                </template>
-                                                <button @click="addModalTab()" class="text-[10px] font-black uppercase px-5 py-2.5 rounded-xl border border-dashed border-white/20 text-arbitra-gray hover:border-arbitra-emerald hover:text-white transition-all">+ Add Tab</button>
-                                            </div>
+                                            <!-- Block Builder UI -->
+                                            <div class="space-y-6">
+                                                <template x-for="(block, index) in modalTabs" :key="index">
+                                                    <div class="bg-black/60 border border-white/5 rounded-2xl p-6 relative group">
+                                                        <div class="absolute -left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
+                                                            <button @click="moveBlock(index, 'up')" class="bg-white/10 hover:bg-white/20 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center text-[10px]" :disabled="index === 0">▲</button>
+                                                            <button @click="moveBlock(index, 'down')" class="bg-white/10 hover:bg-white/20 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center text-[10px]" :disabled="index === modalTabs.length - 1">▼</button>
+                                                        </div>
 
-                                            <template x-if="modalTabs[activeTab]">
-                                                <div class="space-y-8">
-                                                    <div class="flex justify-between items-center bg-white/5 -mx-8 -mt-8 mb-8 p-6 rounded-t-3xl border-b border-white/5">
-                                                        <div class="flex items-center gap-6">
-                                                            <div class="space-y-1">
-                                                                <label class="admin-label text-[8px]">Tab Name</label>
-                                                                <input type="text" x-model="modalTabs[activeTab].name" class="bg-transparent border-none p-0 text-white font-black uppercase tracking-tight focus:ring-0 w-48">
+                                                        <div class="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
+                                                            <div class="flex items-center gap-3">
+                                                                <span class="px-3 py-1 bg-arbitra-emerald/10 text-arbitra-emerald text-[10px] font-black uppercase tracking-widest rounded-lg border border-arbitra-emerald/20" x-text="block.type === 'map' ? 'Map Coordinates' : (block.type === 'border_card' ? 'Border Card' : 'Rich Text')"></span>
                                                             </div>
-                                                            <div class="h-8 w-px bg-white/10"></div>
-                                                            <div class="space-y-1">
-                                                                <label class="admin-label text-[8px]">Display Style</label>
-                                                                <select x-model="modalTabs[activeTab].type" class="bg-transparent border-none p-0 text-arbitra-emerald font-black uppercase text-[10px] focus:ring-0 cursor-pointer">
-                                                                    <option value="points" class="bg-arbitra-black">Bullet Points</option>
-                                                                    <option value="table" class="bg-arbitra-black">Data Table</option>
-                                                                    <option value="map" class="bg-arbitra-black">Infrastructure Map</option>
-                                                                    <option value="text" class="bg-arbitra-black">Plain Text</option>
-                                                                </select>
+                                                            <button @click="removeBlock(index)" class="text-red-500/50 hover:text-red-500 transition-all">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                            </button>
+                                                        </div>
+
+                                                        <!-- Block Content Editors -->
+                                                        
+                                                        <!-- Map Block Editor -->
+                                                        <div x-show="block.type === 'map'" class="space-y-4">
+                                                            <template x-for="(pt, ptIdx) in block.data" :key="ptIdx">
+                                                                <div class="grid grid-cols-12 gap-3 items-center">
+                                                                    <div class="col-span-6"><label class="text-[8px] font-black uppercase mb-1 block tracking-wider text-arbitra-gray">Location Name</label><input type="text" x-model="pt.label" class="admin-input text-xs w-full"></div>
+                                                                    <div class="col-span-2"><label class="text-[8px] font-black uppercase mb-1 block text-arbitra-gray">LAT</label><input type="number" step="0.0001" x-model.number="pt.lat" class="admin-input text-xs w-full"></div>
+                                                                    <div class="col-span-2"><label class="text-[8px] font-black uppercase mb-1 block text-arbitra-gray">LNG</label><input type="number" step="0.0001" x-model.number="pt.lng" class="admin-input text-xs w-full"></div>
+                                                                    <div class="col-span-2 flex justify-end"><button @click="block.data.splice(ptIdx, 1)" class="text-red-500 mt-4 px-2 py-1 bg-red-500/10 rounded border border-red-500/20 text-xs">Remove</button></div>
+                                                                </div>
+                                                            </template>
+                                                            <button @click="block.data.push({label: 'New Pin', lat: 10.7, lng: 122.5})" class="w-full py-3 border border-dashed border-white/10 rounded-xl text-[10px] font-black uppercase text-arbitra-gray hover:border-arbitra-emerald/40 hover:text-white transition-all bg-white/5">+ Add Map Pin</button>
+                                                        </div>
+
+                                                        <!-- Border Card Editor -->
+                                                        <div x-show="block.type === 'border_card'" class="space-y-4">
+                                                            <div>
+                                                                <label class="text-[8px] font-black uppercase mb-1 block tracking-wider text-arbitra-gray">Card Title</label>
+                                                                <input type="text" x-model="block.data.title" class="admin-input text-sm font-bold text-white w-full">
+                                                            </div>
+                                                            <div class="space-y-2 mt-4">
+                                                                <label class="text-[8px] font-black uppercase block tracking-wider text-arbitra-gray mb-2">Bullet Points</label>
+                                                                <template x-for="(item, itemIdx) in block.data.items" :key="itemIdx">
+                                                                    <div class="flex gap-3 items-center group">
+                                                                        <div class="w-1.5 h-1.5 rounded-full bg-arbitra-emerald"></div>
+                                                                        <input type="text" x-model="block.data.items[itemIdx]" class="admin-input flex-1 text-sm bg-black/40">
+                                                                        <button @click="block.data.items.splice(itemIdx, 1)" class="opacity-0 group-hover:opacity-100 text-red-500 p-2">×</button>
+                                                                    </div>
+                                                                </template>
+                                                                <button @click="block.data.items.push('New detail point...')" class="mt-2 w-full py-2 border border-dashed border-white/10 rounded-lg text-[10px] font-bold uppercase text-arbitra-gray hover:text-white transition-all">+ Add Point</button>
                                                             </div>
                                                         </div>
-                                                        <button @click="removeModalTab(activeTab)" class="text-red-500/50 hover:text-red-500 transition-all">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                        </button>
-                                                    </div>
 
-                                                    <div x-show="modalTabs[activeTab].type === 'points'" class="space-y-4">
-                                                        <template x-for="(pt, ptIdx) in modalTabs[activeTab].data" :key="ptIdx">
-                                                            <div class="flex gap-4 items-center group">
-                                                                <div class="w-1.5 h-1.5 rounded-full bg-arbitra-emerald"></div>
-                                                                <input type="text" x-model="modalTabs[activeTab].data[ptIdx]" class="admin-input flex-1 font-medium">
-                                                                <button @click="modalTabs[activeTab].data.splice(ptIdx, 1)" class="opacity-0 group-hover:opacity-100 text-red-500 p-2">×</button>
-                                                            </div>
-                                                        </template>
-                                                        <button @click="modalTabs[activeTab].data.push('New detail point...')" class="w-full py-3 border-2 border-dashed border-white/5 rounded-2xl text-[10px] font-black uppercase text-arbitra-gray hover:border-arbitra-emerald/40 hover:text-white transition-all">+ Add New Point</button>
-                                                    </div>
+                                                        <!-- Text Card Editor -->
+                                                        <div x-show="block.type === 'text_card'">
+                                                            <label class="text-[8px] font-black uppercase mb-1 block tracking-wider text-arbitra-gray">Paragraph Content (Supports Markdown/HTML)</label>
+                                                            <textarea x-model="block.data.text" class="admin-input h-32 leading-relaxed text-sm w-full" placeholder="Type plain text info here..."></textarea>
+                                                        </div>
 
-                                                    <div x-show="modalTabs[activeTab].type === 'table'" class="space-y-3">
-                                                        <template x-for="(row, rowIdx) in modalTabs[activeTab].data" :key="rowIdx">
-                                                            <div class="flex gap-4 items-center">
-                                                                <input type="text" x-model="row.key" placeholder="Metric" class="admin-input flex-1 font-bold">
-                                                                <input type="text" x-model="row.value" placeholder="Value" class="admin-input flex-1 text-arbitra-emerald font-black">
-                                                                <button @click="modalTabs[activeTab].data.splice(rowIdx, 1)" class="text-red-500 p-1">×</button>
-                                                            </div>
-                                                        </template>
-                                                        <button @click="modalTabs[activeTab].data.push({key: '', value: ''})" class="w-full py-3 border-2 border-dashed border-white/5 rounded-2xl text-[10px] font-black uppercase text-arbitra-gray hover:border-arbitra-emerald/40 hover:text-white transition-all">+ Add Row</button>
                                                     </div>
-                                                    
-                                                    <div x-show="modalTabs[activeTab].type === 'map'" class="space-y-4">
-                                                        <template x-for="(pt, ptIdx) in modalTabs[activeTab].data" :key="ptIdx">
-                                                            <div class="grid grid-cols-12 gap-3 items-center">
-                                                                <div class="col-span-6"><label class="text-[8px] font-black uppercase mb-1 block tracking-wider">Label</label><input type="text" x-model="pt.label" class="admin-input text-xs"></div>
-                                                                <div class="col-span-2"><label class="text-[8px] font-black uppercase mb-1 block">LAT</label><input type="number" step="0.0001" x-model.number="pt.lat" class="admin-input text-xs"></div>
-                                                                <div class="col-span-2"><label class="text-[8px] font-black uppercase mb-1 block">LNG</label><input type="number" step="0.0001" x-model.number="pt.lng" class="admin-input text-xs"></div>
-                                                                <div class="col-span-2 flex justify-end"><button @click="modalTabs[activeTab].data.splice(ptIdx, 1)" class="text-red-500 mt-4">×</button></div>
-                                                            </div>
-                                                        </template>
-                                                        <button @click="modalTabs[activeTab].data.push({label: 'New Infrastructure', lat: 10.7, lng: 122.5})" class="w-full py-3 border-2 border-dashed border-white/5 rounded-2xl text-[10px] font-black uppercase text-arbitra-gray hover:border-arbitra-emerald/40 hover:text-white transition-all">+ Add Map Point</button>
-                                                    </div>
+                                                </template>
+                                            </div>
 
-                                                    <div x-show="modalTabs[activeTab].type === 'text'">
-                                                        <textarea x-model="modalTabs[activeTab].data" class="admin-input h-32 leading-relaxed" placeholder="Type plain text info here..."></textarea>
-                                                    </div>
+                                            <!-- Add Block Button (Dropdown) -->
+                                            <div x-data="{ openAddMenu: false }" class="relative mt-8 pt-6 border-t border-white/10 flex justify-center">
+                                                <button @click="openAddMenu = !openAddMenu" @click.away="openAddMenu = false" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2">
+                                                    <span>+ Add Content Block</span>
+                                                    <svg class="w-4 h-4 transition-transform" :class="openAddMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                                </button>
+
+                                                <div x-show="openAddMenu" x-transition class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#111] border border-white/10 rounded-2xl w-56 shadow-2xl overflow-hidden z-50">
+                                                    <button @click="addBlock('map'); openAddMenu = false" class="w-full text-left px-5 py-3 text-xs font-bold text-white hover:bg-arbitra-emerald/10 hover:text-arbitra-emerald border-b border-white/5 transition-colors flex items-center justify-between">
+                                                        <span>📍 Map Coordinates</span>
+                                                    </button>
+                                                    <button @click="addBlock('border_card'); openAddMenu = false" class="w-full text-left px-5 py-3 text-xs font-bold text-white hover:bg-arbitra-emerald/10 hover:text-arbitra-emerald border-b border-white/5 transition-colors flex items-center justify-between">
+                                                        <span>🔲 Card (With Border)</span>
+                                                    </button>
+                                                    <button @click="addBlock('text_card'); openAddMenu = false" class="w-full text-left px-5 py-3 text-xs font-bold text-white hover:bg-arbitra-emerald/10 hover:text-arbitra-emerald transition-colors flex items-center justify-between">
+                                                        <span>📝 Text / Paragraph</span>
+                                                    </button>
                                                 </div>
-                                            </template>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -529,59 +547,73 @@
                     previewChartInstance: null,
                     parseModalDetails() {
                         const details = this.form.modal_details || {};
-                        this.modalTabs = Object.entries(details).map(([name, value]) => {
-                            let type = 'text';
-                            let data = value;
-                            
-                            if (value && typeof value === 'object') {
-                                if (value.Points && Array.isArray(value.Points)) {
-                                    type = 'points';
-                                    data = [...value.Points];
-                                } else if (value['Map Points'] && Array.isArray(value['Map Points'])) {
-                                    type = 'map';
-                                    data = value['Map Points'].map(p => ({...p}));
-                                } else if (Array.isArray(value)) {
-                                    if (value.length > 0 && typeof value[0] === 'object' && value[0].lat !== undefined) {
-                                        type = 'map';
-                                        data = value.map(p => ({...p}));
+                        this.modalTabs = [];
+                        
+                        // Check for new block array structure
+                        if (Array.isArray(details.blocks)) {
+                            this.modalTabs = JSON.parse(JSON.stringify(details.blocks));
+                            return;
+                        }
+
+                        // Backward compatibility: Convert legacy object to blocks
+                        if (Object.keys(details).length > 0) {
+                            Object.entries(details).forEach(([name, value]) => {
+                                if (name === 'Map Labels') return; // Skip old static map labels
+                                
+                                if (value && typeof value === 'object') {
+                                    if (value['Map Points'] && Array.isArray(value['Map Points'])) {
+                                        this.modalTabs.push({ type: 'map', data: [...value['Map Points']] });
+                                    } else if (value.Points && Array.isArray(value.Points)) {
+                                        // Convert legacy hero points to Text Card (Border) blocks
+                                        this.modalTabs.push({ type: 'border_card', data: { title: name, items: [...value.Points] } });
+                                    } else if (Array.isArray(value)) {
+                                        // generic array
+                                        if (value.length > 0 && typeof value[0] === 'object' && value[0].lat !== undefined) {
+                                            this.modalTabs.push({ type: 'map', data: [...value] });
+                                        } else {
+                                            this.modalTabs.push({ type: 'border_card', data: { title: name, items: [...value] } });
+                                        }
                                     } else {
-                                        type = 'points';
-                                        data = [...value];
+                                        // Convert table to text card
+                                        let text = `**${name}**\n`;
+                                        Object.entries(value).forEach(([k, v]) => { text += `${k}: ${v}\n`; });
+                                        this.modalTabs.push({ type: 'text_card', data: { text: text.trim() } });
                                     }
-                                } else {
-                                    type = 'table';
-                                    data = Object.entries(value).map(([k, v]) => ({key: k, value: v}));
+                                } else if (typeof value === 'string') {
+                                    this.modalTabs.push({ type: 'text_card', data: { text: `**${name}**\n${value}` } });
                                 }
-                            }
-                            return { name, type, data };
-                        });
+                            });
+                        }
                     },
                     syncModalDetails() {
-                        const details = {};
-                        this.modalTabs.forEach(tab => {
-                            if (tab.type === 'points') {
-                                details[tab.name] = { Points: tab.data };
-                            } else if (tab.type === 'table') {
-                                const tableObj = {};
-                                tab.data.forEach(row => { if(row.key) tableObj[row.key] = row.value });
-                                details[tab.name] = tableObj;
-                            } else if (tab.type === 'map') {
-                                details[tab.name] = { 'Map Points': tab.data };
-                            } else {
-                                details[tab.name] = tab.data;
-                            }
-                        });
-                        this.form.modal_details = details;
-                        this.modalJson = JSON.stringify(details, null, 4);
+                        this.form.modal_details = { blocks: this.modalTabs };
+                        this.modalJson = JSON.stringify(this.form.modal_details, null, 4);
                     },
-                    addModalTab() {
-                        this.modalTabs.push({ name: 'New Section', type: 'points', data: [] });
-                        this.activeTab = this.modalTabs.length - 1;
+                    addBlock(type) {
+                        let newBlock = { type: type, data: null };
+                        if (type === 'map') {
+                            newBlock.data = [{ label: 'New Infrastructure', lat: 10.7, lng: 122.5 }];
+                        } else if (type === 'border_card') {
+                            newBlock.data = { title: 'New Card Title', items: ['Detail Point 1', 'Detail Point 2'] };
+                        } else if (type === 'text_card') {
+                            newBlock.data = { text: 'Enter paragraph text here...' };
+                        }
+                        this.modalTabs.push(newBlock);
                     },
-                    removeModalTab(index) {
-                        if(confirm('Remove this entire popup section?')) {
+                    removeBlock(index) {
+                        if(confirm('Remove this block?')) {
                             this.modalTabs.splice(index, 1);
-                            if(this.activeTab >= this.modalTabs.length) this.activeTab = Math.max(0, this.modalTabs.length - 1);
+                        }
+                    },
+                    moveBlock(index, direction) {
+                        if (direction === 'up' && index > 0) {
+                            const temp = this.modalTabs[index];
+                            this.modalTabs[index] = this.modalTabs[index - 1];
+                            this.modalTabs[index - 1] = temp;
+                        } else if (direction === 'down' && index < this.modalTabs.length - 1) {
+                            const temp = this.modalTabs[index];
+                            this.modalTabs[index] = this.modalTabs[index + 1];
+                            this.modalTabs[index + 1] = temp;
                         }
                     }
                 }"
@@ -984,84 +1016,87 @@
                                 </div>
 
                                 <div x-show="editingModal" x-transition class="space-y-8 bg-black/40 p-8 rounded-3xl border border-white/5">
-                                    <!-- Category Tabs -->
-                                    <div class="flex flex-wrap gap-2 border-b border-white/10 pb-6">
-                                        <template x-for="(tab, index) in modalTabs" :key="index">
-                                            <div class="flex items-center gap-1 group">
-                                                <button @click="activeTab = index" 
-                                                        class="text-[10px] font-black uppercase px-5 py-2.5 rounded-xl border transition-all"
-                                                        :class="activeTab === index ? 'bg-arbitra-emerald/10 border-arbitra-emerald text-arbitra-emerald' : 'bg-white/5 border-white/10 text-arbitra-gray hover:text-white'">
-                                                    <span x-text="tab.name"></span>
-                                                </button>
-                                            </div>
-                                        </template>
-                                        <button @click="addModalTab()" class="text-[10px] font-black uppercase px-5 py-2.5 rounded-xl border border-dashed border-white/20 text-arbitra-gray hover:border-arbitra-emerald hover:text-white transition-all">+ Add Tab</button>
-                                    </div>
+                                    <!-- Block Builder UI -->
+                                    <div class="space-y-6">
+                                        <template x-for="(block, index) in modalTabs" :key="index">
+                                            <div class="bg-black/60 border border-white/5 rounded-2xl p-6 relative group">
+                                                <div class="absolute -left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
+                                                    <button @click="moveBlock(index, 'up')" class="bg-white/10 hover:bg-white/20 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center text-[10px]" :disabled="index === 0">▲</button>
+                                                    <button @click="moveBlock(index, 'down')" class="bg-white/10 hover:bg-white/20 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center text-[10px]" :disabled="index === modalTabs.length - 1">▼</button>
+                                                </div>
 
-                                    <!-- Active Tab Editor -->
-                                    <template x-if="modalTabs[activeTab]">
-                                        <div class="space-y-8">
-                                            <div class="flex justify-between items-center bg-white/5 -mx-8 -mt-8 mb-8 p-6 rounded-t-3xl border-b border-white/5">
-                                                <div class="flex items-center gap-6">
-                                                    <div class="space-y-1">
-                                                        <label class="admin-label text-[8px]">Tab Name</label>
-                                                        <input type="text" x-model="modalTabs[activeTab].name" class="bg-transparent border-none p-0 text-white font-black uppercase tracking-tight focus:ring-0 w-48">
+                                                <div class="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="px-3 py-1 bg-arbitra-emerald/10 text-arbitra-emerald text-[10px] font-black uppercase tracking-widest rounded-lg border border-arbitra-emerald/20" x-text="block.type === 'map' ? 'Map Coordinates' : (block.type === 'border_card' ? 'Border Card' : 'Rich Text')"></span>
                                                     </div>
-                                                    <div class="h-8 w-px bg-white/10"></div>
-                                                    <div class="space-y-1">
-                                                        <label class="admin-label text-[8px]">Display Style</label>
-                                                        <select x-model="modalTabs[activeTab].type" class="bg-transparent border-none p-0 text-arbitra-emerald font-black uppercase text-[10px] focus:ring-0 cursor-pointer">
-                                                            <option value="points" class="bg-arbitra-black">Bullet Points</option>
-                                                            <option value="table" class="bg-arbitra-black">Data Table</option>
-                                                            <option value="map" class="bg-arbitra-black">Infrastructure Map</option>
-                                                            <option value="text" class="bg-arbitra-black">Plain Text</option>
-                                                        </select>
+                                                    <button @click="removeBlock(index)" class="text-red-500/50 hover:text-red-500 transition-all">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Block Content Editors -->
+                                                
+                                                <!-- Map Block Editor -->
+                                                <div x-show="block.type === 'map'" class="space-y-4">
+                                                    <template x-for="(pt, ptIdx) in block.data" :key="ptIdx">
+                                                        <div class="grid grid-cols-12 gap-3 items-center">
+                                                            <div class="col-span-6"><label class="text-[8px] font-black uppercase mb-1 block tracking-wider text-arbitra-gray">Location Name</label><input type="text" x-model="pt.label" class="admin-input text-xs w-full"></div>
+                                                            <div class="col-span-2"><label class="text-[8px] font-black uppercase mb-1 block text-arbitra-gray">LAT</label><input type="number" step="0.0001" x-model.number="pt.lat" class="admin-input text-xs w-full"></div>
+                                                            <div class="col-span-2"><label class="text-[8px] font-black uppercase mb-1 block text-arbitra-gray">LNG</label><input type="number" step="0.0001" x-model.number="pt.lng" class="admin-input text-xs w-full"></div>
+                                                            <div class="col-span-2 flex justify-end"><button @click="block.data.splice(ptIdx, 1)" class="text-red-500 mt-4 px-2 py-1 bg-red-500/10 rounded border border-red-500/20 text-xs">Remove</button></div>
+                                                        </div>
+                                                    </template>
+                                                    <button @click="block.data.push({label: 'New Pin', lat: 10.7, lng: 122.5})" class="w-full py-3 border border-dashed border-white/10 rounded-xl text-[10px] font-black uppercase text-arbitra-gray hover:border-arbitra-emerald/40 hover:text-white transition-all bg-white/5">+ Add Map Pin</button>
+                                                </div>
+
+                                                <!-- Border Card Editor -->
+                                                <div x-show="block.type === 'border_card'" class="space-y-4">
+                                                    <div>
+                                                        <label class="text-[8px] font-black uppercase mb-1 block tracking-wider text-arbitra-gray">Card Title</label>
+                                                        <input type="text" x-model="block.data.title" class="admin-input text-sm font-bold text-white w-full">
+                                                    </div>
+                                                    <div class="space-y-2 mt-4">
+                                                        <label class="text-[8px] font-black uppercase block tracking-wider text-arbitra-gray mb-2">Bullet Points</label>
+                                                        <template x-for="(item, itemIdx) in block.data.items" :key="itemIdx">
+                                                            <div class="flex gap-3 items-center group">
+                                                                <div class="w-1.5 h-1.5 rounded-full bg-arbitra-emerald"></div>
+                                                                <input type="text" x-model="block.data.items[itemIdx]" class="admin-input flex-1 text-sm bg-black/40">
+                                                                <button @click="block.data.items.splice(itemIdx, 1)" class="opacity-0 group-hover:opacity-100 text-red-500 p-2">×</button>
+                                                            </div>
+                                                        </template>
+                                                        <button @click="block.data.items.push('New detail point...')" class="mt-2 w-full py-2 border border-dashed border-white/10 rounded-lg text-[10px] font-bold uppercase text-arbitra-gray hover:text-white transition-all">+ Add Point</button>
                                                     </div>
                                                 </div>
-                                                <button @click="removeModalTab(activeTab)" class="text-red-500/50 hover:text-red-500 transition-all">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                </button>
-                                            </div>
 
-                                            <div x-show="modalTabs[activeTab].type === 'points'" class="space-y-4">
-                                                <template x-for="(pt, ptIdx) in modalTabs[activeTab].data" :key="ptIdx">
-                                                    <div class="flex gap-4 items-center group">
-                                                        <div class="w-1.5 h-1.5 rounded-full bg-arbitra-emerald"></div>
-                                                        <input type="text" x-model="modalTabs[activeTab].data[ptIdx]" class="admin-input flex-1">
-                                                        <button @click="modalTabs[activeTab].data.splice(ptIdx, 1)" class="opacity-0 group-hover:opacity-100 text-red-500 p-2">×</button>
-                                                    </div>
-                                                </template>
-                                                <button @click="modalTabs[activeTab].data.push('New detail point...')" class="w-full py-3 border-2 border-dashed border-white/5 rounded-2xl text-[10px] font-black uppercase text-arbitra-gray hover:border-arbitra-emerald/40 hover:text-white transition-all">+ Add New Point</button>
-                                            </div>
+                                                <!-- Text Card Editor -->
+                                                <div x-show="block.type === 'text_card'">
+                                                    <label class="text-[8px] font-black uppercase mb-1 block tracking-wider text-arbitra-gray">Paragraph Content (Supports Markdown/HTML)</label>
+                                                    <textarea x-model="block.data.text" class="admin-input h-32 leading-relaxed text-sm w-full" placeholder="Type plain text info here..."></textarea>
+                                                </div>
 
-                                            <div x-show="modalTabs[activeTab].type === 'table'" class="space-y-3">
-                                                <template x-for="(row, rowIdx) in modalTabs[activeTab].data" :key="rowIdx">
-                                                    <div class="flex gap-4 items-center">
-                                                        <input type="text" x-model="row.key" placeholder="Metric Name" class="admin-input flex-1 font-bold">
-                                                        <input type="text" x-model="row.value" placeholder="Value" class="admin-input flex-1 text-arbitra-emerald font-black">
-                                                        <button @click="modalTabs[activeTab].data.splice(rowIdx, 1)" class="text-red-500 p-1">×</button>
-                                                    </div>
-                                                </template>
-                                                <button @click="modalTabs[activeTab].data.push({key: '', value: ''})" class="w-full py-3 border-2 border-dashed border-white/5 rounded-2xl text-[10px] font-black uppercase text-arbitra-gray hover:border-arbitra-emerald/40 hover:text-white transition-all">+ Add Table Row</button>
                                             </div>
+                                        </template>
+                                    </div>
 
-                                            <div x-show="modalTabs[activeTab].type === 'map'" class="space-y-4">
-                                                <template x-for="(pt, ptIdx) in modalTabs[activeTab].data" :key="ptIdx">
-                                                    <div class="grid grid-cols-12 gap-3 items-center">
-                                                        <div class="col-span-4"><label class="text-[8px] font-black uppercase mb-1 block">Location Label</label><input type="text" x-model="pt.label" class="admin-input text-xs"></div>
-                                                        <div class="col-span-3"><label class="text-[8px] font-black uppercase mb-1 block">LAT</label><input type="number" step="0.0001" x-model.number="pt.lat" class="admin-input text-xs"></div>
-                                                        <div class="col-span-3"><label class="text-[8px] font-black uppercase mb-1 block">LNG</label><input type="number" step="0.0001" x-model.number="pt.lng" class="admin-input text-xs"></div>
-                                                        <div class="col-span-2 flex justify-end"><button @click="modalTabs[activeTab].data.splice(ptIdx, 1)" class="text-red-500 mt-4">×</button></div>
-                                                    </div>
-                                                </template>
-                                                <button @click="modalTabs[activeTab].data.push({label: 'New Infrastructure', lat: 10.7, lng: 122.5})" class="w-full py-3 border-2 border-dashed border-white/5 rounded-2xl text-[10px] font-black uppercase text-arbitra-gray hover:border-arbitra-emerald/40 hover:text-white transition-all">+ Add Map Point</button>
-                                            </div>
-                                            
-                                            <div x-show="modalTabs[activeTab].type === 'text'">
-                                                <textarea x-model="modalTabs[activeTab].data" class="admin-input h-32 leading-relaxed" placeholder="Type plain text info here..."></textarea>
-                                            </div>
+                                    <!-- Add Block Button (Dropdown) -->
+                                    <div x-data="{ openAddMenu: false }" class="relative mt-8 pt-6 border-t border-white/10 flex justify-center">
+                                        <button @click="openAddMenu = !openAddMenu" @click.away="openAddMenu = false" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2">
+                                            <span>+ Add Content Block</span>
+                                            <svg class="w-4 h-4 transition-transform" :class="openAddMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </button>
+
+                                        <div x-show="openAddMenu" x-transition class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#111] border border-white/10 rounded-2xl w-56 shadow-2xl overflow-hidden z-50">
+                                            <button @click="addBlock('map'); openAddMenu = false" class="w-full text-left px-5 py-3 text-xs font-bold text-white hover:bg-arbitra-emerald/10 hover:text-arbitra-emerald border-b border-white/5 transition-colors flex items-center justify-between">
+                                                <span>📍 Map Coordinates</span>
+                                            </button>
+                                            <button @click="addBlock('border_card'); openAddMenu = false" class="w-full text-left px-5 py-3 text-xs font-bold text-white hover:bg-arbitra-emerald/10 hover:text-arbitra-emerald border-b border-white/5 transition-colors flex items-center justify-between">
+                                                <span>🔲 Card (With Border)</span>
+                                            </button>
+                                            <button @click="addBlock('text_card'); openAddMenu = false" class="w-full text-left px-5 py-3 text-xs font-bold text-white hover:bg-arbitra-emerald/10 hover:text-arbitra-emerald transition-colors flex items-center justify-between">
+                                                <span>📝 Text / Paragraph</span>
+                                            </button>
                                         </div>
-                                    </template>
+                                    </div>
                                 </div>
                             </div>
                         </div>

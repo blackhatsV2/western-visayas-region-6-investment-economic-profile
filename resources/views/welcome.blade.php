@@ -568,6 +568,45 @@
         ];
     @endphp
     <script>
+        // Global Map Renderer for Blocks
+        window.renderModalMap = function(containerId, data) {
+            const mapContainer = document.getElementById(containerId);
+            const points = Array.isArray(data) ? data : (data.items || []);
+            if (!mapContainer || points.length === 0) return;
+
+            // Optional: Store map instance globally to destroy it on close
+            if (window.currentModalMap) { window.currentModalMap.remove(); }
+            
+            window.currentModalMap = L.map(containerId).setView([points[0].lat, points[0].lng], 8);
+            
+            setTimeout(() => { window.currentModalMap.invalidateSize(); }, 200);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap',
+                className: 'map-tiles'
+            }).addTo(window.currentModalMap);
+
+            const emeraldIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: "<div style='background-color: #10b981; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px #10b981;'></div>",
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+            });
+
+            const bounds = [];
+            points.forEach(point => {
+                L.marker([point.lat, point.lng], {icon: emeraldIcon})
+                    .addTo(window.currentModalMap)
+                    .bindPopup(`<b style="color:#FFFFFF; font-size: 13px; text-transform: uppercase;">${point.label}</b>`);
+                
+                bounds.push([point.lat, point.lng]);
+            });
+            
+            if (bounds.length > 0) {
+                window.currentModalMap.fitBounds(bounds, { padding: [50, 50] });
+            }
+        };
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('app', () => ({
                 mobileSidebarOpen: false,
@@ -672,12 +711,27 @@
                     }
                 },
                 initMap() {
-                    const mapContainer = document.getElementById('leaflet-map');
-                    const points = this.modalContent['Map Points'];
+                    // Legacy Support for dictionaries (Map Points property)
+                    if (!Array.isArray(this.modalContent) && this.modalContent && this.modalContent['Map Points']) {
+                        this.renderMapInstance('leaflet-map', this.modalContent['Map Points']);
+                    } else if (Array.isArray(this.modalContent)) {
+                       // Find the first map block and render it for global backward compatibility
+                       const mapBlock = this.modalContent.find(b => b.type === 'map');
+                       if (mapBlock && mapBlock.data) {
+                           // The frontend will call renderModalMap via x-init, but we can do a fallback here
+                           setTimeout(() => {
+                               // Usually handled by x-init="$nextTick(() => window.renderModalMap(block.data, index))",
+                               // but we keep this here just in case.
+                           }, 100);
+                       }
+                    }
+                },
+                renderMapInstance(containerId, points) {
+                    const mapContainer = document.getElementById(containerId);
                     if (!mapContainer || !points || points.length === 0) return;
 
                     if (this.map) { this.map.remove(); }
-                    this.map = L.map('leaflet-map').setView([points[0].lat, points[0].lng], 8);
+                    this.map = L.map(containerId).setView([points[0].lat, points[0].lng], 8);
                     
                     setTimeout(() => { this.map.invalidateSize(); }, 200);
 
@@ -1750,48 +1804,107 @@
 
             <h3 class="text-xl md:text-3xl font-extrabold text-white tracking-tighter mb-6 md:mb-12 uppercase italic pr-8" x-text="modalTitle"></h3>
             
-            <div class="space-y-12 max-h-[60vh] overflow-y-auto pr-6 custom-scrollbar">
-                
-                <!-- Leaflet Map Container (Fixed Position) -->
-                <template x-if="modalContent['Map Points']">
-                    <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8">
-                        <div id="leaflet-map" class="w-full h-full bg-arbitra-dark"></div>
-                    </div>
+            <div class="space-y-10 max-h-[60vh] overflow-y-auto pr-6 custom-scrollbar">
+                <template x-if="Array.isArray(modalContent)">
+                    <template x-for="(block, index) in modalContent" :key="index">
+                        <div class="space-y-4">
+                            <!-- Map Block rendering -->
+                            <template x-if="block.type === 'map'">
+                                <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8" x-init="$nextTick(() => { if(window.renderModalMap) window.renderModalMap('leaflet-map-' + index, block.data) })">
+                                    <div :id="'leaflet-map-' + index" class="w-full h-full bg-arbitra-dark"></div>
+                                </div>
+                            </template>
+
+                            <!-- Border Card Block rendering -->
+                            <template x-if="block.type === 'border_card'">
+                                <div class="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-arbitra-emerald/30 transition-all group">
+                                    <!-- Title -->
+                                    <template x-if="block.data.title">
+                                        <h4 class="text-sm font-black uppercase tracking-[0.2em] text-arbitra-emerald mb-6 pb-4 border-b border-white/5" x-text="block.data.title"></h4>
+                                    </template>
+                                    
+                                    <!-- Bullet Points -->
+                                    <template x-if="block.data.items && block.data.items.length > 0">
+                                        <div class="space-y-4">
+                                            <template x-for="(item, itemIdx) in block.data.items" :key="itemIdx">
+                                                <div class="flex items-start gap-4">
+                                                    <div class="mt-2 w-1.5 h-1.5 rounded-full bg-arbitra-emerald/50 shrink-0 group-hover:bg-arbitra-emerald transition-colors"></div>
+                                                    <p class="text-base font-medium text-white/80 leading-relaxed" x-text="item"></p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            
+                            <!-- Text Card Block rendering -->
+                            <template x-if="block.type === 'text_card'">
+                                <div class="prose prose-invert prose-emerald max-w-none">
+                                    <p class="text-lg text-white/80 font-medium leading-relaxed whitespace-pre-line" x-html="block.data.text"></p>
+                                </div>
+                            </template>
+
+                            <!-- Fallback for legacy blocks that weren't migrated properly (optional, safety net) -->
+                            <template x-if="!block.type && typeof block === 'object'">
+                                <div class="bg-red-500/10 border border-red-500/20 p-4 rounded-xl">
+                                    <span class="text-xs font-bold text-red-500 uppercase tracking-widest block mb-2">Notice:</span>
+                                    <p class="text-sm text-red-500/80">This section is using a legacy data structure. Please edit and re-save it in the dashboard to migrate it to the new block format.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
                 </template>
 
-                <template x-for="(value, key) in modalContent" :key="key">
-                    <div class="space-y-6">
-                        <!-- Hide Map Points Key in Loop -->
-                        <template x-if="key !== 'Map Points'">
-                            <h4 class="text-sm font-bold uppercase tracking-[0.3em] text-arbitra-emerald sticky top-0 bg-arbitra-dark z-10 py-2" x-text="key"></h4>
-                        </template>
+                <!-- Legacy Fallback for dictionaries -->
+                <template x-if="!Array.isArray(modalContent)">
+                     <div class="space-y-12">
+                        <div class="bg-arbitra-emerald/10 border border-arbitra-emerald/20 p-6 rounded-2xl">
+                             <h4 class="text-sm font-black text-arbitra-emerald uppercase tracking-widest mb-2">Legacy Content Mode</h4>
+                             <p class="text-sm text-white/70">This popup is still using the legacy format. Edit it in the dashboard to convert it to the new block system.</p>
+                        </div>
                         
-                        <!-- Grid for 'Points' (Why Invest) -->
-                        <template x-if="key === 'Points' && Array.isArray(value)">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <template x-for="item in value">
-                                    <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-arbitra-emerald/50 hover:bg-white/10 transition-all group flex items-center justify-center text-center">
-                                        <span class="text-lg font-bold text-white group-hover:text-arbitra-emerald transition-colors" x-text="item"></span>
-                                    </div>
-                                </template>
+                        <!-- Leaflet Map Container (Fixed Position) -->
+                        <template x-if="modalContent['Map Points']">
+                            <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8">
+                                <div id="leaflet-map" class="w-full h-full bg-arbitra-dark"></div>
                             </div>
                         </template>
 
-                        <!-- Standard Key-Value List (Stats) -->
-                        <template x-if="key !== 'Points' && key !== 'Map Points' && typeof value === 'object'">
-                            <div class="grid grid-cols-1 gap-4">
-                                <template x-for="(v, k) in value" :key="k">
-                                    <div class="flex items-center justify-between p-6 rounded-2xl bg-black/40 border border-white/5">
-                                        <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest" x-text="k"></span>
-                                        <span class="text-lg font-bold text-white" x-text="v"></span>
+                        <template x-for="(value, key) in modalContent" :key="key">
+                            <div class="space-y-6">
+                                <!-- Hide Map Points Key in Loop -->
+                                <template x-if="key !== 'Map Points'">
+                                    <h4 class="text-sm font-bold uppercase tracking-[0.3em] text-arbitra-emerald sticky top-0 bg-arbitra-dark z-10 py-2" x-text="key"></h4>
+                                </template>
+                                
+                                <!-- Grid for 'Points' (Why Invest) -->
+                                <template x-if="key === 'Points' && Array.isArray(value)">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <template x-for="item in value">
+                                            <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-arbitra-emerald/50 hover:bg-white/10 transition-all group flex items-center justify-center text-center">
+                                                <span class="text-lg font-bold text-white group-hover:text-arbitra-emerald transition-colors" x-text="item"></span>
+                                            </div>
+                                        </template>
                                     </div>
                                 </template>
+
+                                <!-- Standard Key-Value List (Stats) -->
+                                <template x-if="key !== 'Points' && key !== 'Map Points' && typeof value === 'object'">
+                                    <div class="grid grid-cols-1 gap-4">
+                                        <template x-for="(v, k) in value" :key="k">
+                                            <div class="flex items-center justify-between p-6 rounded-2xl bg-black/40 border border-white/5">
+                                                <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest" x-text="k"></span>
+                                                <span class="text-lg font-bold text-white" x-text="v"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                                
+                                <!-- Fallback Text -->
+                                <template x-if="typeof value !== 'object' && key !== 'Map Points'">
+                                    <p class="text-lg text-white/80 font-medium leading-relaxed" x-text="value"></p>
+                                </template>
                             </div>
-                        </template>
-                        
-                        <!-- Fallback Text -->
-                        <template x-if="typeof value !== 'object'">
-                            <p class="text-lg text-white/80 font-medium leading-relaxed" x-text="value"></p>
                         </template>
                     </div>
                 </template>
