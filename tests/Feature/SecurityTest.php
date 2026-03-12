@@ -7,6 +7,8 @@ use Tests\TestCase;
 
 class SecurityTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * A basic test example.
      */

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     @php $meta = $contents->where('type', 'metadata')->first(); @endphp
-    <title>{{ $meta->content['browser_tab_title'] ?? 'Western Visayas: Investment and Economic Profile' }}</title>
+    <title>{{ isset($meta) && isset($meta->content['browser_tab_title']) ? $meta->content['browser_tab_title'] : 'Western Visayas: Investment and Economic Profile' }}</title>
     <link rel="icon" type="image/png" href="{{ asset('dti-logo.png') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#000000">
@@ -907,7 +907,7 @@
 
                 <img src="{{ asset('dti-logo.png') }}" class="h-7 md:h-8 w-auto" alt="DTI Logo">
                 <div class="h-6 w-px bg-white/10 hidden md:block"></div>
-                <h1 class="text-[9px] md:text-sm font-black tracking-tight uppercase block max-w-[120px] md:max-w-none leading-tight">{{ $meta->content['site_title'] ?? 'Western Visayas: Investment and Economic Profile' }}</h1>
+                <h1 class="text-[9px] md:text-sm font-black tracking-tight uppercase block max-w-[120px] md:max-w-none leading-tight">{{ isset($meta) && isset($meta->content['site_title']) ? $meta->content['site_title'] : 'Western Visayas: Investment and Economic Profile' }}</h1>
             </div>
             
             <!-- Desktop Nav -->
@@ -1158,7 +1158,7 @@
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mobile-scroll-x">
-                            @foreach($content->content['stats'] as $stat)
+                            @foreach(($content->content['stats'] ?? []) as $stat)
                                 @php
                                     $hasExtra = isset($content->content['modal_details']) || isset($stat['detail']);
                                     $extraData = $content->content['modal_details'] ?? (isset($stat['detail']) ? ['Details' => $stat['detail']] : null);
@@ -1188,8 +1188,8 @@
                                         <div class="w-10 h-10 rounded-xl bg-arbitra-emerald/10 flex items-center justify-center mb-8 border border-arbitra-emerald/10">
                                             <svg class="h-5 w-5 text-arbitra-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconPath }}"></path></svg>
                                         </div>
-                                        <h4 class="text-sm font-bold text-arbitra-gray uppercase tracking-widest mb-3">{{ $stat['label'] }}</h4>
-                                        <h3 class="text-3xl font-extrabold text-white tracking-tight leading-none">{{ $stat['value'] }}</h3>
+                                        <h4 class="text-sm font-bold text-arbitra-gray uppercase tracking-widest mb-3">{{ $stat['label'] ?? 'Metric' }}</h4>
+                                        <h3 class="text-3xl font-extrabold text-white tracking-tight leading-none">{{ $stat['value'] ?? '0' }}</h3>
                                     </div>
 
                                     @if(isset($stat['detail']) && !$hasExtra)
@@ -1396,7 +1396,7 @@
                                         </div>
                                         
                                         <p class="text-xl text-white/90 font-medium leading-relaxed border-l-2 border-white/10 pl-6 group-hover:border-arbitra-emerald transition-colors">
-                                            {{ $item['details'] }}
+                                            {{ $item['details'] ?? '' }}
                                         </p>
                                     </div>
                                 </div>
@@ -1437,7 +1437,7 @@
                                         if(str_contains($name, 'bamboo') || str_contains($name, 'cacao')) $iconPath = 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z';
                                     @endphp
                                     <div @if($poppable) 
-                                         data-content="{{ json_encode($item['modal_details'] ?? ['Key Details' => $item['details']]) }}"
+                                         data-content="{{ json_encode($item['modal_details'] ?? ['Key Details' => ($item['details'] ?? '')]) }}"
                                          data-title="{{ $item['name'] }}"
                                          @click="openFromEl($el)" 
                                          @endif
@@ -1456,7 +1456,7 @@
                                         </div>
 
                                         <div class="flex-1">
-                                            <h3 class="text-lg font-black text-arbitra-emerald uppercase tracking-wide mb-5">{{ $item['name'] }}</h3>
+                                            <h3 class="text-lg font-black text-arbitra-emerald uppercase tracking-wide mb-5">{{ $item['name'] ?? '' }}</h3>
                                             @if($isCompact)
                                                 <div class="space-y-3">
                                                     @foreach($subItems as $sub)
@@ -1468,7 +1468,7 @@
                                                 </div>
                                             @else
                                                 <p class="text-lg text-white/85 leading-relaxed font-medium">
-                                                    {{ $item['details'] }}
+                                                    {{ $item['details'] ?? '' }}
                                                 </p>
                                             @endif
                                         </div>

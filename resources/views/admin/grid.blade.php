@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SPREADSHEET - Admin Panel</title>
+    <title>{{ isset($meta) && isset($meta->content['browser_tab_title']) ? $meta->content['browser_tab_title'] : 'Western Visayas: Investment and Economic Profile' }}</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
@@ -112,12 +112,12 @@
             <tbody>
                 @foreach($contents as $content)
                     <tr x-data="{ 
-                        id: {{ $content->id }},
-                        page: '{{ $content->page_number }}',
-                        title: '{{ str_replace("'", "\\'", $content->section_title) }}',
-                        type: '{{ $content->type }}',
-                        json: @js(json_encode($content->content, JSON_PRETTY_PRINT)),
-                        source: '{{ str_replace("'", "\\'", $content->source) }}',
+                        id: {{ optional($content)->id ?? 0 }},
+                        page: '{{ optional($content)->page_number ?? '' }}',
+                        title: '{{ str_replace("'", "\\'", optional($content)->section_title ?? '') }}',
+                        type: '{{ optional($content)->type ?? '' }}',
+                        json: @js(json_encode(optional($content)->content ?? [], JSON_PRETTY_PRINT)),
+                        source: '{{ str_replace("'", "\\'", optional($content)->source ?? '') }}',
                         dirty: false
                     }" @keyup="dirty = true">
                         <td class="grid-cell text-center py-3 text-arbitra-gray font-mono">{{ $content->id }}</td>

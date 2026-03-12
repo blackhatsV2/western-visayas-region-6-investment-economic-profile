@@ -25,7 +25,7 @@ class ProjectContentExport implements FromCollection, WithHeadings
             ->orderBy('page_number')
             ->get();
             
-        $rows = collect();
+        $rows = [];
 
         foreach ($contents as $content) {
             $baseData = [
@@ -42,11 +42,11 @@ class ProjectContentExport implements FromCollection, WithHeadings
                     // In Hero, we only care about stats (e.g. GRDP Growth, Population)
                     if (isset($data['highlight_stats'])) {
                         foreach ($data['highlight_stats'] as $stat) {
-                            $rows->push(array_merge($baseData, [
+                            $rows[] = array_merge($baseData, [
                                 'key' => $stat['label'] ?? '',
                                 'value' => $stat['value'] ?? '',
                                 'extra' => 'Highlight Stat'
-                            ]));
+                            ]);
                         }
                     }
                     // Exclude title/subtitle as they are structural/branding
@@ -55,11 +55,11 @@ class ProjectContentExport implements FromCollection, WithHeadings
                 case 'stats_grid':
                     if (isset($data['stats'])) {
                         foreach ($data['stats'] as $stat) {
-                            $rows->push(array_merge($baseData, [
+                            $rows[] = array_merge($baseData, [
                                 'key' => $stat['label'] ?? '',
                                 'value' => $stat['value'] ?? '',
                                 'extra' => 'Stat'
-                            ]));
+                            ]);
                         }
                     }
                     // Description is usually qualitative/structural, but we can keep it if it contains data
@@ -71,11 +71,11 @@ class ProjectContentExport implements FromCollection, WithHeadings
                     $series = $data['series'] ?? [];
                     foreach ($series as $s) {
                         foreach ($categories as $index => $cat) {
-                            $rows->push(array_merge($baseData, [
+                            $rows[] = array_merge($baseData, [
                                 'key' => $cat,
                                 'value' => $s['data'][$index] ?? '',
                                 'extra' => $s['name'] ?? 'Value'
-                            ]));
+                            ]);
                         }
                     }
                     break;
@@ -85,17 +85,17 @@ class ProjectContentExport implements FromCollection, WithHeadings
                     if (isset($data['items'])) {
                         foreach ($data['items'] as $item) {
                             if (is_array($item)) {
-                                $rows->push(array_merge($baseData, [
+                                $rows[] = array_merge($baseData, [
                                     'key' => $item['name'] ?? '',
                                     'value' => $item['details'] ?? '',
                                     'extra' => 'Data Point'
-                                ]));
+                                ]);
                             } else {
-                                $rows->push(array_merge($baseData, [
+                                $rows[] = array_merge($baseData, [
                                     'key' => 'Item',
                                     'value' => $item,
                                     'extra' => ''
-                                ]));
+                                ]);
                             }
                         }
                     }
@@ -105,7 +105,7 @@ class ProjectContentExport implements FromCollection, WithHeadings
             }
         }
 
-        return $rows;
+        return collect($rows);
     }
 
     public function headings(): array

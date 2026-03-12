@@ -103,10 +103,10 @@
         @endif
 
         <div class="c-section">
-            <div class="c-section-title">{{ $content->section_title }}</div>
+            <div class="c-section-title">{{ optional($content)->section_title ?? 'Economic Data' }}</div>
 
             {{-- Description Block --}}
-            @if(isset($content->content['description']) || isset($content->content['notable_info']))
+            @if(isset($content) && (isset($content->content['description']) || isset($content->content['notable_info'])))
                 <div class="c-desc">
                     @if(isset($content->content['description']))
                         <p style="margin: 0 0 5px 0;">{{ $content->content['description'] }}</p>
@@ -292,7 +292,7 @@
                 </div>
             @endif
 
-            @if($content->source)
+            @if(isset($content) && $content->source)
                 <div class="source">Source: {{ $content->source }}</div>
             @endif
         </div>

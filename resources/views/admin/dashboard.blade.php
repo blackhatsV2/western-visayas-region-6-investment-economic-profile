@@ -1101,26 +1101,28 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
-                        @forelse($inquiries as $inquiry)
-                            <tr class="group hover:bg-white/[0.02] transition-colors">
-                                <td class="py-6 text-xs font-medium text-arbitra-gray">{{ $inquiry->created_at->format('M d, Y') }}</td>
-                                <td class="py-6">
-                                    <div class="text-sm font-bold text-white">{{ $inquiry->name }}</div>
-                                    <div class="text-[10px] text-arbitra-gray">{{ $inquiry->email }}</div>
-                                </td>
-                                <td class="py-6 text-xs text-arbitra-gray">{{ $inquiry->contact }}</td>
-                                <td class="py-6 text-xs text-white max-w-xs truncate" title="{{ $inquiry->message }}">{{ $inquiry->message }}</td>
-                                <td class="py-6 text-right">
-                                    <button @click="deleteInquiry({{ $inquiry->id }})" class="text-arbitra-gray hover:text-red-500 transition-all">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
+                        @if(isset($inquiries) && $inquiries->count() > 0)
+                            @foreach($inquiries as $inquiry)
+                                <tr class="group hover:bg-white/[0.02] transition-colors">
+                                    <td class="py-6 text-xs font-medium text-arbitra-gray">{{ $inquiry->created_at->format('M d, Y') }}</td>
+                                    <td class="py-6">
+                                        <div class="text-sm font-bold text-white">{{ $inquiry->name }}</div>
+                                        <div class="text-[10px] text-arbitra-gray">{{ $inquiry->email }}</div>
+                                    </td>
+                                    <td class="py-6 text-xs text-arbitra-gray">{{ $inquiry->contact }}</td>
+                                    <td class="py-6 text-xs text-white max-w-xs truncate" title="{{ $inquiry->message }}">{{ $inquiry->message }}</td>
+                                    <td class="py-6 text-right">
+                                        <button @click="deleteInquiry({{ $inquiry->id }})" class="text-arbitra-gray hover:text-red-500 transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
                             <tr>
                                 <td colspan="5" class="py-20 text-center text-arbitra-gray uppercase text-[10px] font-black tracking-[0.2em] italic">No inquiries received yet</td>
                             </tr>
-                        @endforelse
+                        @endif
                     </tbody>
                 </table>
             </div>
