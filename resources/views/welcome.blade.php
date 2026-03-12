@@ -1130,7 +1130,8 @@
                         str_contains($title, 'driver') => 'drivers',
                         str_contains($title, 'airport') || str_contains($title, 'port') || str_contains($title, 'telecom') || str_contains($title, 'infrastructure') => 'infrastructure',
                         str_contains($title, 'peza') || str_contains($title, 'logistics') => 'logistics',
-                        str_contains($title, 'industry') || str_contains($title, 'fruit') || str_contains($title, 'wearable') || str_contains($title, 'strategy') => 'industries',
+                        str_contains($title, 'priority industries by province') => 'industries',
+                        str_contains($title, 'industry') || str_contains($title, 'fruit') || str_contains($title, 'wearable') || str_contains($title, 'strategy') => 'other-industries',
                         default => 'section-' . $content->id
                     };
                 @endphp
