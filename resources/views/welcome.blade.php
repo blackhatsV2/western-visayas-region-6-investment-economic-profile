@@ -922,8 +922,8 @@
             <div class="flex items-center gap-2 md:gap-3">
                 @php 
                     $yearsList = collect($years);
-                    $shownYears = $yearsList->take(3); 
-                    $otherYears = $yearsList->slice(3);
+                    $shownYears = $yearsList->take(2); 
+                    $otherYears = $yearsList->slice(2);
                     
                     // On mobile we show 1, so the 2nd year onwards should be in the dropdown
                     $mobileDropYears = $yearsList->slice(1);
@@ -949,7 +949,7 @@
                     <div class="relative">
                         <button @click="moreOpen = !moreOpen" 
                                 class="px-1.5 md:px-2 py-1 text-arbitra-gray hover:text-white transition-all text-xs font-bold flex items-center gap-1 group"
-                                title="More years available">
+                                title="More periods available">
                             <span class="text-[10px]" :class="moreOpen ? 'rotate-90' : ''">›</span>
                         </button>
                         <div x-show="moreOpen" @click.away="moreOpen = false" x-cloak

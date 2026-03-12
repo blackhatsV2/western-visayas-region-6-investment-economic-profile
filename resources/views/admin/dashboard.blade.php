@@ -111,13 +111,36 @@
                     EXCEL
                 </a>
 
-                @foreach($years as $year)
+                @php 
+                    $yearsList = collect($years);
+                    $shownYears = $yearsList->take(2); 
+                    $otherYears = $yearsList->slice(2);
+                @endphp
+                @foreach($shownYears as $year)
                     <a href="?year={{ $year }}" 
                        class="px-3 py-1 rounded-full text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'text-arbitra-gray hover:text-white' }}">
                         {{ $year }}
                     </a>
                 @endforeach
-                <button @click="showAddYear = true" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-arbitra-emerald hover:text-arbitra-black transition-all">
+                @if($otherYears->count() > 0)
+                <div class="relative" x-data="{ moreOpen: false }">
+                    <button @click="moreOpen = !moreOpen" 
+                            class="px-2 py-1 text-arbitra-gray hover:text-white transition-all text-xs font-bold flex items-center gap-1 group"
+                            title="More periods available">
+                        <span class="text-[10px]" :class="moreOpen ? 'rotate-90' : ''">›</span>
+                    </button>
+                    <div x-show="moreOpen" @click.away="moreOpen = false" x-cloak
+                         class="absolute top-10 right-0 bg-arbitra-dark border border-white/10 rounded-xl p-2 min-w-[100px] z-[60] shadow-2xl">
+                        @foreach($otherYears as $year)
+                            <a href="?year={{ $year }}" 
+                               class="block px-4 py-2 rounded-lg text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'text-arbitra-gray hover:text-white hover:bg-white/5' }}">
+                                {{ $year }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+                <button @click="showAddYear = true" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-arbitra-emerald hover:text-arbitra-black transition-all" title="Add New Period">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
                 </button>
                 
@@ -125,7 +148,7 @@
                 
                 <button @click="confirmDeleteYear('{{ $selectedYear }}')" class="group flex items-center gap-2 text-arbitra-gray hover:text-red-500 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    <span class="text-[10px] font-black uppercase tracking-widest hidden group-hover:block">Delete Year</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest hidden group-hover:block">Delete Period</span>
                 </button>
             </div>
 
@@ -1213,9 +1236,9 @@
 
     <div x-show="showAddYear" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl px-6">
         <div class="bg-arbitra-dark p-12 rounded-[2.5rem] border border-white/10 max-w-md w-full">
-            <h3 class="text-2xl font-black mb-6 italic uppercase tracking-tighter">Add New Year Profile</h3>
+            <h3 class="text-2xl font-black mb-6 italic uppercase tracking-tighter">Add New Profile Period</h3>
             
-            <label class="admin-label">Year Range (e.g., 2030-2031)</label>
+            <label class="admin-label">Profile Period (e.g., As of 2024-2025, Q1 2024)</label>
             <input type="text" x-model="newYear" class="admin-input mt-2 mb-6">
             
             <div class="flex items-center gap-3 mb-8 bg-white/5 p-4 rounded-2xl border border-white/5">
@@ -1478,7 +1501,7 @@
                 },
 
                 async confirmDeleteYear(year) {
-                    if (!confirm(`CRITICAL WARNING: This will delete ALL data for the year range ${year}. This action is permanent. Are you sure?`)) return;
+                    if (!confirm(`CRITICAL WARNING: This will delete ALL data for the period ${year}. This action is permanent. Are you sure?`)) return;
                     
                     try {
                         const response = await fetch(`/admin/year/${year}`, {
