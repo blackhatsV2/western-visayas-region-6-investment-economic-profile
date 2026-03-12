@@ -1249,8 +1249,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mobile-scroll-x">
                             @foreach(($content->content['stats'] ?? []) as $stat)
                                 @php
-                                    $hasExtra = isset($content->content['modal_details']) || isset($stat['detail']);
-                                    $extraData = $content->content['modal_details'] ?? (isset($stat['detail']) ? ['Details' => $stat['detail']] : null);
+                                    $hasExtra = isset($stat['modal_details']) || isset($content->content['modal_details']) || isset($stat['detail']);
+                                    $extraData = $stat['modal_details'] ?? $content->content['modal_details'] ?? (isset($stat['detail']) ? ['Details' => $stat['detail']] : null);
                                     
                                     // Dynamic Icon Logic for Stats
                                     $label = strtolower($stat['label']);

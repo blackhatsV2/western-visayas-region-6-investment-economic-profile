@@ -615,6 +615,35 @@
                             this.modalTabs[index] = this.modalTabs[index + 1];
                             this.modalTabs[index + 1] = temp;
                         }
+                    },
+                    parseItemBlocks(item) {
+                        if (!item.modal_details) item.modal_details = {};
+                        if (!item.blocks) {
+                            item.blocks = [];
+                            if (Array.isArray(item.modal_details.blocks)) {
+                                item.blocks = JSON.parse(JSON.stringify(item.modal_details.blocks));
+                            } else if (item.modal_details['Map Points']) {
+                                item.blocks.push({ type: 'map', data: JSON.parse(JSON.stringify(item.modal_details['Map Points'])) });
+                            } else if (item.details) {
+                                // Default legacy text
+                                item.blocks.push({ type: 'text_card', data: { text: item.details } });
+                            }
+                        }
+                    },
+                    syncItemBlocks(item) {
+                        item.modal_details = { blocks: JSON.parse(JSON.stringify(item.blocks || [])) };
+                    },
+                    addItemBlock(item, type) {
+                        this.parseItemBlocks(item);
+                        let newBlock = { type: type, data: null };
+                        if (type === 'map') {
+                            newBlock.data = [{ label: 'New Point', lat: 10.7, lng: 122.5 }];
+                        } else if (type === 'border_card') {
+                            newBlock.data = { title: 'Card Title', items: [] };
+                        } else if (type === 'text_card') {
+                            newBlock.data = { text: '' };
+                        }
+                        item.blocks.push(newBlock);
                     }
                 }"
                 data-form="{{ json_encode($content->content) }}"
@@ -804,18 +833,59 @@
                             @if($content->type === 'stats_grid')
                                 <div class="space-y-4">
                                     <template x-for="(stat, index) in form.stats" :key="index">
-                                        <div class="flex gap-4 items-end bg-white/5 p-4 rounded-xl">
-                                            <div class="flex-1">
-                                                <label class="admin-label">Label</label>
-                                                <input type="text" x-model="stat.label" class="admin-input">
+                                         <div class="bg-white/5 p-4 rounded-xl space-y-4">
+                                            <div class="flex gap-4 items-end">
+                                                <div class="flex-1">
+                                                    <label class="admin-label">Label</label>
+                                                    <input type="text" x-model="stat.label" class="admin-input">
+                                                </div>
+                                                <div class="flex-1">
+                                                    <label class="admin-label">Value</label>
+                                                    <input type="text" x-model="stat.value" class="admin-input">
+                                                </div>
+                                                <button @click="form.stats.splice(index, 1)" class="p-2 text-red-500 hover:bg-red-500/10 rounded">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
                                             </div>
-                                            <div class="flex-1">
-                                                <label class="admin-label">Value</label>
-                                                <input type="text" x-model="stat.value" class="admin-input">
+ 
+                                            {{-- Stat-level Block Builder --}}
+                                            <div class="pt-4 border-t border-white/5" x-init="parseItemBlocks(stat)">
+                                                 <div class="flex items-center justify-between mb-3">
+                                                     <span class="text-[8px] font-black uppercase text-arbitra-emerald tracking-widest">Stat Popup Content</span>
+                                                     <button @click="stat.showEditor = !stat.showEditor" 
+                                                             class="text-[8px] font-black uppercase bg-white/5 border border-white/10 px-3 py-1 rounded-full hover:bg-arbitra-emerald hover:text-arbitra-black transition-all"
+                                                             x-text="stat.showEditor ? 'Hide Editor' : 'Edit Popup'"></button>
+                                                 </div>
+ 
+                                                 <div x-show="stat.showEditor" class="space-y-4 bg-black/40 p-4 rounded-xl border border-white/5">
+                                                     <div class="space-y-3">
+                                                         <template x-for="(block, bIdx) in stat.blocks" :key="bIdx">
+                                                             <div class="bg-black/40 border border-white/5 rounded-lg p-3 relative group/block">
+                                                                 <div class="flex justify-between items-center mb-2">
+                                                                     <span class="text-[7px] font-black uppercase text-arbitra-emerald" x-text="block.type"></span>
+                                                                     <button @click="stat.blocks.splice(bIdx, 1); syncItemBlocks(stat)" class="text-red-500/30">×</button>
+                                                                 </div>
+                                                                 <!-- Block Fields -->
+                                                                 <div x-show="block.type === 'map'" class="space-y-1">
+                                                                     <template x-for="pt in block.data"><div class="flex gap-1"><input type="text" x-model="pt.label" class="admin-input text-[8px] py-0.5 flex-1"><input type="number" step="0.0001" x-model.number="pt.lat" class="admin-input text-[8px] py-0.5 w-12"><input type="number" step="0.0001" x-model.number="pt.lng" class="admin-input text-[8px] py-0.5 w-12"></div></template>
+                                                                     <button @click="block.data.push({label: 'New Point', lat: 10.7, lng: 122.5}); syncItemBlocks(stat)" class="text-[7px] text-arbitra-gray hover:text-white">+ Add Pin</button>
+                                                                 </div>
+                                                                 <div x-show="block.type === 'border_card'" class="space-y-1">
+                                                                     <input type="text" x-model="block.data.title" class="admin-input text-[8px] py-0.5 w-full" @input="syncItemBlocks(stat)">
+                                                                 </div>
+                                                                 <div x-show="block.type === 'text_card'">
+                                                                     <textarea x-model="block.data.text" class="admin-input h-12 text-[8px]" @input="syncItemBlocks(stat)"></textarea>
+                                                                 </div>
+                                                             </div>
+                                                         </template>
+                                                     </div>
+                                                     <div class="flex gap-2">
+                                                         <button @click="addItemBlock(stat, 'map'); syncItemBlocks(stat)" class="flex-1 py-1 bg-white/5 text-[7px] font-black uppercase">+ MAP</button>
+                                                         <button @click="addItemBlock(stat, 'border_card'); syncItemBlocks(stat)" class="flex-1 py-1 bg-white/5 text-[7px] font-black uppercase">+ CARD</button>
+                                                         <button @click="addItemBlock(stat, 'text_card'); syncItemBlocks(stat)" class="flex-1 py-1 bg-white/5 text-[7px] font-black uppercase">+ TEXT</button>
+                                                     </div>
+                                                 </div>
                                             </div>
-                                            <button @click="form.stats.splice(index, 1)" class="p-2 text-red-500 hover:bg-red-500/10 rounded">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
                                         </div>
                                     </template>
                                     <button @click="form.stats.push({label: 'New Label', value: '0'})" class="w-full py-2 border-2 border-dashed border-white/10 rounded-xl text-arbitra-gray hover:border-arbitra-emerald hover:text-white transition-all font-bold text-xs uppercase">+ Add New Stat</button>
@@ -848,41 +918,66 @@
                                                 </button>
                                             </div>
 
-                                            {{-- Simplified Item-level Popup Editor --}}
-                                            <div class="pt-4 border-t border-white/5">
-                                                <div class="flex items-center justify-between mb-3">
-                                                    <span class="text-[8px] font-black uppercase text-arbitra-emerald tracking-widest">Item Pop-up Details</span>
-                                                    <button @click="if(!item.modal_details) item.modal_details = {}; item.showEditor = !item.showEditor" 
-                                                            class="text-[8px] font-black uppercase bg-white/5 border border-white/10 px-3 py-1 rounded-full hover:bg-arbitra-emerald hover:text-arbitra-black transition-all"
-                                                            x-text="item.showEditor ? 'Hide' : 'Edit Pop-up'"></button>
-                                                </div>
-
-                                                <div x-show="item.showEditor" class="space-y-4 bg-black/40 p-4 rounded-xl border border-white/5">
-                                                    <template x-if="item.modal_details && item.modal_details['Map Points']">
-                                                        <div class="space-y-3">
-                                                            <template x-for="(pt, ptIdx) in item.modal_details['Map Points']" :key="ptIdx">
-                                                                <div class="flex gap-2">
-                                                                    <input type="text" x-model="pt.label" placeholder="Label" class="admin-input text-[10px] flex-1">
-                                                                    <input type="number" step="0.0001" x-model.number="pt.lat" placeholder="Lat" class="admin-input text-[10px] w-24">
-                                                                    <input type="number" step="0.0001" x-model.number="pt.lng" placeholder="Lng" class="admin-input text-[10px] w-24">
-                                                                    <button @click="item.modal_details['Map Points'].splice(ptIdx, 1)" class="text-red-500">×</button>
-                                                                </div>
-                                                            </template>
-                                                            <button @click="item.modal_details['Map Points'].push({label: 'New Point', lat: 10.7, lng: 122.5})" class="w-full py-1.5 border border-dashed border-white/10 rounded text-[8px] uppercase font-black text-arbitra-gray hover:text-white">+ Add Map Point</button>
-                                                        </div>
-                                                    </template>
-
-                                                    <template x-if="!item.modal_details || !item.modal_details['Map Points']">
-                                                        <div class="py-2">
-                                                            <p class="text-[8px] text-arbitra-gray italic mb-4">No map points found for this item.</p>
-                                                            <div class="flex gap-3">
-                                                                <button @click="item.modal_details = {'Map Points': [{label: 'Center Point', lat: 10.7, lng: 122.5}]}" class="flex-1 py-2 bg-white/5 rounded-lg text-[8px] font-black hover:bg-arbitra-emerald/20 hover:text-arbitra-emerald transition-all border border-white/5">INIT INFRA MAP</button>
-                                                                <button @click="item.showEditor = false; techy = true" class="flex-1 py-2 bg-white/5 rounded-lg text-[8px] font-black hover:bg-white/10 transition-all border border-white/5 uppercase tracking-widest">Use Techy Mode</button>
-                                                            </div>
-                                                        </div>
-                                                    </template>
-                                                </div>
-                                            </div>
+                                            {{-- Enhanced Item-level Block Builder --}}
+                                             <div class="pt-4 border-t border-white/5" x-init="parseItemBlocks(item)">
+                                                 <div class="flex items-center justify-between mb-3">
+                                                     <div>
+                                                        <span class="text-[8px] font-black uppercase text-arbitra-emerald tracking-widest">Card Content Builder</span>
+                                                        <p class="text-[7px] text-arbitra-gray uppercase mt-0.5">Customize the popup/expand view for this card</p>
+                                                     </div>
+                                                     <button @click="item.showEditor = !item.showEditor" 
+                                                             class="text-[8px] font-black uppercase bg-white/5 border border-white/10 px-4 py-1.5 rounded-full hover:bg-arbitra-emerald hover:text-arbitra-black transition-all"
+                                                             x-text="item.showEditor ? 'Hide Editor' : 'Edit Blocks'"></button>
+                                                 </div>
+ 
+                                                 <div x-show="item.showEditor" class="space-y-4 bg-black/40 p-4 rounded-2xl border border-white/5">
+                                                     <div class="space-y-4">
+                                                         <template x-for="(block, bIdx) in item.blocks" :key="bIdx">
+                                                             <div class="bg-black/40 border border-white/5 rounded-xl p-4 relative group/block">
+                                                                 <div class="flex justify-between items-center mb-4">
+                                                                     <span class="px-2 py-0.5 bg-white/5 text-[7px] font-black uppercase text-arbitra-emerald rounded border border-white/10" x-text="block.type"></span>
+                                                                     <button @click="item.blocks.splice(bIdx, 1); syncItemBlocks(item)" class="text-red-500/30 hover:text-red-500">
+                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                                     </button>
+                                                                 </div>
+ 
+                                                                 <!-- Block Content -->
+                                                                 <div x-show="block.type === 'map'" class="space-y-2">
+                                                                     <template x-for="(pt, ptIdx) in block.data">
+                                                                         <div class="grid grid-cols-12 gap-2">
+                                                                             <input type="text" x-model="pt.label" class="col-span-6 admin-input text-[10px] py-1">
+                                                                             <input type="number" step="0.0001" x-model.number="pt.lat" class="col-span-3 admin-input text-[10px] py-1">
+                                                                             <input type="number" step="0.0001" x-model.number="pt.lng" class="col-span-3 admin-input text-[10px] py-1">
+                                                                         </div>
+                                                                     </template>
+                                                                     <button @click="block.data.push({label: 'New Point', lat: 10.7, lng: 122.5}); syncItemBlocks(item)" class="w-full py-1 border border-dashed border-white/10 text-[7px] font-black uppercase text-arbitra-gray hover:text-white">+ Add Point</button>
+                                                                 </div>
+                                                                 <div x-show="block.type === 'border_card'" class="space-y-2">
+                                                                     <input type="text" x-model="block.data.title" placeholder="Card Title" class="admin-input text-[10px] py-1 w-full" @input="syncItemBlocks(item)">
+                                                                     <div class="space-y-1">
+                                                                         <template x-for="(it, itIdx) in block.data.items">
+                                                                             <div class="flex gap-2 items-center">
+                                                                                 <input type="text" x-model="block.data.items[itIdx]" class="admin-input text-[10px] py-1 flex-1" @input="syncItemBlocks(item)">
+                                                                                 <button @click="block.data.items.splice(itIdx, 1); syncItemBlocks(item)" class="text-red-500">×</button>
+                                                                             </div>
+                                                                         </template>
+                                                                         <button @click="block.data.items.push(''); syncItemBlocks(item)" class="w-full py-1 border border-dashed border-white/10 text-[7px] font-black uppercase text-arbitra-gray hover:text-white">+ Add Point</button>
+                                                                     </div>
+                                                                 </div>
+                                                                 <div x-show="block.type === 'text_card'">
+                                                                     <textarea x-model="block.data.text" class="admin-input h-16 text-[10px] leading-relaxed w-full" @input="syncItemBlocks(item)"></textarea>
+                                                                 </div>
+                                                             </div>
+                                                         </template>
+                                                     </div>
+ 
+                                                     <div class="flex gap-2 pt-2 border-t border-white/5">
+                                                         <button @click="addItemBlock(item, 'map'); syncItemBlocks(item)" class="flex-1 py-1.5 bg-white/5 hover:bg-arbitra-emerald/10 text-[8px] font-black uppercase rounded border border-white/5 transition-all">+ MAP</button>
+                                                         <button @click="addItemBlock(item, 'border_card'); syncItemBlocks(item)" class="flex-1 py-1.5 bg-white/5 hover:bg-arbitra-emerald/10 text-[8px] font-black uppercase rounded border border-white/5 transition-all">+ CARD</button>
+                                                         <button @click="addItemBlock(item, 'text_card'); syncItemBlocks(item)" class="flex-1 py-1.5 bg-white/5 hover:bg-arbitra-emerald/10 text-[8px] font-black uppercase rounded border border-white/5 transition-all">+ TEXT</button>
+                                                     </div>
+                                                 </div>
+                                             </div>                 </div>
                                         </div>
                                     </template>
                                     <button @click="form.items.push({name: 'New Item', details: 'Description...', modal_details: {}})" class="w-full py-2 border-2 border-dashed border-white/10 rounded-xl text-arbitra-gray hover:border-arbitra-emerald hover:text-white transition-all font-bold text-xs uppercase">+ Add New Item</button>
