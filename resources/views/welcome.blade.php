@@ -1793,124 +1793,131 @@
         
         <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="modalOpen = false"></div>
         
-        <div class="relative bg-arbitra-dark max-w-2xl w-full p-6 md:p-16 rounded-t-[2rem] md:rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden max-h-[90vh] md:max-h-auto"
+        <div class="relative bg-arbitra-dark max-w-2xl w-full rounded-t-[2rem] md:rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden max-h-[85vh] flex flex-col"
              x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
              x-transition:enter-end="scale-100 opacity-100"
              x-transition:leave="transition ease-in duration-300 transform scale-95 opacity-0">
             
-            <button @click="modalOpen = false" class="absolute top-5 right-5 md:top-10 md:right-10 text-arbitra-gray hover:text-white transition-all transform hover:rotate-90 z-20">
-                <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+            <!-- Fixed Header -->
+            <div class="shrink-0 p-6 pb-0 md:p-16 md:pb-0">
+                <button @click="modalOpen = false" class="absolute top-5 right-5 md:top-10 md:right-10 text-arbitra-gray hover:text-white transition-all transform hover:rotate-90 z-20">
+                    <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
 
-            <h3 class="text-xl md:text-3xl font-extrabold text-white tracking-tighter mb-6 md:mb-12 uppercase italic pr-8" x-text="modalTitle"></h3>
+                <h3 class="text-xl md:text-3xl font-extrabold text-white tracking-tighter mb-6 md:mb-12 uppercase italic pr-8" x-text="modalTitle"></h3>
+            </div>
             
-            <div class="space-y-10 max-h-[75vh] overflow-y-auto pr-6 custom-scrollbar">
-                <template x-if="Array.isArray(modalContent)">
-                    <template x-for="(block, index) in modalContent" :key="index">
-                        <div class="space-y-4">
-                            <!-- Map Block rendering -->
-                            <template x-if="block.type === 'map'">
-                                <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8" x-init="$nextTick(() => { if(window.renderModalMap) window.renderModalMap('leaflet-map-' + index, block.data) })">
-                                    <div :id="'leaflet-map-' + index" class="w-full h-full bg-arbitra-dark"></div>
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto px-6 md:px-16 custom-scrollbar">
+                <div class="space-y-10 pb-4">
+                    <template x-if="Array.isArray(modalContent)">
+                        <template x-for="(block, index) in modalContent" :key="index">
+                            <div class="space-y-4">
+                                <!-- Map Block rendering -->
+                                <template x-if="block.type === 'map'">
+                                    <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8" x-init="$nextTick(() => { if(window.renderModalMap) window.renderModalMap('leaflet-map-' + index, block.data) })">
+                                        <div :id="'leaflet-map-' + index" class="w-full h-full bg-arbitra-dark"></div>
+                                    </div>
+                                </template>
+
+                                <!-- Border Card Block rendering -->
+                                <template x-if="block.type === 'border_card'">
+                                    <div class="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-arbitra-emerald/30 transition-all group">
+                                        <!-- Title -->
+                                        <template x-if="block.data.title">
+                                            <h4 class="text-sm font-black uppercase tracking-[0.2em] text-arbitra-emerald mb-6 pb-4 border-b border-white/5" x-text="block.data.title"></h4>
+                                        </template>
+                                        
+                                        <!-- Bullet Points -->
+                                        <template x-if="block.data.items && block.data.items.length > 0">
+                                            <div class="space-y-4">
+                                                <template x-for="(item, itemIdx) in block.data.items" :key="itemIdx">
+                                                    <div class="flex items-start gap-4">
+                                                        <div class="mt-2 w-1.5 h-1.5 rounded-full bg-arbitra-emerald/50 shrink-0 group-hover:bg-arbitra-emerald transition-colors"></div>
+                                                        <p class="text-base font-medium text-white/80 leading-relaxed" x-text="item"></p>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                                
+                                <!-- Text Card Block rendering -->
+                                <template x-if="block.type === 'text_card'">
+                                    <div class="prose prose-invert prose-emerald max-w-none">
+                                        <p class="text-lg text-white/80 font-medium leading-relaxed whitespace-pre-line" x-html="block.data.text"></p>
+                                    </div>
+                                </template>
+
+                                <!-- Fallback for legacy blocks that weren't migrated properly (optional, safety net) -->
+                                <template x-if="!block.type && typeof block === 'object'">
+                                    <div class="bg-red-500/10 border border-red-500/20 p-4 rounded-xl">
+                                        <span class="text-xs font-bold text-red-500 uppercase tracking-widest block mb-2">Notice:</span>
+                                        <p class="text-sm text-red-500/80">This section is using a legacy data structure. Please edit and re-save it in the dashboard to migrate it to the new block format.</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+
+                    <!-- Legacy Fallback for dictionaries -->
+                    <template x-if="!Array.isArray(modalContent)">
+                         <div class="space-y-12">
+                            <div class="bg-arbitra-emerald/10 border border-arbitra-emerald/20 p-6 rounded-2xl">
+                                 <h4 class="text-sm font-black text-arbitra-emerald uppercase tracking-widest mb-2">Legacy Content Mode</h4>
+                                 <p class="text-sm text-white/70">This popup is still using the legacy format. Edit it in the dashboard to convert it to the new block system.</p>
+                            </div>
+                            
+                            <!-- Leaflet Map Container (Fixed Position) -->
+                            <template x-if="modalContent['Map Points']">
+                                <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8">
+                                    <div id="leaflet-map" class="w-full h-full bg-arbitra-dark"></div>
                                 </div>
                             </template>
 
-                            <!-- Border Card Block rendering -->
-                            <template x-if="block.type === 'border_card'">
-                                <div class="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-arbitra-emerald/30 transition-all group">
-                                    <!-- Title -->
-                                    <template x-if="block.data.title">
-                                        <h4 class="text-sm font-black uppercase tracking-[0.2em] text-arbitra-emerald mb-6 pb-4 border-b border-white/5" x-text="block.data.title"></h4>
+                            <template x-for="(value, key) in modalContent" :key="key">
+                                <div class="space-y-6">
+                                    <!-- Hide Map Points Key in Loop -->
+                                    <template x-if="key !== 'Map Points'">
+                                        <h4 class="text-sm font-bold uppercase tracking-[0.3em] text-arbitra-emerald sticky top-0 bg-arbitra-dark z-10 py-2" x-text="key"></h4>
                                     </template>
                                     
-                                    <!-- Bullet Points -->
-                                    <template x-if="block.data.items && block.data.items.length > 0">
-                                        <div class="space-y-4">
-                                            <template x-for="(item, itemIdx) in block.data.items" :key="itemIdx">
-                                                <div class="flex items-start gap-4">
-                                                    <div class="mt-2 w-1.5 h-1.5 rounded-full bg-arbitra-emerald/50 shrink-0 group-hover:bg-arbitra-emerald transition-colors"></div>
-                                                    <p class="text-base font-medium text-white/80 leading-relaxed" x-text="item"></p>
+                                    <!-- Grid for 'Points' (Why Invest) -->
+                                    <template x-if="key === 'Points' && Array.isArray(value)">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <template x-for="item in value">
+                                                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-arbitra-emerald/50 hover:bg-white/10 transition-all group flex items-center justify-center text-center">
+                                                    <span class="text-lg font-bold text-white group-hover:text-arbitra-emerald transition-colors" x-text="item"></span>
                                                 </div>
                                             </template>
                                         </div>
                                     </template>
-                                </div>
-                            </template>
-                            
-                            <!-- Text Card Block rendering -->
-                            <template x-if="block.type === 'text_card'">
-                                <div class="prose prose-invert prose-emerald max-w-none">
-                                    <p class="text-lg text-white/80 font-medium leading-relaxed whitespace-pre-line" x-html="block.data.text"></p>
-                                </div>
-                            </template>
 
-                            <!-- Fallback for legacy blocks that weren't migrated properly (optional, safety net) -->
-                            <template x-if="!block.type && typeof block === 'object'">
-                                <div class="bg-red-500/10 border border-red-500/20 p-4 rounded-xl">
-                                    <span class="text-xs font-bold text-red-500 uppercase tracking-widest block mb-2">Notice:</span>
-                                    <p class="text-sm text-red-500/80">This section is using a legacy data structure. Please edit and re-save it in the dashboard to migrate it to the new block format.</p>
+                                    <!-- Standard Key-Value List (Stats) -->
+                                    <template x-if="key !== 'Points' && key !== 'Map Points' && typeof value === 'object'">
+                                        <div class="grid grid-cols-1 gap-4">
+                                            <template x-for="(v, k) in value" :key="k">
+                                                <div class="flex items-center justify-between p-6 rounded-2xl bg-black/40 border border-white/5">
+                                                    <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest" x-text="k"></span>
+                                                    <span class="text-lg font-bold text-white" x-text="v"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Fallback Text -->
+                                    <template x-if="typeof value !== 'object' && key !== 'Map Points'">
+                                        <p class="text-lg text-white/80 font-medium leading-relaxed" x-text="value"></p>
+                                    </template>
                                 </div>
                             </template>
                         </div>
                     </template>
-                </template>
-
-                <!-- Legacy Fallback for dictionaries -->
-                <template x-if="!Array.isArray(modalContent)">
-                     <div class="space-y-12">
-                        <div class="bg-arbitra-emerald/10 border border-arbitra-emerald/20 p-6 rounded-2xl">
-                             <h4 class="text-sm font-black text-arbitra-emerald uppercase tracking-widest mb-2">Legacy Content Mode</h4>
-                             <p class="text-sm text-white/70">This popup is still using the legacy format. Edit it in the dashboard to convert it to the new block system.</p>
-                        </div>
-                        
-                        <!-- Leaflet Map Container (Fixed Position) -->
-                        <template x-if="modalContent['Map Points']">
-                            <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8">
-                                <div id="leaflet-map" class="w-full h-full bg-arbitra-dark"></div>
-                            </div>
-                        </template>
-
-                        <template x-for="(value, key) in modalContent" :key="key">
-                            <div class="space-y-6">
-                                <!-- Hide Map Points Key in Loop -->
-                                <template x-if="key !== 'Map Points'">
-                                    <h4 class="text-sm font-bold uppercase tracking-[0.3em] text-arbitra-emerald sticky top-0 bg-arbitra-dark z-10 py-2" x-text="key"></h4>
-                                </template>
-                                
-                                <!-- Grid for 'Points' (Why Invest) -->
-                                <template x-if="key === 'Points' && Array.isArray(value)">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <template x-for="item in value">
-                                            <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-arbitra-emerald/50 hover:bg-white/10 transition-all group flex items-center justify-center text-center">
-                                                <span class="text-lg font-bold text-white group-hover:text-arbitra-emerald transition-colors" x-text="item"></span>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
-
-                                <!-- Standard Key-Value List (Stats) -->
-                                <template x-if="key !== 'Points' && key !== 'Map Points' && typeof value === 'object'">
-                                    <div class="grid grid-cols-1 gap-4">
-                                        <template x-for="(v, k) in value" :key="k">
-                                            <div class="flex items-center justify-between p-6 rounded-2xl bg-black/40 border border-white/5">
-                                                <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest" x-text="k"></span>
-                                                <span class="text-lg font-bold text-white" x-text="v"></span>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
-                                
-                                <!-- Fallback Text -->
-                                <template x-if="typeof value !== 'object' && key !== 'Map Points'">
-                                    <p class="text-lg text-white/80 font-medium leading-relaxed" x-text="value"></p>
-                                </template>
-                            </div>
-                        </template>
-                    </div>
-                </template>
+                </div>
             </div>
             
-            <div class="mt-12 pt-8 border-t border-white/5 flex justify-end">
+            <!-- Fixed Footer -->
+            <div class="shrink-0 p-6 md:px-16 md:py-8 border-t border-white/5 flex justify-end bg-arbitra-dark">
                 <button @click="modalOpen = false" class="bg-arbitra-emerald text-arbitra-black font-extrabold px-10 py-3 rounded-full hover:brightness-110 transition uppercase text-sm tracking-widest">
                     GO BACK
                 </button>
