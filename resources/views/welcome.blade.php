@@ -688,7 +688,7 @@
                     this.$watch('termsOpen', () => this.updateScrollLock());
                 },
                 updateScrollLock() {
-                    if (this.modalOpen || this.contactOpen || this.policyOpen || this.termsOpen) {
+                    if (this.modalOpen || this.contactOpen || this.policyOpen || this.termsOpen || this.searchOpen) {
                         document.body.classList.add('overflow-hidden');
                     } else {
                         document.body.classList.remove('overflow-hidden');
@@ -1804,7 +1804,7 @@
 
             <h3 class="text-xl md:text-3xl font-extrabold text-white tracking-tighter mb-6 md:mb-12 uppercase italic pr-8" x-text="modalTitle"></h3>
             
-            <div class="space-y-10 max-h-[60vh] overflow-y-auto pr-6 custom-scrollbar">
+            <div class="space-y-10 max-h-[75vh] overflow-y-auto pr-6 custom-scrollbar">
                 <template x-if="Array.isArray(modalContent)">
                     <template x-for="(block, index) in modalContent" :key="index">
                         <div class="space-y-4">
