@@ -109,10 +109,10 @@
             @if(isset($content) && (isset($content->content['description']) || isset($content->content['notable_info'])))
                 <div class="c-desc">
                     @if(isset($content->content['description']))
-                        <p style="margin: 0 0 5px 0;">{{ $content->content['description'] }}</p>
+                        <p style="margin: 0 0 5px 0;">{{ is_array($content->content['description']) ? json_encode($content->content['description']) : $content->content['description'] }}</p>
                     @endif
                     @if(isset($content->content['notable_info']))
-                        <p style="margin: 0; color: #059669; font-weight: bold;">NOTE: {{ $content->content['notable_info'] }}</p>
+                        <p style="margin: 0; color: #059669; font-weight: bold;">NOTE: {{ is_array($content->content['notable_info']) ? json_encode($content->content['notable_info']) : $content->content['notable_info'] }}</p>
                     @endif
                 </div>
             @endif
@@ -148,7 +148,7 @@
                         @foreach($content->content['items'] ?? [] as $item)
                             <tr>
                                 <td class="matrix-name">{{ $item['name'] }}</td>
-                                <td class="matrix-details">{{ $item['details'] }}</td>
+                                <td class="matrix-details">{{ is_array($item['details']) ? json_encode($item['details']) : $item['details'] }}</td>
                                 <td>
                                     @if(isset($item['modal_details']))
                                         <ul class="sub-list">
@@ -161,7 +161,7 @@
                                                     <strong>{{ $mKey }}:</strong>
                                                     <ul style="margin: 2px 0 0 10px; list-style-type: circle;">
                                                         @foreach($mVal as $subK => $subV)
-                                                            <li>{{ $subK }}: {{ $subV }}</li>
+                                                            <li>{{ $subK }}: {{ is_array($subV) ? json_encode($subV) : $subV }}</li>
                                                         @endforeach
                                                     </ul>
                                                 @elseif(is_array($mVal))
@@ -251,7 +251,7 @@
                 
                 @if(isset($content->content['modal_text']))
                     <div style="font-size: 10px; color: #0f172a; font-weight: 800; margin-top: 12px; padding: 10px; background: #f8fafc; border-radius: 6px; border: 1px solid #f1f5f9;">
-                        EXECUTIVE SUMMARY: <span style="font-weight: 500; color: #475569;">{{ $content->content['modal_text'] }}</span>
+                        EXECUTIVE SUMMARY: <span style="font-weight: 500; color: #475569;">{{ is_array($content->content['modal_text']) ? json_encode($content->content['modal_text']) : $content->content['modal_text'] }}</span>
                     </div>
                 @endif
             @endif
@@ -260,7 +260,7 @@
                 <div style="background: #fff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
                     <ul class="sub-list">
                         @foreach($content->content['items'] ?? [] as $listItem)
-                            <li>{{ $listItem }}</li>
+                            <li>{{ is_array($listItem) ? json_encode($listItem) : $listItem }}</li>
                         @endforeach
                     </ul>
                 </div>
