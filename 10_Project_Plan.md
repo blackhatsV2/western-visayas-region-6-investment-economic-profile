@@ -1,33 +1,52 @@
-# Executive Roadmap: Western Visayas Investment & Economic Profile
-*Project Guide for Presentation*
+# Comprehensive Project Master Plan: Western Visayas Investment Profile
 
-## 1. Executive Summary
-The **Western Visayas Region 6 Investment & Economic Profile** is a digital transformation project that replaces traditional printed economic reports with an interactive, data-driven platform. Its primary goal is to **attract and convert investors** by providing real-time economic data in a premium, accessible format.
+## 1. Project Introduction & Goal
+The **Western Visayas Region 6 Investment & Economic Profile** is a premium digital platform designed to modernize how regional economic data is presented to the world. It replaces static printed books with an interactive, real-time web experience, aiming to attract domestic and foreign investors through data transparency and visual excellence.
 
-## 2. Current Project Status: "V1 Launch Ready"
-The system is currently fully functional and ready for initial deployment. 
-- **Built:** Secure admin portal and dynamic frontend views.
-- **Enabled:** Real-time data visualization (Charts/Stats).
-- **Automated:** Professional PDF export for offline distribution.
-- **Verified:** Security-tested (VAPT) and documented.
+## 2. Core Features & Capabilities
+- **Dynamic Content Dashboard:** Interactive visual widgets (Charts, Graphs, Statistical Grids) that adapt to data updates.
+- **Automated PDF Export:** Converts live web statistics into a professionally formatted offline document in seconds.
+- **Investor Inquiry System:** A direct communication pipeline for lead generation and inter-agency follow-ups.
+- **Administrative CMS:** A secure backend allowing non-technical staff to manage complex economic data via JSON structures.
 
-## 3. Key Value Propositions (The "Why")
-- **Instant Updates:** No need to reprint books; update data in seconds via the CMS.
-- **Premium Experience:** Interactive charts and maps build trust with high-value investors.
-- **Lead Generation:** Integrated inquiry system captures investor interest immediately.
-- **Accessibility:** Available 24/7 globally, minimizing barriers to entry.
+## 3. The Process Workflow
+### For Administrators:
+1. **Manage Content:** Update statistical data, section titles, and layout types (Hero, Table, Chart).
+2. **Review Inquiries:** Track and respond to investor interest directly from the portal.
+### For Investors/Users:
+1. **Explore Data:** Navigate through regional economic indicators in an engaging format.
+2. **Download Report:** Generate a current PDF version of the profile for offline analysis.
 
-## 4. Short-Term Roadmap (Next 30-60 Days)
-> [!IMPORTANT]
-> These are the immediate items for focus following the presentation.
+## 4. Technical Architecture
+The system follows the **MVC (Model-View-Controller)** pattern for scalability and security.
+- **Backend:** Laravel 12 (PHP) handling logic and security.
+- **Frontend:** Tailwind CSS & Alpine.js for a premium, responsive UI.
+- **Data Tier:** MySQL database storing structured `ProjectContent` and `Inquiry` logs.
+- **Deployment:** Containerized via Docker for consistent environments across development and production.
 
-1. **Mobile Experience Optimization:** Ensuring the full interactive experience works flawlessly on tablets and smartphones.
-2. **Advanced Search Integration:** Implementing "Power Search" to allow investors to find specific terms across all content and modals.
-3. **Data Refresh:** Finalizing the 2024-2025 economic indicators within the system.
+## 5. Security & Reliability
+A **Vulnerability Assessment and Penetration Testing (VAPT)** review confirms the application adheres to OWASP standards:
+- **Injection Protection:** Secured via Eloquent ORM.
+- **XSS/CSRF Defenses:** Built-in Laravel safeguards.
+- **Authentication:** Robust session management and encrypted credential storage.
 
-## 5. Long-Term Vision (Future Growth)
-- **Multi-Language Support:** Adding dialects or foreign languages to attract international markets.
-- **Inter-Agency Data Sync:** Potential integration with other regional government databases for automatic statistics updates.
+## 6. Development Roadmap
+- **Phase 1 (Current):** Searchability (Power Search) and Mobile Optimization.
+- **Phase 2 (Upcoming):** Multi-language support and provincial-specific map integrations.
+- **Phase 3 (Vision):** Automated inter-agency data synchronization.
 
-## 6. Closing Statement
-This project positions Western Visayas as a leader in digital government services, directly contributing to the region's economic growth by modernizing investor relations.
+## 7. Resource Catalog (Supporting Documents)
+For deeper technical details, refer to the following specialized documents:
+1. [Project Overview](1_Project_Overview.md)
+2. [Process Workflow](2_Process_Workflow.md)
+3. [Functional Requirements](3_Functional_Requirements.md)
+4. [System Architecture](4_System_Architecture.md)
+5. [Database Documentation](5_Database_Documentation.md)
+6. [Deployment Guide](6_Deployment_Guide.md)
+7. [User Manual](7_User_Manual.md)
+8. [VAPT Report](8_VAPT_Report.md)
+9. [Presentation Deck](9_Presentation.md)
+10. [Master Project Plan](10_Project_Plan.md)
+
+---
+*Generated for: Western Visayas Region 6 Presentation Guide*
