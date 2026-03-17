@@ -92,6 +92,31 @@
     </style>
 </head>
 <body>
+    @php
+        /**
+         * Recursively flatten any nested array value into a human-readable string.
+         * - Associative arrays become "key: value, key: value"
+         * - Sequential arrays become "item1, item2, item3"
+         * - Deeply nested arrays are handled recursively
+         */
+        $flatten = function($value) use (&$flatten) {
+            if (!is_array($value)) {
+                return (string) $value;
+            }
+            $isAssoc = array_keys($value) !== range(0, count($value) - 1);
+            $parts = [];
+            foreach ($value as $k => $v) {
+                $flat = $flatten($v);
+                if ($isAssoc && !is_numeric($k)) {
+                    $parts[] = "$k: $flat";
+                } else {
+                    $parts[] = $flat;
+                }
+            }
+            return implode(', ', $parts);
+        };
+    @endphp
+
     <div class="header">
         <h1>Western Visayas Regional Economic Profile</h1>
         <p>{{ $year }} EXECUTIVE REPORT</p>
@@ -109,10 +134,10 @@
             @if(isset($content) && (isset($content->content['description']) || isset($content->content['notable_info'])))
                 <div class="c-desc">
                     @if(isset($content->content['description']))
-                        <p style="margin: 0 0 5px 0;">{{ is_array($content->content['description']) ? json_encode($content->content['description']) : $content->content['description'] }}</p>
+                        <p style="margin: 0 0 5px 0;">{{ $flatten($content->content['description']) }}</p>
                     @endif
                     @if(isset($content->content['notable_info']))
-                        <p style="margin: 0; color: #059669; font-weight: bold;">NOTE: {{ is_array($content->content['notable_info']) ? json_encode($content->content['notable_info']) : $content->content['notable_info'] }}</p>
+                        <p style="margin: 0; color: #059669; font-weight: bold;">NOTE: {{ $flatten($content->content['notable_info']) }}</p>
                     @endif
                 </div>
             @endif
@@ -125,8 +150,8 @@
                         @foreach(collect($stats)->chunk(2) as $row)
                             <tr>
                                 @foreach($row as $stat)
-                                    <th>{{ $stat['label'] }}</th>
-                                    <td>{{ $stat['value'] }}</td>
+                                    <th>{{ $flatten($stat['label'] ?? '') }}</th>
+                                    <td>{{ $flatten($stat['value'] ?? '') }}</td>
                                 @endforeach
                                 @if($row->count() == 1) <th></th><td></td> @endif
                             </tr>
@@ -147,25 +172,25 @@
                     <tbody>
                         @foreach($content->content['items'] ?? [] as $item)
                             <tr>
-                                <td class="matrix-name">{{ $item['name'] }}</td>
-                                <td class="matrix-details">{{ is_array($item['details']) ? json_encode($item['details']) : $item['details'] }}</td>
+                                <td class="matrix-name">{{ $flatten($item['name'] ?? '') }}</td>
+                                <td class="matrix-details">{{ $flatten($item['details'] ?? '') }}</td>
                                 <td>
                                     @if(isset($item['modal_details']))
                                         <ul class="sub-list">
                                         @foreach($item['modal_details'] as $mKey => $mVal)
                                             <li>
-                                                @if($mKey === 'Map Points')
+                                                @if($mKey === 'Map Points' && is_array($mVal))
                                                     <strong>Locations:</strong> 
-                                                    {{ implode(', ', array_map(fn($p) => $p['label'], $mVal)) }}
-                                                @elseif(is_array($mVal) && array_keys($mVal) !== range(0, count($mVal) - 1))
+                                                    {{ implode(', ', array_map(fn($p) => is_array($p) ? ($p['label'] ?? $flatten($p)) : $p, $mVal)) }}
+                                                @elseif(is_array($mVal) && !empty($mVal) && array_keys($mVal) !== range(0, count($mVal) - 1))
                                                     <strong>{{ $mKey }}:</strong>
                                                     <ul style="margin: 2px 0 0 10px; list-style-type: circle;">
                                                         @foreach($mVal as $subK => $subV)
-                                                            <li>{{ $subK }}: {{ is_array($subV) ? json_encode($subV) : $subV }}</li>
+                                                            <li>{{ $subK }}: {{ $flatten($subV) }}</li>
                                                         @endforeach
                                                     </ul>
                                                 @elseif(is_array($mVal))
-                                                    <strong>{{ $mKey }}:</strong> {{ implode(', ', $mVal) }}
+                                                    <strong>{{ $mKey }}:</strong> {{ implode(', ', array_map($flatten, $mVal)) }}
                                                 @else
                                                     <strong>{{ $mKey }}:</strong> {{ $mVal }}
                                                 @endif
@@ -190,7 +215,7 @@
                 @endphp
 
                 <div style="margin-bottom: 10px; font-weight: bold; font-size: 11px; text-transform: uppercase; color: #334155;">
-                    {{ $content->content['title'] ?? 'Data Analysis' }}
+                    {{ $flatten($content->content['title'] ?? 'Data Analysis') }}
                 </div>
 
                 @if(!$isMultiSeries && count($series) > 0)
@@ -214,7 +239,7 @@
                                     $width = min(abs($val) / $max * 100, 100);
                                 @endphp
                                 <tr>
-                                    <td>{{ $cat }}</td>
+                                    <td>{{ $flatten($cat) }}</td>
                                     <td>
                                         <div style="display: flex; align-items: center;">
                                             <div class="bar-container" style="width: 80%;">
@@ -233,13 +258,13 @@
                         <thead>
                             <tr>
                                 <th>Category / Year</th>
-                                @foreach($series as $s) <th>{{ $s['name'] }}</th> @endforeach
+                                @foreach($series as $s) <th>{{ $flatten($s['name'] ?? '') }}</th> @endforeach
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($categories as $index => $cat)
                                 <tr>
-                                    <td>{{ $cat }}</td>
+                                    <td>{{ $flatten($cat) }}</td>
                                     @foreach($series as $s) 
                                         <td>{{ number_format($s['data'][$index] ?? 0) }}</td> 
                                     @endforeach
@@ -251,7 +276,7 @@
                 
                 @if(isset($content->content['modal_text']))
                     <div style="font-size: 10px; color: #0f172a; font-weight: 800; margin-top: 12px; padding: 10px; background: #f8fafc; border-radius: 6px; border: 1px solid #f1f5f9;">
-                        EXECUTIVE SUMMARY: <span style="font-weight: 500; color: #475569;">{{ is_array($content->content['modal_text']) ? json_encode($content->content['modal_text']) : $content->content['modal_text'] }}</span>
+                        EXECUTIVE SUMMARY: <span style="font-weight: 500; color: #475569;">{{ $flatten($content->content['modal_text']) }}</span>
                     </div>
                 @endif
             @endif
@@ -260,7 +285,7 @@
                 <div style="background: #fff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
                     <ul class="sub-list">
                         @foreach($content->content['items'] ?? [] as $listItem)
-                            <li>{{ is_array($listItem) ? json_encode($listItem) : $listItem }}</li>
+                            <li>{{ $flatten($listItem) }}</li>
                         @endforeach
                     </ul>
                 </div>
@@ -279,7 +304,7 @@
                                 @foreach($mVal as $subK => $subV)
                                     <li>
                                         {{ is_numeric($subK) ? '' : "$subK: " }}
-                                        {{ is_array($subV) ? json_encode($subV) : $subV }}
+                                        {{ $flatten($subV) }}
                                     </li>
                                 @endforeach
                                 </ul>
