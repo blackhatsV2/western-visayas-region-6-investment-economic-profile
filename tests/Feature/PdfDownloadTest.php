@@ -8,6 +8,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class PdfDownloadTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * Test PDF download success for a valid year.
      */

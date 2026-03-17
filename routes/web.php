@@ -11,15 +11,13 @@ Route::middleware(['throttle:global'])->group(function () {
     Route::post('/contact', [PublicController::class, 'submitContactForm'])->middleware('throttle:contact');
 });
 
+// PDF Download Route - Moved out of throttle group to prevent issues
 Route::get('/download-profile/{year}', [PublicController::class, 'downloadPdf']);
 
-
-// Temporary route for visual verification
+// Debug Routes
+Route::get('/debug-db', [PublicController::class, 'debugDb']);
 Route::get('/test-pdf-view/{year}', function ($year) {
-    $contents = App\Models\ProjectContent::where('year_range', $year)->get();
-    if ($contents->isEmpty()) {
-        return "No profile data found for this year.";
-    }
+    $contents = \App\Models\ProjectContent::where('year_range', trim($year))->orderBy('page_number')->get();
     return view('pdf.profile', [
         'contents' => $contents,
         'year' => $year

@@ -59,27 +59,59 @@ class PublicController extends Controller
 
     public function downloadPdf($year)
     {
-        Log::info("Starting PDF download for year: {$year}");
+        $year = trim($year);
+        $totalRecords = ProjectContent::count();
+        Log::info("Starting PDF download for year: [{$year}]. Total records in DB: {$totalRecords}");
+        
+        // Increase limits for PDF generation
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
 
         try {
-            $contents = ProjectContent::where('year_range', $year)->get();
+            $contents = ProjectContent::where('year_range', $year)->orderBy('page_number')->get();
             if ($contents->isEmpty()) {
-                Log::warning("No profile data found for year: {$year}");
-                abort(404, "No profile data found for this year.");
+                Log::warning("No profile data found for year: [{$year}]");
+                return response()->json([
+                    'error' => 'No profile data found for this year.',
+                    'year' => $year
+                ], 404);
             }
+
+            Log::info("Found " . $contents->count() . " records for year: [{$year}]. Starting rendering...");
 
             $pdf = Pdf::loadView('pdf.profile', [
                 'contents' => $contents,
                 'year' => $year
             ]);
 
-            Log::info("PDF generated successfully for year: {$year}");
+            // Optional: set paper and orientation
+            $pdf->setPaper('a4', 'portrait');
+
+            Log::info("PDF rendered in-memory. Attempting download...");
             return $pdf->download("Western_Visayas_Investment_Profile_{$year}.pdf");
-        } catch (\Exception $e) {
-            Log::error("PDF generation failed for year: {$year}. Error: " . $e->getMessage(), [
-                'exception' => $e
+        } catch (\Throwable $e) {
+            Log::error("FATAL ERROR during PDF generation for year: [{$year}]", [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ]);
-            return response()->json(['error' => 'Failed to generate PDF. Please try again later.'], 500);
+            
+            return response()->json([
+                'error' => 'Failed to generate PDF. This might be due to a memory limit or complex content.',
+                'details' => $e->getMessage()
+            ], 500);
         }
     }
+
+    public function debugDb()
+    {
+        $count = ProjectContent::count();
+        $years = ProjectContent::distinct()->pluck('year_range')->toArray();
+        return response()->json([
+            'total_count' => $count,
+            'distinct_years' => $years,
+            'first_row' => ProjectContent::first()
+        ]);
+    }
+
 }
