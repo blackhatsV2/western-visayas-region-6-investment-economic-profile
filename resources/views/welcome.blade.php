@@ -1069,7 +1069,7 @@
                 <div class="hidden md:flex items-center gap-3">
                     <!-- PDF Shortcut -->
                     <div class="relative group">
-                        <a href="/download-profile/{{ $selectedYear }}" 
+                        <a href="/download-profile/{{ urlencode($selectedYear) }}" 
                            class="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-arbitra-gray hover:text-arbitra-emerald hover:border-arbitra-emerald/50 transition-all"
                            title="Download Profile PDF">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1614,7 +1614,7 @@
                         <button @click="contactOpen = true; contactSuccess = false" class="w-full sm:w-auto bg-arbitra-emerald text-arbitra-black px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-sm md:text-lg uppercase tracking-widest hover:scale-105 transition shadow-[0_0_50px_rgba(16,185,129,0.3)]">
                             Contact DTI Region 6
                         </button>
-                        <a href="/download-profile/{{ $selectedYear }}" class="w-full sm:w-auto text-center bg-white/5 text-white border border-white/10 px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-sm md:text-lg uppercase tracking-widest hover:bg-white/10 transition inline-block">
+                        <a href="/download-profile/{{ urlencode($selectedYear) }}" class="w-full sm:w-auto text-center bg-white/5 text-white border border-white/10 px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-sm md:text-lg uppercase tracking-widest hover:bg-white/10 transition inline-block">
                             Download Profile PDF
                         </a>
                     </div>
@@ -1649,7 +1649,7 @@
                         <li><a href="#hero" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Why Invest</a></li>
                         <li><a href="#economy" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Economic Stats</a></li>
                         <li><a href="#drivers" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Key Drivers</a></li>
-                        <li><a href="/download-profile/{{ $selectedYear }}" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Download Profile</a></li>
+                        <li><a href="/download-profile/{{ urlencode($selectedYear) }}" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Download Profile</a></li>
                     </ul>
                 </div>
 
@@ -2139,7 +2139,7 @@
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             <span>Drivers</span>
         </a>
-        <a href="/download-profile/{{ $selectedYear }}">
+        <a href="/download-profile/{{ urlencode($selectedYear) }}">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             <span>PDF</span>
         </a>
