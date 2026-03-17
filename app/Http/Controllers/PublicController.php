@@ -8,6 +8,7 @@ use App\Models\ProjectContent;
 use App\Models\Inquiry;
 use App\Services\RecaptchaService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 
 class PublicController extends Controller
 {
@@ -58,16 +59,27 @@ class PublicController extends Controller
 
     public function downloadPdf($year)
     {
-        $contents = ProjectContent::where('year_range', $year)->get();
-        if ($contents->isEmpty()) {
-            abort(404, "No profile data found for this year.");
+        Log::info("Starting PDF download for year: {$year}");
+
+        try {
+            $contents = ProjectContent::where('year_range', $year)->get();
+            if ($contents->isEmpty()) {
+                Log::warning("No profile data found for year: {$year}");
+                abort(404, "No profile data found for this year.");
+            }
+
+            $pdf = Pdf::loadView('pdf.profile', [
+                'contents' => $contents,
+                'year' => $year
+            ]);
+
+            Log::info("PDF generated successfully for year: {$year}");
+            return $pdf->download("Western_Visayas_Investment_Profile_{$year}.pdf");
+        } catch (\Exception $e) {
+            Log::error("PDF generation failed for year: {$year}. Error: " . $e->getMessage(), [
+                'exception' => $e
+            ]);
+            return response()->json(['error' => 'Failed to generate PDF. Please try again later.'], 500);
         }
-
-        $pdf = Pdf::loadView('pdf.profile', [
-            'contents' => $contents,
-            'year' => $year
-        ]);
-
-        return $pdf->download("Western_Visayas_Investment_Profile_{$year}.pdf");
     }
 }
