@@ -15,6 +15,7 @@ Explore the project's documentation to understand the architecture, features, an
 - 📘 [User Manual](7_User_Manual.md)
 - 🛡️ [VAPT Report](8_VAPT_Report.md)
 - 📊 [Presentation Deck](9_Presentation.md)
+- 🗺️ [Project Plan / Roadmap](10_Project_Plan.md)
 
 ## 🚀 Getting Started
 
