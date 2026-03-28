@@ -1,8 +1,8 @@
-<div x-data="aiChat()" class="fixed bottom-6 right-6 z-[999]">
+<div x-data="aiChat()" class="fixed bottom-24 right-4 sm:bottom-28 sm:right-8 z-[999]">
     <!-- Chat Button -->
     <button @click="toggleChat"
             class="flex items-center justify-center w-14 h-14 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full shadow-xl transition-transform hover:scale-105"
-            :class="isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'">
+            :class="isOpen ? '!scale-105 ring-4 ring-emerald-500/30' : 'scale-100 opacity-100'">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
         </svg>
@@ -16,8 +16,8 @@
          x-transition:leave="transition ease-in duration-200 transform origin-bottom-right"
          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
          x-transition:leave-end="opacity-0 scale-50 translate-y-4"
-         class="absolute bottom-0 right-0 w-[90vw] sm:w-[380px] bg-[#0f0f11] border border-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[500px] max-h-[85vh] z-[1000]"
-         style="display: none; transform-origin: calc(100% - 28px) calc(100% - 28px);">
+         class="absolute bottom-full mb-6 right-0 w-[calc(100vw-2rem)] sm:w-[380px] bg-[#0f0f11] border border-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[500px] max-h-[75vh] z-[1000]"
+         style="display: none; transform-origin: bottom right;">
         
         <!-- Header -->
         <div class="bg-gradient-to-r from-[#141416] to-[#1c1c1f] p-4 flex justify-between items-center border-b border-gray-800 relative">
