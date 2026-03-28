@@ -5,11 +5,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChatController;
 
 Route::middleware(['throttle:global'])->group(function () {
     Route::get('/', [PublicController::class, 'index']);
     Route::post('/contact', [PublicController::class, 'submitContactForm'])->middleware('throttle:contact');
 });
+
+// AI Chat API Route with strict rate limiting (max 14 requests per minute)
+Route::post('/api/chat', [ChatController::class, 'ask'])->middleware('throttle:14,1');
 
 // PDF Download Route - Moved out of throttle group to prevent issues
 Route::get('/download-profile/{year}', [PublicController::class, 'downloadPdf']);
