@@ -104,6 +104,7 @@
                 <div class="flex bg-white/5 rounded-lg p-1 mr-4">
                     <a href="/admin?year={{ $selectedYear }}" class="px-4 py-1.5 rounded-md text-[10px] font-black uppercase transition-all bg-arbitra-emerald text-arbitra-black">Visual Edit</a>
                     <a href="/admin/grid?year={{ $selectedYear }}" class="px-4 py-1.5 rounded-md text-[10px] font-black uppercase transition-all text-arbitra-gray hover:text-white">Spreadsheet</a>
+                    <a href="/admin/json?year={{ $selectedYear }}" class="px-4 py-1.5 rounded-md text-[10px] font-black uppercase transition-all text-arbitra-gray hover:text-white">JSON Master</a>
                 </div>
 
                 <a href="/admin/export?year={{ $selectedYear }}" class="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-xs font-bold hover:bg-white/10 transition-all mr-4">
