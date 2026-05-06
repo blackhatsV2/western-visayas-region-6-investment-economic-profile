@@ -16,7 +16,7 @@ Route::middleware(['throttle:global'])->group(function () {
 Route::post('/api/chat', [ChatController::class, 'ask'])->middleware('throttle:14,1');
 
 // PDF Download Route - Moved out of throttle group to prevent issues
-Route::get('/download-profile/{year}', [PublicController::class, 'downloadPdf']);
+Route::get('/download-profile/{year}', [PublicController::class, 'downloadPdf'])->name('download.pdf');
 
 // Debug Routes
 Route::get('/debug-db', [PublicController::class, 'debugDb']);
