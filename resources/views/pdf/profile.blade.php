@@ -131,20 +131,20 @@
             <div class="c-section-title">{{ optional($content)->section_title ?? 'Economic Data' }}</div>
 
             {{-- Description Block --}}
-            @if(isset($content) && (isset($content->content['description']) || isset($content->content['notable_info'])))
+            @if(isset($content) && (!empty(data_get($content->content, 'description')) || !empty(data_get($content->content, 'notable_info'))))
                 <div class="c-desc">
-                    @if(isset($content->content['description']))
-                        <p style="margin: 0 0 5px 0;">{{ $flatten($content->content['description']) }}</p>
+                    @if(!empty(data_get($content->content, 'description')))
+                        <p style="margin: 0 0 5px 0;">{{ $flatten(data_get($content->content, 'description')) }}</p>
                     @endif
-                    @if(isset($content->content['notable_info']))
-                        <p style="margin: 0; color: #059669; font-weight: bold;">NOTE: {{ $flatten($content->content['notable_info']) }}</p>
+                    @if(!empty(data_get($content->content, 'notable_info')))
+                        <p style="margin: 0; color: #059669; font-weight: bold;">NOTE: {{ $flatten(data_get($content->content, 'notable_info')) }}</p>
                     @endif
                 </div>
             @endif
 
             {{-- Content Type Logic --}}
             @if($content->type === 'hero' || $content->type === 'stats_grid')
-                @php $stats = $content->type === 'hero' ? ($content->content['highlight_stats'] ?? []) : ($content->content['stats'] ?? []); @endphp
+                @php $stats = $content->type === 'hero' ? (data_get($content->content, 'highlight_stats', [])) : (data_get($content->content, 'stats', [])); @endphp
                 @if(count($stats) > 0)
                     <table class="kpi-table">
                         @foreach(collect($stats)->chunk(2) as $row)
@@ -170,14 +170,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($content->content['items'] ?? [] as $item)
+                        @foreach(data_get($content->content, 'items', []) as $item)
                             <tr>
                                 <td class="matrix-name">{{ $flatten($item['name'] ?? '') }}</td>
                                 <td class="matrix-details">{{ $flatten($item['details'] ?? '') }}</td>
                                 <td>
-                                    @if(isset($item['modal_details']))
+                                    @if(!empty(data_get($item, 'modal_details')))
                                         <ul class="sub-list">
-                                        @foreach($item['modal_details'] as $mKey => $mVal)
+                                        @foreach(data_get($item, 'modal_details', []) as $mKey => $mVal)
                                             <li>
                                                 @if($mKey === 'Map Points' && is_array($mVal))
                                                     <strong>Locations:</strong> 
@@ -209,13 +209,13 @@
 
             @if($content->type === 'chart')
                 @php
-                    $series = $content->content['series'] ?? [];
-                    $categories = $content->content['categories'] ?? [];
+                    $series = data_get($content->content, 'series', []);
+                    $categories = data_get($content->content, 'categories', []);
                     $isMultiSeries = count($series) > 1;
                 @endphp
 
                 <div style="margin-bottom: 10px; font-weight: bold; font-size: 11px; text-transform: uppercase; color: #334155;">
-                    {{ $flatten($content->content['title'] ?? 'Data Analysis') }}
+                    {{ $flatten(data_get($content->content, 'title', 'Data Analysis')) }}
                 </div>
 
                 @if(!$isMultiSeries && count($series) > 0)
@@ -235,7 +235,7 @@
                         <tbody>
                             @foreach($categories as $index => $cat)
                                 @php 
-                                    $val = $data[$index] ?? 0;
+                                    $val = data_get($series, "0.data.$index", 0);
                                     $width = min(abs($val) / $max * 100, 100);
                                 @endphp
                                 <tr>
@@ -266,7 +266,7 @@
                                 <tr>
                                     <td>{{ $flatten($cat) }}</td>
                                     @foreach($series as $s) 
-                                        <td>{{ number_format($s['data'][$index] ?? 0) }}</td> 
+                                        <td>{{ number_format(data_get($s, "data.$index", 0)) }}</td> 
                                     @endforeach
                                 </tr>
                             @endforeach
@@ -274,9 +274,9 @@
                     </table>
                 @endif
                 
-                @if(isset($content->content['modal_text']))
+                @if(!empty(data_get($content->content, 'modal_text')))
                     <div style="font-size: 10px; color: #0f172a; font-weight: 800; margin-top: 12px; padding: 10px; background: #f8fafc; border-radius: 6px; border: 1px solid #f1f5f9;">
-                        EXECUTIVE SUMMARY: <span style="font-weight: 500; color: #475569;">{{ $flatten($content->content['modal_text']) }}</span>
+                        EXECUTIVE SUMMARY: <span style="font-weight: 500; color: #475569;">{{ $flatten(data_get($content->content, 'modal_text')) }}</span>
                     </div>
                 @endif
             @endif
@@ -284,7 +284,7 @@
             @if($content->type === 'list')
                 <div style="background: #fff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
                     <ul class="sub-list">
-                        @foreach($content->content['items'] ?? [] as $listItem)
+                        @foreach(data_get($content->content, 'items', []) as $listItem)
                             <li>{{ $flatten($listItem) }}</li>
                         @endforeach
                     </ul>
@@ -292,11 +292,11 @@
             @endif
 
             {{-- General Modal Details Output if not already handled --}}
-            @if(isset($content->content['modal_details']) && $content->type !== 'grid' && $content->type !== 'hero' && $content->type !== 'stats_grid')
+            @if(!empty(data_get($content->content, 'modal_details')) && $content->type !== 'grid' && $content->type !== 'hero' && $content->type !== 'stats_grid')
                 <div style="margin-top: 10px; background: #fff; border: 1px dashed #cbd5e1; padding: 8px;">
                     <strong style="display: block; font-size: 9px; margin-bottom: 5px; color: #475569;">SUPPLEMENTARY DATA:</strong>
                     <ul class="sub-list">
-                    @foreach($content->content['modal_details'] as $mKey => $mVal)
+                    @foreach(data_get($content->content, 'modal_details', []) as $mKey => $mVal)
                         <li>
                             <strong>{{ $mKey }}:</strong> 
                             @if(is_array($mVal))

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     @php $meta = $contents->where('type', 'metadata')->first(); @endphp
-    <title>{{ isset($meta) && isset($meta->content['browser_tab_title']) ? $meta->content['browser_tab_title'] : 'Western Visayas: Investment and Economic Profile' }}</title>
+    <title>{{ isset($meta) && !empty(data_get($meta->content, 'browser_tab_title')) ? data_get($meta->content, 'browser_tab_title') : 'Western Visayas: Investment and Economic Profile' }}</title>
     <link rel="icon" type="image/png" href="{{ asset('dti-logo.png') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#000000">
@@ -1021,7 +1021,7 @@
 
                 <img src="{{ asset('dti-logo.png') }}" class="h-7 md:h-8 w-auto" alt="DTI Logo">
                 <div class="h-6 w-px bg-white/10 hidden md:block"></div>
-                <h1 class="text-[9px] md:text-sm font-black tracking-tight uppercase block max-w-[120px] md:max-w-none leading-tight">{{ isset($meta) && isset($meta->content['site_title']) ? $meta->content['site_title'] : 'Western Visayas: Investment and Economic Profile' }}</h1>
+                <h1 class="text-[9px] md:text-sm font-black tracking-tight uppercase block max-w-[120px] md:max-w-none leading-tight">{{ isset($meta) && !empty(data_get($meta->content, 'site_title')) ? data_get($meta->content, 'site_title') : 'Western Visayas: Investment and Economic Profile' }}</h1>
             </div>
             
             <!-- Desktop Nav -->
@@ -1155,9 +1155,9 @@
                 @if($content->type === 'hero')
                     <div id="{{ $sectionId }}" class="scroll-mt-32 mobile-hero-fullscreen">
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div @if(isset($content->content['modal_details'])) 
-                                    data-content="{{ json_encode($content->content['modal_details']['Why Invest in Visayas Logistics Cluster?'] ?? $content->content['modal_details']) }}"
-                                    data-title="{{ $content->content['modal_details']['Why Invest in Visayas Logistics Cluster?']['title'] ?? 'Why Invest in Visayas Logistics Cluster?' }}"
+                            <div @if(!empty(data_get($content->content, 'modal_details'))) 
+                                    data-content="{{ json_encode(data_get($content->content, 'modal_details.Why Invest in Visayas Logistics Cluster?', data_get($content->content, 'modal_details'))) }}"
+                                    data-title="{{ data_get($content->content, 'modal_details.Why Invest in Visayas Logistics Cluster?.title', 'Why Invest in Visayas Logistics Cluster?') }}"
                                     @click="openFromEl($el)" 
                                     class="lg:col-span-2 bento-card p-6 md:p-12 flex flex-col justify-center bg-gradient-to-br from-arbitra-dark to-arbitra-black cursor-pointer group hover:border-arbitra-emerald/60 transition-all relative overflow-hidden"
                                  @else
@@ -1175,10 +1175,10 @@
                                         @endif
                                     </div>
                                     <h2 class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 md:mb-10 leading-[1] tracking-tighter uppercase italic group-hover:text-white transition-colors">
-                                        {!! nl2br(e($content->content['title'] ?? 'Why Invest in Western Visayas?')) !!}
+                                        {!! nl2br(e(data_get($content->content, 'title', 'Why Invest in Western Visayas?'))) !!}
                                     </h2>
                                     <p class="text-lg text-arbitra-gray max-w-xl leading-relaxed font-medium group-hover:text-white/80 transition-colors">
-                                        {{ $content->content['description'] ?? '' }}
+                                        {{ data_get($content->content, 'description', '') }}
                                     </p>
                                 </div>
                                 <div class="pt-8 mt-auto border-t border-white/5">
@@ -1188,7 +1188,7 @@
                             </div>
                             
                             <div class="flex flex-row md:flex-col gap-3 md:gap-6 overflow-x-auto mobile-hero-stats">
-                                @foreach(($content->content['highlight_stats'] ?? []) as $index => $stat)
+                                @foreach((data_get($content->content, 'highlight_stats', [])) as $index => $stat)
                                 <div class="bento-card flex-1 p-6 md:p-10 flex flex-col justify-between">
                                     <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest">{{ $stat['label'] }}</span>
                                     <div class="mt-4">
@@ -1211,7 +1211,7 @@
                          @mouseleave="hovered = false"
                          class="relative overflow-hidden whitespace-nowrap py-10 border-y border-white/5 transition duration-500">
                         <div class="inline-block animate-marquee transition-all duration-500" :class="hovered ? 'scale-[1.1] text-arbitra-emerald' : ''">
-                            @php $firms = $content->content['items'] ?? []; @endphp
+                            @php $firms = data_get($content->content, 'items', []); @endphp
                             @foreach(array_merge($firms, $firms, $firms) as $firm)
                                 <span class="text-2xl font-black mx-12 tracking-widest cursor-default inline-block transition-colors duration-500" :class="hovered ? 'text-arbitra-emerald' : 'text-white'">
                                     {{ $firm }}
@@ -1230,16 +1230,16 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mobile-scroll-x">
-                            @foreach(($content->content['stats'] ?? []) as $stat)
+                            @foreach((data_get($content->content, 'stats', [])) as $stat)
                                 @php
-                                    $hasExtra = isset($stat['modal_details']) || isset($content->content['modal_details']) || isset($stat['detail']);
-                                    $extraData = $stat['modal_details'] ?? $content->content['modal_details'] ?? (isset($stat['detail']) ? ['Details' => $stat['detail']] : null);
-                                    $label = strtolower($stat['label']);
+                                    $hasExtra = !empty(data_get($stat, 'modal_details')) || !empty(data_get($content->content, 'modal_details')) || !empty(data_get($stat, 'detail'));
+                                    $extraData = data_get($stat, 'modal_details') ?? data_get($content->content, 'modal_details') ?? (!empty(data_get($stat, 'detail')) ? ['Details' => data_get($stat, 'detail')] : null);
+                                    $label = strtolower(data_get($stat, 'label'));
                                     $iconPath = 'M13 10V3L4 14h7v7l9-11h-7z'; 
                                     if(str_contains($label, 'population') || str_contains($label, 'graduate')) $iconPath = 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z';
                                     if(str_contains($label, 'area') || str_contains($label, 'land')) $iconPath = 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
                                 @endphp
-                                <div @if($hasExtra) data-content="{{ json_encode($extraData) }}" data-title="{{ $stat['label'] }}" @click="openFromEl($el)" @endif
+                                <div @if($hasExtra) data-content="{{ json_encode($extraData) }}" data-title="{{ data_get($stat, 'label') }}" @click="openFromEl($el)" @endif
                                      class="bento-card p-5 md:p-8 flex flex-col justify-between {{ $hasExtra ? 'poppable cursor-pointer group' : '' }}">
                                     @if($hasExtra)
                                     <div class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold text-white/30 group-hover:text-white group-hover:bg-arbitra-emerald/20 transition-all flex items-center gap-1.5 absolute top-6 right-6">
@@ -1264,7 +1264,7 @@
                             <div class="flex items-center justify-between mb-12">
                                 <div>
                                     <h2 class="text-2xl font-extrabold text-white">{{ $content->section_title }}</h2>
-                                    <p class="text-sm text-arbitra-gray mt-2">{{ $content->content['modal_text'] ?? '' }}</p>
+                                    <p class="text-sm text-arbitra-gray mt-2">{{ data_get($content->content, 'modal_text', '') }}</p>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-3 h-3 rounded-full bg-arbitra-emerald animate-pulse"></div>
@@ -1277,7 +1277,7 @@
                             <div>
                                 <h3 class="text-sm font-bold text-arbitra-gray uppercase tracking-[0.2em] mb-8">INSIGHTS</h3>
                                 <p class="text-base text-white/80 leading-relaxed font-medium">
-                                    {{ $content->content['modal_text'] ?? 'Detailed statistical analysis of the regional performance.' }}
+                                    {{ data_get($content->content, 'modal_text', 'Detailed statistical analysis of the regional performance.') }}
                                 </p>
                             </div>
                             <div class="pt-8 border-t border-white/5">
@@ -1288,12 +1288,12 @@
                         <script>
                             document.addEventListener('DOMContentLoaded', function () {
                                 var options = {
-                                    series: @json($content->content['series']),
-                                    chart: { type: '{{ $content->content['chart_type'] ?? 'bar' }}', height: 400, fontFamily: 'Inter, sans-serif', toolbar: { show: false }, background: 'transparent' },
+                                    series: @json(data_get($content->content, 'series', [])),
+                                    chart: { type: '{{ data_get($content->content, 'chart_type', 'bar') }}', height: 400, fontFamily: 'Inter, sans-serif', toolbar: { show: false }, background: 'transparent' },
                                     theme: { mode: 'dark' },
-                                    plotOptions: { bar: { horizontal: {{ isset($content->content['horizontal']) && $content->content['horizontal'] ? 'true' : 'false' }}, borderRadius: 2, columnWidth: '50%', distributed: {{ count($content->content['series'] ?? []) <= 1 ? 'true' : 'false' }} } },
+                                    plotOptions: { bar: { horizontal: {{ !empty(data_get($content->content, 'horizontal')) ? 'true' : 'false' }}, borderRadius: 2, columnWidth: '50%', distributed: {{ count(data_get($content->content, 'series', [])) <= 1 ? 'true' : 'false' }} } },
                                     grid: { borderColor: 'rgba(255,255,255,0.05)' },
-                                    xaxis: { categories: @json($content->content['categories'] ?? []), labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
+                                    xaxis: { categories: @json(data_get($content->content, 'categories', [])), labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
                                     yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
                                     colors: ['#10b981', '#FFFFFF', '#334155'],
                                     stroke: { width: 2, curve: 'smooth' },
@@ -1316,9 +1316,9 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            @foreach(($content->content['items'] ?? []) as $item)
-                                @php $hasModal = isset($item['modal_details']); @endphp
-                                <div @if($hasModal) data-content="{{ json_encode($item['modal_details']) }}" data-title="{{ $item['name'] }}" @click="openFromEl($el)" @endif
+                            @foreach((data_get($content->content, 'items', [])) as $item)
+                                @php $hasModal = !empty(data_get($item, 'modal_details')); @endphp
+                                <div @if($hasModal) data-content="{{ json_encode(data_get($item, 'modal_details')) }}" data-title="{{ data_get($item, 'name') }}" @click="openFromEl($el)" @endif
                                      class="bento-card p-6 md:p-10 flex flex-col justify-between group {{ $hasModal ? 'cursor-pointer' : '' }}">
                                     <div class="flex justify-between items-start mb-6">
                                         <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-arbitra-emerald/50 group-hover:bg-arbitra-emerald/10 transition-all">
@@ -1328,8 +1328,8 @@
                                         <span class="text-[9px] font-black uppercase text-arbitra-emerald/40 group-hover:text-arbitra-emerald">Details</span>
                                         @endif
                                     </div>
-                                    <h3 class="text-xl font-black text-white uppercase tracking-tight mb-4 group-hover:text-arbitra-emerald transition-colors">{{ $item['name'] }}</h3>
-                                    <p class="text-sm text-arbitra-gray leading-relaxed">{{ $item['details'] ?? '' }}</p>
+                                    <h3 class="text-xl font-black text-white uppercase tracking-tight mb-4 group-hover:text-arbitra-emerald transition-colors">{{ data_get($item, 'name') }}</h3>
+                                    <p class="text-sm text-arbitra-gray leading-relaxed">{{ data_get($item, 'details', '') }}</p>
                                 </div>
                             @endforeach
                         </div>
@@ -1341,7 +1341,7 @@
                             <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            @foreach(($content->content['items'] ?? []) as $item)
+                            @foreach((data_get($content->content, 'items', [])) as $item)
                                 <div class="bento-card p-6 flex items-center gap-4 group">
                                     <div class="w-2 h-2 rounded-full bg-arbitra-emerald group-hover:scale-150 transition-transform"></div>
                                     <span class="text-sm font-bold text-white/90 uppercase tracking-wider">{{ $item }}</span>
@@ -1353,8 +1353,8 @@
                 @elseif($content->type === 'cta')
                     <section id="{{ $sectionId }}" class="scroll-mt-32 mb-20">
                         <div class="bento-card p-12 text-center bg-gradient-to-br from-arbitra-emerald/10 to-transparent border-arbitra-emerald/20">
-                            <h3 class="text-4xl font-black uppercase italic mb-6">{{ $content->content['title'] ?? 'Ready to Invest?' }}</h3>
-                            <p class="text-lg text-arbitra-gray max-w-xl mx-auto mb-8">{{ $content->content['description'] ?? '' }}</p>
+                            <h3 class="text-4xl font-black uppercase italic mb-6">{{ data_get($content->content, 'title', 'Ready to Invest?') }}</h3>
+                            <p class="text-lg text-arbitra-gray max-w-xl mx-auto mb-8">{{ data_get($content->content, 'description', '') }}</p>
                             <button @click="contactOpen = true" class="bg-arbitra-emerald text-arbitra-black px-10 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-all">Get in Touch</button>
                         </div>
                     </section>
@@ -1367,10 +1367,10 @@
             <section id="action" class="py-20">
                 <div class="bento-card p-8 md:p-20 text-center bg-gradient-to-br from-arbitra-emerald/10 to-transparent border-arbitra-emerald/20">
                     <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 md:mb-8 tracking-tighter uppercase italic">
-                        {!! nl2br(e($cta->content['title'])) !!}
+                        {!! nl2br(e(data_get($cta->content, 'title'))) !!}
                     </h2>
                     <p class="text-base md:text-xl text-arbitra-gray max-w-2xl mx-auto mb-8 md:mb-12 font-medium">
-                        {{ $cta->content['description'] }}
+                        {{ data_get($cta->content, 'description') }}
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
                         <button @click="contactOpen = true; contactSuccess = false" class="w-full sm:w-auto bg-arbitra-emerald text-arbitra-black px-8 md:px-12 py-4 md:py-5 rounded-full font-black text-sm md:text-lg uppercase tracking-widest hover:scale-105 transition shadow-[0_0_50px_rgba(16,185,129,0.3)]">
