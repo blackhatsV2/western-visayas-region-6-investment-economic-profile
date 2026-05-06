@@ -552,20 +552,46 @@
             border-radius: 0.25rem;
             font-family: sans-serif;
         }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+        }
     </style>
 
 </head>
 <body x-data="app()" class="antialiased font-sans">
     @php
-        $sidebarNav = [
-            ['id' => 'hero', 'name' => 'Profile', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
-            ['id' => 'economy', 'name' => 'Economy', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
-            ['id' => 'drivers', 'name' => 'Drivers', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
-            ['id' => 'infrastructure', 'name' => 'Infra', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
-            ['id' => 'logistics', 'name' => 'Logistics', 'icon' => 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9'],
-            ['id' => 'industries', 'name' => 'Industries', 'icon' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.282a2 2 0 01-1.808 0l-.628-.282a6 6 0 00-3.86-.517l-2.387.477a2 2 0 00-1.022.547l-1.159 1.159a2 2 0 00-.547 1.022l-.477 2.387a2 2 0 00.547 1.022l1.159 1.159a2 2 0 001.022.547l2.159-.432-.628.282a2 2 0 011.808 0l.628.282a6 6 0 003.86.517z'],
-            ['id' => 'action', 'name' => 'Connect', 'icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z']
-        ];
+        // Dynamic Navigation Builder
+        $navSections = $contents->whereNotIn('type', ['metadata', 'marquee', 'cta'])
+            ->sortBy('page_number')
+            ->map(function($item) {
+                $slug = Str::slug($item->section_title);
+                if (empty($slug)) $slug = "section-" . $item->id;
+                
+                // Dynamic Icon Mapping
+                $icon = 'M4 6h16M4 12h16M4 18h7'; // Default
+                $title = strtolower($item->section_title);
+                
+                if ($item->type === 'hero') $icon = 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6';
+                elseif (str_contains($title, 'economy') || str_contains($title, 'gdp')) $icon = 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z';
+                elseif (str_contains($title, 'driver') || str_contains($title, 'priority')) $icon = 'M13 10V3L4 14h7v7l9-11h-7z';
+                elseif (str_contains($title, 'infra') || str_contains($title, 'airport') || str_contains($title, 'port')) $icon = 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4';
+                elseif (str_contains($title, 'logistic') || str_contains($title, 'transport')) $icon = 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9';
+                elseif (str_contains($title, 'industry')) $icon = 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.282a2 2 0 01-1.808 0l-.628-.282a6 6 0 00-3.86-.517l-2.387.477a2 2 0 00-1.022.547l-1.159 1.159a2 2 0 00-.547 1.022l-.477 2.387a2 2 0 00.547 1.022l1.159 1.159a2 2 0 001.022.547l2.159-.432-.628.282a2 2 0 011.808 0l.628.282a6 6 0 003.86.517z';
+                
+                return [
+                    'id' => $slug,
+                    'name' => $item->section_title,
+                    'icon' => $icon
+                ];
+            })->filter(fn($i) => !empty($i['name']));
+
+        $sidebarNav = $navSections->values()->toArray();
+        $sidebarNav[] = ['id' => 'action', 'name' => 'Connect', 'icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'];
     @endphp
     <script>
         // Global Map Renderer for Blocks
@@ -999,11 +1025,10 @@
             </div>
             
             <!-- Desktop Nav -->
-            <div class="hidden md:flex items-center gap-6 bg-white/5 px-6 py-2 rounded-full border border-white/5">
-                <a href="#hero" class="nav-link text-xs uppercase tracking-widest">WHY</a>
-                <a href="#economy" class="nav-link text-xs uppercase tracking-widest">STATS</a>
-                <a href="#drivers" class="nav-link text-xs uppercase tracking-widest">DRIVERS</a>
-                <a href="#action" class="nav-link text-xs uppercase tracking-widest">ACT</a>
+            <div class="hidden md:flex items-center gap-6 bg-white/5 px-6 py-2 rounded-full border border-white/5 overflow-x-auto max-w-[400px] no-scrollbar">
+                @foreach(collect($sidebarNav)->take(5) as $nav)
+                    <a href="#{{ $nav['id'] }}" class="nav-link text-[10px] font-black uppercase tracking-widest whitespace-nowrap">{{ strtoupper($nav['name']) }}</a>
+                @endforeach
             </div>
             
             <!-- Right Side Actions -->
@@ -1065,9 +1090,22 @@
                     @endif
                 </div>
 
+                <!-- Mobile Actions (PDF/Connect) -->
+                <div class="flex md:hidden items-center gap-2">
+                    <a href="/download-profile/{{ rawurlencode($selectedYear) }}" 
+                       class="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-arbitra-gray"
+                       title="Download PDF">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </a>
+                    <button @click="contactOpen = true; contactSuccess = false" class="bg-arbitra-emerald text-arbitra-black p-2 rounded-full hover:scale-105 transition active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    </button>
+                </div>
+
                 <!-- Desktop Tools -->
                 <div class="hidden md:flex items-center gap-3">
-                    <!-- PDF Shortcut -->
                     <div class="relative group">
                         <a href="/download-profile/{{ rawurlencode($selectedYear) }}" 
                            class="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-arbitra-gray hover:text-arbitra-emerald hover:border-arbitra-emerald/50 transition-all"
@@ -1107,198 +1145,117 @@
         @else
         <div class="max-w-[1240px] mx-auto space-y-16">
             
-            <!-- STAGE 1: AWARENESS (HERO) -->
-            @php $hero = $contents->where('type', 'hero')->first(); @endphp
-            @if($hero)
-            <div id="hero" class="scroll-mt-32 mobile-hero-fullscreen">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div @if(isset($hero->content['modal_details'])) 
-                            data-content="{{ json_encode($hero->content['modal_details']['Why Invest in Visayas Logistics Cluster?'] ?? $hero->content['modal_details']) }}"
-                            data-title="{{ $hero->content['modal_details']['Why Invest in Visayas Logistics Cluster?']['title'] ?? 'Why Invest in Visayas Logistics Cluster?' }}"
-                            @click="openFromEl($el)" 
-                            class="lg:col-span-2 bento-card p-6 md:p-12 flex flex-col justify-center bg-gradient-to-br from-arbitra-dark to-arbitra-black cursor-pointer group hover:border-arbitra-emerald/60 transition-all relative overflow-hidden"
-                         @else
-                            class="lg:col-span-2 bento-card p-6 md:p-12 flex flex-col justify-center bg-gradient-to-br from-arbitra-dark to-arbitra-black"
-                         @endif>
-                         
-                        <!-- Hover Effect BG -->
-                        <div class="absolute inset-0 bg-arbitra-emerald/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                        <div class="relative z-10">
-                            <div class="flex items-center gap-3 mb-10">
-                                <span class="px-5 py-1.5 rounded-full bg-arbitra-emerald/10 text-arbitra-emerald font-black text-[10px] uppercase tracking-[0.2em] border border-arbitra-emerald/20">Investment Motivation</span>
-                                @if(isset($hero->content['modal_details']))
-                                <div class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-white/50 group-hover:text-white group-hover:bg-arbitra-emerald/20 transition-all flex items-center gap-2">
-                                    <span>CLICK TO VIEW DETAILS</span>
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </div>
-                                @endif
-                            </div>
-                            <h2 class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 md:mb-10 leading-[1] tracking-tighter uppercase italic group-hover:text-white transition-colors">
-                                {!! nl2br(e($hero->content['title'] ?? 'Why Invest in Western Visayas?')) !!}
-                            </h2>
-                            <p class="text-lg text-arbitra-gray max-w-xl leading-relaxed font-medium group-hover:text-white/80 transition-colors">
-                                {{ $hero->content['description'] ?? 'A strategic gateway in the heart of the Philippines, offering a collaborative environment, abundant natural resources, and a rapidly industrializing economy ready for global expansion.' }}
-                            </p>
-                        </div>
-                        <div class="pt-8 mt-auto border-t border-white/5">
-                            <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block mb-1">Source</span>
-                            <p class="text-xs text-arbitra-emerald font-bold">{{ $hero->source ?? 'DTI Region 6' }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex flex-row md:flex-col gap-3 md:gap-6 overflow-x-auto mobile-hero-stats">
-                        @foreach($hero->content['highlight_stats'] as $index => $stat)
-                        <div class="bento-card flex-1 p-6 md:p-10 flex flex-col justify-between">
-                            <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest">{{ $stat['label'] }}</span>
-                            <div class="mt-4">
-                                <h3 class="text-3xl md:text-5xl font-black emerald-text tracking-tighter">{{ $stat['value'] }}</h3>
-                                <span class="text-[10px] font-black text-arbitra-gray uppercase tracking-widest mt-2 block opacity-40">{{ $stat['label'] }}</span>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-                
-                <!-- Mobile Scroll Indicator -->
-                <div class="mobile-scroll-hint">
-                    <span class="text-[10px] font-bold uppercase tracking-[0.3em]">Scroll to explore</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-                </div>
-            </div>
-            @endif
-
-            <!-- STAGE 2: AUTHORITY (TRUST BAR) -->
-            @php $marquee = $contents->where('type', 'marquee')->first(); @endphp
-            @if($marquee)
-            <div x-data="{ hovered: false }" 
-                 @mouseenter="hovered = true" 
-                 @mouseleave="hovered = false"
-                 class="relative overflow-hidden whitespace-nowrap py-10 border-y border-white/5 transition duration-500">
-                
-                <div x-show="hovered"
-                     x-cloak
-                     class="absolute top-2 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-arbitra-emerald text-arbitra-black font-black text-[10px] tracking-[0.2em] whitespace-nowrap pointer-events-none z-50 shadow-[0_0_30px_rgba(16,185,129,0.4)]">
-                    PARTNERS OF WESTERN VISAYAS
-                </div>
-
-                <div class="inline-block animate-marquee transition-all duration-500"
-                     :class="hovered ? 'scale-[1.1] text-arbitra-emerald' : ''">
-                    @php
-                        $firms = $marquee->content['items'] ?? [];
-                    @endphp
-                    @foreach(array_merge($firms, $firms, $firms) as $firm)
-                        <span class="text-2xl font-black mx-12 tracking-widest cursor-default inline-block text-white transition-colors duration-500"
-                              :class="hovered ? 'text-arbitra-emerald' : 'text-white'">
-                            {{ $firm }}
-                        </span>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-            <style>
-                @keyframes marquee {
-                    0% { transform: translateX(0); }
-                    100% { transform: translateX(-50%); }
-                }
-                .animate-marquee {
-                    display: inline-block;
-                    animation: marquee 30s linear infinite;
-                }
-            </style>
-
-            <!-- MAIN CONTENT SECTIONS (ORDERED BY PAGE NUMBER) -->
-            @foreach($contents->whereIn('type', ['stats_grid', 'chart', 'grid', 'list'])->sortBy('page_number') as $content)
-                {{-- Dynamic ID for navigation --}}
+            @foreach($contents->whereNotIn('type', ['metadata'])->sortBy('page_number') as $content)
                 @php
-                    $title = strtolower($content->section_title);
-                    $sectionId = match(true) {
-                        str_contains($title, 'overview') => 'profile',
-                        str_contains($title, 'gdp') || str_contains($title, 'registration') || str_contains($title, 'distribution') => 'economy',
-                        str_contains($title, 'driver') => 'drivers',
-                        str_contains($title, 'airport') || str_contains($title, 'port') || str_contains($title, 'telecom') || str_contains($title, 'infrastructure') => 'infrastructure',
-                        str_contains($title, 'peza') || str_contains($title, 'logistics') => 'logistics',
-                        str_contains($title, 'priority industries by province') => 'industries',
-                        str_contains($title, 'industry') || str_contains($title, 'fruit') || str_contains($title, 'wearable') || str_contains($title, 'strategy') => 'other-industries',
-                        default => 'section-' . $content->id
-                    };
+                    $slug = Str::slug($content->section_title);
+                    if (empty($slug)) $slug = "section-" . $content->id;
+                    $sectionId = $slug;
                 @endphp
 
-                @if($content->type === 'stats_grid')
+                @if($content->type === 'hero')
+                    <div id="{{ $sectionId }}" class="scroll-mt-32 mobile-hero-fullscreen">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div @if(isset($content->content['modal_details'])) 
+                                    data-content="{{ json_encode($content->content['modal_details']['Why Invest in Visayas Logistics Cluster?'] ?? $content->content['modal_details']) }}"
+                                    data-title="{{ $content->content['modal_details']['Why Invest in Visayas Logistics Cluster?']['title'] ?? 'Why Invest in Visayas Logistics Cluster?' }}"
+                                    @click="openFromEl($el)" 
+                                    class="lg:col-span-2 bento-card p-6 md:p-12 flex flex-col justify-center bg-gradient-to-br from-arbitra-dark to-arbitra-black cursor-pointer group hover:border-arbitra-emerald/60 transition-all relative overflow-hidden"
+                                 @else
+                                    class="lg:col-span-2 bento-card p-6 md:p-12 flex flex-col justify-center bg-gradient-to-br from-arbitra-dark to-arbitra-black"
+                                 @endif>
+                                 
+                                <div class="absolute inset-0 bg-arbitra-emerald/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <div class="relative z-10">
+                                    <div class="flex items-center gap-3 mb-10">
+                                        <span class="px-5 py-1.5 rounded-full bg-arbitra-emerald/10 text-arbitra-emerald font-black text-[10px] uppercase tracking-[0.2em] border border-arbitra-emerald/20">Investment Motivation</span>
+                                        @if(isset($content->content['modal_details']))
+                                        <div class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-white/50 group-hover:text-white group-hover:bg-arbitra-emerald/20 transition-all flex items-center gap-2">
+                                            <span>CLICK TO VIEW DETAILS</span>
+                                        </div>
+                                        @endif
+                                    </div>
+                                    <h2 class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 md:mb-10 leading-[1] tracking-tighter uppercase italic group-hover:text-white transition-colors">
+                                        {!! nl2br(e($content->content['title'] ?? 'Why Invest in Western Visayas?')) !!}
+                                    </h2>
+                                    <p class="text-lg text-arbitra-gray max-w-xl leading-relaxed font-medium group-hover:text-white/80 transition-colors">
+                                        {{ $content->content['description'] ?? '' }}
+                                    </p>
+                                </div>
+                                <div class="pt-8 mt-auto border-t border-white/5">
+                                    <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block mb-1">Source</span>
+                                    <p class="text-xs text-arbitra-emerald font-bold">{{ $content->source ?? 'DTI Region 6' }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-row md:flex-col gap-3 md:gap-6 overflow-x-auto mobile-hero-stats">
+                                @foreach(($content->content['highlight_stats'] ?? []) as $index => $stat)
+                                <div class="bento-card flex-1 p-6 md:p-10 flex flex-col justify-between">
+                                    <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest">{{ $stat['label'] }}</span>
+                                    <div class="mt-4">
+                                        <h3 class="text-3xl md:text-5xl font-black emerald-text tracking-tighter">{{ $stat['value'] }}</h3>
+                                        <span class="text-[10px] font-black text-arbitra-gray uppercase tracking-widest mt-2 block opacity-40">{{ $stat['label'] }}</span>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="mobile-scroll-hint">
+                            <span class="text-[10px] font-bold uppercase tracking-[0.3em]">Scroll to explore</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                        </div>
+                    </div>
+
+                @elseif($content->type === 'marquee')
+                    <div x-data="{ hovered: false }" 
+                         @mouseenter="hovered = true" 
+                         @mouseleave="hovered = false"
+                         class="relative overflow-hidden whitespace-nowrap py-10 border-y border-white/5 transition duration-500">
+                        <div class="inline-block animate-marquee transition-all duration-500" :class="hovered ? 'scale-[1.1] text-arbitra-emerald' : ''">
+                            @php $firms = $content->content['items'] ?? []; @endphp
+                            @foreach(array_merge($firms, $firms, $firms) as $firm)
+                                <span class="text-2xl font-black mx-12 tracking-widest cursor-default inline-block transition-colors duration-500" :class="hovered ? 'text-arbitra-emerald' : 'text-white'">
+                                    {{ $firm }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
+
+                @elseif($content->type === 'stats_grid')
                     <section id="{{ $sectionId }}" class="scroll-mt-32 border-b border-white/5 pb-20 mb-20">
                         <div class="section-header border-b border-white/5 pb-4 mb-10 justify-between items-end">
                             <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
-                            
-                            <!-- Source Display (Compact Header) -->
                             <div class="hidden md:block text-right">
                                 <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block">Source</span>
-                                @php
-                                    $source = $content->source ?? 'DTI Region 6';
-                                    $isUrl = preg_match('/^https?:\/\//', $source) || preg_match('/^www\./', $source);
-                                    $displaySource = $isUrl ? (strlen($source) > 30 ? substr($source, 0, 27) . '...' : $source) : $source;
-                                    $url = preg_match('/^www\./', $source) ? 'https://' . $source : $source;
-                                @endphp
-                                @if($isUrl)
-                                    <a href="{{ $url }}" target="_blank" class="text-xs text-arbitra-emerald font-bold hover:underline">{{ $displaySource }}</a>
-                                @else
-                                    <p class="text-xs text-arbitra-emerald font-bold">{{ $source }}</p>
-                                @endif
+                                <p class="text-xs text-arbitra-emerald font-bold">{{ $content->source ?? 'DTI Region 6' }}</p>
                             </div>
                         </div>
-                        
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mobile-scroll-x">
                             @foreach(($content->content['stats'] ?? []) as $stat)
                                 @php
                                     $hasExtra = isset($stat['modal_details']) || isset($content->content['modal_details']) || isset($stat['detail']);
                                     $extraData = $stat['modal_details'] ?? $content->content['modal_details'] ?? (isset($stat['detail']) ? ['Details' => $stat['detail']] : null);
-                                    
-                                    // Dynamic Icon Logic for Stats
                                     $label = strtolower($stat['label']);
-                                    $iconPath = 'M13 10V3L4 14h7v7l9-11h-7z'; // Default Lightning
+                                    $iconPath = 'M13 10V3L4 14h7v7l9-11h-7z'; 
                                     if(str_contains($label, 'population') || str_contains($label, 'graduate')) $iconPath = 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z';
                                     if(str_contains($label, 'area') || str_contains($label, 'land')) $iconPath = 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
-                                    if(str_contains($label, 'university') || str_contains($label, 'school')) $iconPath = 'M12 14l9-5-9-5-9 5 9 5z';
-                                    if(str_contains($label, 'tower') || str_contains($label, 'wifi')) $iconPath = 'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0';
                                 @endphp
-                                <div @if($hasExtra) 
-                                     data-content="{{ json_encode($extraData) }}"
-                                     data-title="{{ $stat['label'] }}"
-                                     @click="openFromEl($el)" 
-                                     @endif
+                                <div @if($hasExtra) data-content="{{ json_encode($extraData) }}" data-title="{{ $stat['label'] }}" @click="openFromEl($el)" @endif
                                      class="bento-card p-5 md:p-8 flex flex-col justify-between {{ $hasExtra ? 'poppable cursor-pointer group' : '' }}">
-                                    
                                     @if($hasExtra)
                                     <div class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold text-white/30 group-hover:text-white group-hover:bg-arbitra-emerald/20 transition-all flex items-center gap-1.5 absolute top-6 right-6">
-                                        <span>CLICK TO VIEW DETAILS</span>
+                                        <span>DETAILS</span>
                                     </div>
                                     @endif
-
                                     <div>
                                         <div class="w-10 h-10 rounded-xl bg-arbitra-emerald/10 flex items-center justify-center mb-8 border border-arbitra-emerald/10">
                                             <svg class="h-5 w-5 text-arbitra-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconPath }}"></path></svg>
                                         </div>
-                                        <h4 class="text-sm font-bold text-arbitra-gray uppercase tracking-widest mb-3">{{ $stat['label'] ?? 'Metric' }}</h4>
-                                        <h3 class="text-3xl font-extrabold text-white tracking-tight leading-none">{{ $stat['value'] ?? '0' }}</h3>
+                                        <h4 class="text-sm font-bold text-arbitra-gray uppercase tracking-widest mb-3">{{ $stat['label'] }}</h4>
+                                        <h3 class="text-3xl font-extrabold text-white tracking-tight leading-none">{{ $stat['value'] }}</h3>
                                     </div>
-
-                                    @if(isset($stat['detail']) && !$hasExtra)
-                                    <p class="mt-6 text-sm text-arbitra-gray/60 leading-relaxed">{{ $stat['detail'] }}</p>
-                                    @endif
                                 </div>
                             @endforeach
                         </div>
-                        
-                        @if(isset($content->content['notable_info']))
-                        <div class="mt-8 p-6 rounded-2xl bg-arbitra-emerald/5 border border-arbitra-emerald/10 flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-full bg-arbitra-emerald/20 flex items-center justify-center shrink-0">
-                                <svg class="w-5 h-5 text-arbitra-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <div>
-                                <h4 class="text-xs font-black text-arbitra-emerald uppercase tracking-[0.2em] mb-1">Notable Info</h4>
-                                <p class="text-base font-medium text-white/80 leading-relaxed">{{ $content->content['notable_info'] }}</p>
-                            </div>
-                        </div>
-                        @endif
                     </section>
 
                 @elseif($content->type === 'chart')
@@ -1307,16 +1264,15 @@
                             <div class="flex items-center justify-between mb-12">
                                 <div>
                                     <h2 class="text-2xl font-extrabold text-white">{{ $content->section_title }}</h2>
-                                    <p class="text-sm text-arbitra-gray mt-2">{{ $content->content['modal_text'] ?? 'Sectoral growth breakdown' }}</p>
+                                    <p class="text-sm text-arbitra-gray mt-2">{{ $content->content['modal_text'] ?? '' }}</p>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-3 h-3 rounded-full bg-arbitra-emerald animate-pulse"></div>
-                                    <span class="text-sm font-bold text-arbitra-gray">ACTIVE TREND</span>
+                                    <span class="text-sm font-bold text-arbitra-gray uppercase">Trending</span>
                                 </div>
                             </div>
                             <div id="chart-{{ $content->id }}" class="w-full"></div>
                         </div>
-
                         <div class="bento-card p-6 md:p-10 flex flex-col justify-between bg-gradient-to-br from-arbitra-dark to-[#151515]">
                             <div>
                                 <h3 class="text-sm font-bold text-arbitra-gray uppercase tracking-[0.2em] mb-8">INSIGHTS</h3>
@@ -1325,123 +1281,24 @@
                                 </p>
                             </div>
                             <div class="pt-8 border-t border-white/5">
-                                <span class="text-sm font-bold text-arbitra-gray block mb-4">PRIMARY SOURCE:</span>
-                                @php
-                                    $source = $content->source;
-                                    $isUrl = preg_match('/^https?:\/\//', $source) || preg_match('/^www\./', $source);
-                                    $displaySource = $isUrl ? (strlen($source) > 30 ? substr($source, 0, 27) . '...' : $source) : $source;
-                                    $url = preg_match('/^www\./', $source) ? 'https://' . $source : $source;
-                                @endphp
-                                
-                                @if($isUrl)
-                                    <a href="{{ $url }}" target="_blank" class="text-sm text-arbitra-emerald font-bold italic hover:underline transition-all">
-                                        {{ $displaySource }}
-                                    </a>
-                                @else
-                                    <p class="text-sm text-arbitra-emerald font-bold italic">{{ $source }}</p>
-                                @endif
+                                <span class="text-[10px] font-bold text-arbitra-gray block mb-2 uppercase tracking-widest">Source</span>
+                                <p class="text-xs text-arbitra-emerald font-bold italic">{{ $content->source ?? 'DTI Region 6' }}</p>
                             </div>
                         </div>
-
-                        @php
-                            $categories = $content->content['categories'] ?? $content->content['labels'] ?? [];
-                            $region6Keywords = ['WV (VI)', 'VI (WV)', 'Region VI', 'WESTERN VISAYAS'];
-                            $colorArray = [];
-                            $isDistributed = count($content->content['series'] ?? []) <= 1;
-                            
-                            if ($isDistributed) {
-                                foreach($categories as $cat) {
-                                    $isRegion6 = false;
-                                    foreach($region6Keywords as $key) {
-                                        if(stripos($cat, $key) !== false) { $isRegion6 = true; break; }
-                                    }
-                                    // Region 6 gets White (#FFFFFF), others stay Emerald (#10b981)
-                                    $colorArray[] = $isRegion6 ? '#FFFFFF' : '#10b981';
-                                }
-                            }
-                        @endphp
                         <script>
                             document.addEventListener('DOMContentLoaded', function () {
                                 var options = {
                                     series: @json($content->content['series']),
-                                    chart: {
-                                        type: '{{ $content->content['chart_type'] ?? 'bar' }}',
-                                        height: 400,
-                                        fontFamily: 'Inter, sans-serif',
-                                        toolbar: { show: false },
-                                        background: 'transparent',
-                                        sparkline: { enabled: false }
-                                    },
+                                    chart: { type: '{{ $content->content['chart_type'] ?? 'bar' }}', height: 400, fontFamily: 'Inter, sans-serif', toolbar: { show: false }, background: 'transparent' },
                                     theme: { mode: 'dark' },
-                                    plotOptions: {
-                                        bar: {
-                                            horizontal: {{ isset($content->content['horizontal']) && $content->content['horizontal'] ? 'true' : 'false' }},
-                                            borderRadius: 2,
-                                            columnWidth: '50%',
-                                            distributed: {{ $isDistributed ? 'true' : 'false' }},
-                                            dataLabels: { position: 'top' }
-                                        }
-                                    },
-                                    grid: { 
-                                        show: true,
-                                        borderColor: 'rgba(255,255,255,0.05)',
-                                        strokeDashArray: 0,
-                                        xaxis: { lines: { show: false } },
-                                        yaxis: { lines: { show: true } },
-                                        padding: { top: 0, right: 0, bottom: 0, left: 10 }
-                                    },
-                                    xaxis: {
-                                        categories: @json($categories),
-                                        labels: { 
-                                            style: { colors: '#94a3b8', fontWeight: 500, fontSize: '11px' },
-                                            offsetY: 5
-                                        },
-                                        axisBorder: { show: true, color: 'rgba(255,255,255,0.1)' },
-                                        axisTicks: { show: true, color: 'rgba(255,255,255,0.1)' },
-                                        crosshairs: { show: true }
-                                    },
-                                    yaxis: { 
-                                        labels: { 
-                                            style: { colors: '#94a3b8', fontWeight: 500, fontSize: '11px' } 
-                                        },
-                                        axisBorder: { show: true, color: 'rgba(255,255,255,0.1)' },
-                                        axisTicks: { show: false }
-                                    },
-                                    colors: {!! $isDistributed && count($colorArray) > 0 ? json_encode($colorArray) : "['#334155', '#065f46', '#475569', '#1e293b', '#64748b']" !!},
-                                    stroke: { 
-                                        show: true, 
-                                        width: {{ ($content->content['chart_type'] ?? 'bar') === 'bar' ? 0 : 2 }},
-                                        curve: 'straight',
-                                        lineCap: 'square'
-                                    },
-                                    fill: {
-                                        type: 'solid',
-                                        opacity: {{ ($content->content['chart_type'] ?? 'bar') === 'area' ? 0.2 : 0.9 }}
-                                    },
-                                    dataLabels: { enabled: false },
-                                    tooltip: { 
-                                        theme: 'dark',
-                                        x: { show: true },
-                                        y: { formatter: (val) => val + (typeof @js($content->content['unit'] ?? '') !== 'undefined' ? ' ' + @js($content->content['unit'] ?? '') : '') },
-                                        style: { fontSize: '12px', fontFamily: 'Inter, sans-serif' },
-                                        marker: { show: true }
-                                    },
-                                    markers: {
-                                        size: {{ ($content->content['chart_type'] ?? 'bar') === 'bar' ? 0 : 4 }},
-                                        colors: ['#065f46'],
-                                        strokeColors: '#fff',
-                                        strokeWidth: 1,
-                                        hover: { size: 6 }
-                                    },
-                                    legend: {
-                                        show: {{ count($content->content['series'] ?? []) > 1 ? 'true' : 'false' }},
-                                        position: 'top',
-                                        horizontalAlign: 'right',
-                                        fontSize: '11px',
-                                        fontWeight: 500,
-                                        labels: { colors: '#94a3b8' },
-                                        markers: { radius: 2 }
-                                    }
+                                    plotOptions: { bar: { horizontal: {{ isset($content->content['horizontal']) && $content->content['horizontal'] ? 'true' : 'false' }}, borderRadius: 2, columnWidth: '50%', distributed: {{ count($content->content['series'] ?? []) <= 1 ? 'true' : 'false' }} } },
+                                    grid: { borderColor: 'rgba(255,255,255,0.05)' },
+                                    xaxis: { categories: @json($content->content['categories'] ?? []), labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
+                                    yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
+                                    colors: ['#10b981', '#FFFFFF', '#334155'],
+                                    stroke: { width: 2, curve: 'smooth' },
+                                    fill: { opacity: 0.9 },
+                                    tooltip: { theme: 'dark' }
                                 };
                                 var chart = new ApexCharts(document.querySelector("#chart-{{ $content->id }}"), options);
                                 chart.render();
@@ -1450,150 +1307,55 @@
                     </section>
 
                 @elseif($content->type === 'grid')
-                    @if($content->section_title === 'Transportation Infrastructure')
-                        <section id="{{ $sectionId }}" class="scroll-mt-32 border-b border-white/5 pb-20 mb-20 font-sans">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                @foreach($content->content['items'] as $item)
+                    <section id="{{ $sectionId }}" class="scroll-mt-32 border-b border-white/5 pb-20 mb-20">
+                        <div class="section-header border-b border-white/5 pb-4 mb-10 justify-between items-end">
+                            <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
+                            <div class="hidden md:block text-right">
+                                <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block">Source</span>
+                                <p class="text-xs text-arbitra-emerald font-bold">{{ $content->source ?? 'DTI Region 6' }}</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @foreach(($content->content['items'] ?? []) as $item)
                                 @php $hasModal = isset($item['modal_details']); @endphp
-                                <div @if($hasModal)
-                                     data-content="{{ json_encode($item['modal_details'] ?? []) }}"
-                                     data-title="{{ $item['name'] }}"
-                                     @click="openFromEl($el)" 
-                                     @endif
-                                     class="bento-card p-10 flex flex-col relative overflow-hidden group {{ $hasModal ? 'cursor-pointer hover:border-arbitra-emerald/60' : '' }} transition-all">
-                                    <!-- Background Glow -->
-                                    <div class="absolute top-0 right-0 w-64 h-64 bg-arbitra-emerald/5 rounded-full blur-[100px] group-hover:bg-arbitra-emerald/10 transition-all duration-500"></div>
-                                    
-                                    <div class="relative z-10">
-                                        <div class="flex items-center justify-between mb-6">
-                                            <div class="flex items-center gap-4">
-                                                <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-arbitra-emerald/50 group-hover:bg-arbitra-emerald/10 transition-all duration-300">
-                                                    @if(str_contains($item['name'], 'Airports'))
-                                                        <svg class="w-6 h-6 text-white group-hover:text-arbitra-emerald transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                                                    @else
-                                                        <svg class="w-6 h-6 text-white group-hover:text-arbitra-emerald transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25-2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>
-                                                    @endif
-                                                </div>
-                                                <h3 class="text-3xl font-black text-white uppercase tracking-tight">{{ $item['name'] }}</h3>
-                                            </div>
-                                            @if($hasModal)
-                                            <div class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-white/50 group-hover:text-white group-hover:bg-arbitra-emerald/20 transition-all flex items-center gap-2">
-                                                <span>CLICK TO VIEW DETAILS</span>
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                            </div>
-                                            @endif
+                                <div @if($hasModal) data-content="{{ json_encode($item['modal_details']) }}" data-title="{{ $item['name'] }}" @click="openFromEl($el)" @endif
+                                     class="bento-card p-6 md:p-10 flex flex-col justify-between group {{ $hasModal ? 'cursor-pointer' : '' }}">
+                                    <div class="flex justify-between items-start mb-6">
+                                        <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-arbitra-emerald/50 group-hover:bg-arbitra-emerald/10 transition-all">
+                                            <svg class="w-6 h-6 text-white group-hover:text-arbitra-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                         </div>
-                                        
-                                        <p class="text-xl text-white/90 font-medium leading-relaxed border-l-2 border-white/10 pl-6 group-hover:border-arbitra-emerald transition-colors">
-                                            {{ $item['details'] ?? '' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
-                            <div class="mt-8 flex justify-end">
-                                <div class="text-right">
-                                    <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block mb-1">Source</span>
-                                    <p class="text-xs text-arbitra-emerald font-bold">{{ $content->source ?? 'DTI Region 6' }}</p>
-                                </div>
-                            </div>
-                        </section>
-                    @else
-                        {{-- Generic Grid (Drivers, Industries, etc) --}}
-                        <section id="{{ $sectionId }}" class="scroll-mt-32 border-b border-white/5 pb-20 mb-20">
-                            <div class="section-header border-b border-white/5 pb-4 mb-10 justify-between items-end">
-                                <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
-                                 <!-- Source Display -->
-                                 <div class="hidden md:block text-right">
-                                    <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block">Source</span>
-                                    <p class="text-xs text-arbitra-emerald font-bold">{{ $content->source ?? 'DTI Region 6' }}</p>
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                                @foreach($content->content['items'] as $item)
-                                    @php
-                                        $details = $item['details'] ?? '';
-                                        $subItems = $details ? preg_split('/[;•]/', $details, -1, PREG_SPLIT_NO_EMPTY) : [];
-                                        $isCompact = count($subItems) <= 3 && strlen($details) < 150;
-                                        $hasModal = isset($item['modal_details']);
-                                        $poppable = $hasModal || !$isCompact;
-                                        
-                                        // Special Icons for Drivers
-                                        $name = strtolower($item['name']);
-                                        $iconPath = 'M13 10V3L4 14h7v7l9-11h-7z'; // Default
-                                        if(str_contains($name, 'it-bpm') || str_contains($name, 'cyber')) $iconPath = 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z';
-                                        if(str_contains($name, 'bamboo') || str_contains($name, 'cacao')) $iconPath = 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z';
-                                    @endphp
-                                    <div @if($poppable) 
-                                         data-content="{{ json_encode($item['modal_details'] ?? ['Key Details' => ($item['details'] ?? '')]) }}"
-                                         data-title="{{ $item['name'] }}"
-                                         @click="openFromEl($el)" 
-                                         @endif
-                                         class="bento-card p-5 md:p-10 flex flex-col justify-between group h-full {{ $poppable ? 'poppable cursor-pointer' : '' }}">
-                                        
-                                        <div class="flex justify-between items-start mb-8">
-                                            <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-arbitra-emerald/50 group-hover:bg-arbitra-emerald/10 transition-all duration-300">
-                                                <svg class="h-6 w-6 text-white group-hover:text-arbitra-emerald transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ $iconPath }}"></path></svg>
-                                            </div>
-                                            
-                                            @if($poppable)
-                                            <div class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold text-white/30 group-hover:text-white group-hover:bg-arbitra-emerald/20 transition-all flex items-center gap-1.5">
-                                                <span>CLICK TO VIEW DETAILS</span>
-                                            </div>
-                                            @endif
-                                        </div>
-
-                                        <div class="flex-1">
-                                            <h3 class="text-lg font-black text-arbitra-emerald uppercase tracking-wide mb-5">{{ $item['name'] ?? '' }}</h3>
-                                            @if($isCompact)
-                                                <div class="space-y-3">
-                                                    @foreach($subItems as $sub)
-                                                    <div class="flex items-start gap-3">
-                                                        <div class="mt-2 w-1.5 h-1.5 rounded-full bg-white/40 shrink-0"></div>
-                                                        <p class="text-base font-medium text-white/85 leading-relaxed">{{ trim($sub) }}</p>
-                                                    </div>
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <p class="text-lg text-white/85 leading-relaxed font-medium">
-                                                    {{ $item['details'] ?? '' }}
-                                                </p>
-                                            @endif
-                                        </div>
-
-                                        @if($poppable)
-                                        <div class="mt-10 pt-6 border-t border-white/5 text-[10px] font-bold text-arbitra-gray tracking-[0.2em] uppercase flex items-center justify-between group-hover:text-arbitra-emerald transition-colors">
-                                            <span>CLICK TO VIEW DETAILS</span>
-                                            <svg class="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                        </div>
+                                        @if($hasModal)
+                                        <span class="text-[9px] font-black uppercase text-arbitra-emerald/40 group-hover:text-arbitra-emerald">Details</span>
                                         @endif
                                     </div>
-                                @endforeach
-                            </div>
-                        </section>
-                    @endif
+                                    <h3 class="text-xl font-black text-white uppercase tracking-tight mb-4 group-hover:text-arbitra-emerald transition-colors">{{ $item['name'] }}</h3>
+                                    <p class="text-sm text-arbitra-gray leading-relaxed">{{ $item['details'] ?? '' }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    </section>
 
                 @elseif($content->type === 'list')
                     <section id="{{ $sectionId }}" class="scroll-mt-32 pb-20 mb-20 border-b border-white/5">
                         <div class="section-header border-b border-white/5 pb-4 mb-10">
                             <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
                         </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            @foreach($content->content['items'] as $item)
-                                <div class="bento-card p-5 md:p-10 flex items-center gap-4 group">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-arbitra-emerald shrink-0"></div>
-                                    <h3 class="text-base font-bold text-white/90 uppercase tracking-wider group-hover:text-white transition-colors">{{ $item }}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @foreach(($content->content['items'] ?? []) as $item)
+                                <div class="bento-card p-6 flex items-center gap-4 group">
+                                    <div class="w-2 h-2 rounded-full bg-arbitra-emerald group-hover:scale-150 transition-transform"></div>
+                                    <span class="text-sm font-bold text-white/90 uppercase tracking-wider">{{ $item }}</span>
                                 </div>
                             @endforeach
                         </div>
-                        
-                        <div class="mt-8 flex justify-end">
-                            <div class="text-right">
-                                <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block mb-1">Source</span>
-                                <p class="text-xs text-arbitra-emerald font-bold">{{ $content->source ?? 'DTI Region 6' }}</p>
-                            </div>
+                    </section>
+
+                @elseif($content->type === 'cta')
+                    <section id="{{ $sectionId }}" class="scroll-mt-32 mb-20">
+                        <div class="bento-card p-12 text-center bg-gradient-to-br from-arbitra-emerald/10 to-transparent border-arbitra-emerald/20">
+                            <h3 class="text-4xl font-black uppercase italic mb-6">{{ $content->content['title'] ?? 'Ready to Invest?' }}</h3>
+                            <p class="text-lg text-arbitra-gray max-w-xl mx-auto mb-8">{{ $content->content['description'] ?? '' }}</p>
+                            <button @click="contactOpen = true" class="bg-arbitra-emerald text-arbitra-black px-10 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-all">Get in Touch</button>
                         </div>
                     </section>
                 @endif
@@ -1646,10 +1408,10 @@
                 <div>
                     <h4 class="text-white font-black text-xs uppercase tracking-[0.2em] mb-8">Navigation</h4>
                     <ul class="space-y-4">
-                        <li><a href="#hero" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Why Invest</a></li>
-                        <li><a href="#economy" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Economic Stats</a></li>
-                        <li><a href="#drivers" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Key Drivers</a></li>
-                        <li><a href="/download-profile/{{ rawurlencode($selectedYear) }}" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Download Profile</a></li>
+                        @foreach(collect($sidebarNav)->take(5) as $nav)
+                            <li><a href="#{{ $nav['id'] }}" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">{{ $nav['name'] }}</a></li>
+                        @endforeach
+                        <li><a href="{{ route('download.pdf', ['year' => $selectedYear]) }}" class="text-arbitra-gray hover:text-arbitra-emerald transition-colors text-sm font-medium uppercase tracking-widest">Download PDF</a></li>
                     </ul>
                 </div>
 
@@ -1669,7 +1431,7 @@
                 </div>
 
                 <!-- Connect -->
-                <div>
+                <div id="action">
                     <h4 class="text-white font-black text-xs uppercase tracking-[0.2em] mb-8">Ready to Invest?</h4>
                     <p class="text-arbitra-gray text-sm mb-6">Connect with our team to explore opportunities in Western Visayas.</p>
                     <button @click="contactOpen = true; contactSuccess = false" class="inline-flex items-center gap-2 bg-arbitra-emerald/10 text-arbitra-emerald border border-arbitra-emerald/20 px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-arbitra-emerald hover:text-arbitra-black transition-all">
@@ -2190,6 +1952,15 @@
                     <span class="text-xs font-bold uppercase tracking-widest">{{ $nav['name'] }}</span>
                 </a>
             @endforeach
+            <a href="/download-profile/{{ rawurlencode($selectedYear) }}" 
+               class="flex items-center gap-4 p-4 rounded-2xl border border-white/5 bg-arbitra-emerald/5 text-arbitra-emerald hover:bg-arbitra-emerald hover:text-arbitra-black transition-all mt-4 group">
+                <div class="w-10 h-10 rounded-full bg-arbitra-emerald/10 flex items-center justify-center group-hover:bg-white/20 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <span class="text-xs font-black uppercase tracking-widest">Download Full PDF</span>
+            </a>
         </div>
     </div>
 
