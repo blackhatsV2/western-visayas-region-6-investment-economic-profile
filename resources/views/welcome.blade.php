@@ -1168,7 +1168,7 @@
                                 <div class="relative z-10">
                                     <div class="flex items-center gap-3 mb-10">
                                         <span class="px-5 py-1.5 rounded-full bg-arbitra-emerald/10 text-arbitra-emerald font-black text-[10px] uppercase tracking-[0.2em] border border-arbitra-emerald/20">Investment Motivation</span>
-                                        @if(isset($content->content['modal_details']))
+                                        @if(!empty(data_get($content->content, 'modal_details')))
                                         <div class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-white/50 group-hover:text-white group-hover:bg-arbitra-emerald/20 transition-all flex items-center gap-2">
                                             <span>CLICK TO VIEW DETAILS</span>
                                         </div>
@@ -1190,10 +1190,10 @@
                             <div class="flex flex-row md:flex-col gap-3 md:gap-6 overflow-x-auto mobile-hero-stats">
                                 @foreach((data_get($content->content, 'highlight_stats', [])) as $index => $stat)
                                 <div class="bento-card flex-1 p-6 md:p-10 flex flex-col justify-between">
-                                    <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest">{{ $stat['label'] }}</span>
+                                    <span class="text-sm font-bold text-arbitra-gray uppercase tracking-widest">{{ data_get($stat, 'label') }}</span>
                                     <div class="mt-4">
-                                        <h3 class="text-3xl md:text-5xl font-black emerald-text tracking-tighter">{{ $stat['value'] }}</h3>
-                                        <span class="text-[10px] font-black text-arbitra-gray uppercase tracking-widest mt-2 block opacity-40">{{ $stat['label'] }}</span>
+                                        <h3 class="text-3xl md:text-5xl font-black emerald-text tracking-tighter">{{ data_get($stat, 'value') }}</h3>
+                                        <span class="text-[10px] font-black text-arbitra-gray uppercase tracking-widest mt-2 block opacity-40">{{ data_get($stat, 'label') }}</span>
                                     </div>
                                 </div>
                                 @endforeach
@@ -1250,8 +1250,8 @@
                                         <div class="w-10 h-10 rounded-xl bg-arbitra-emerald/10 flex items-center justify-center mb-8 border border-arbitra-emerald/10">
                                             <svg class="h-5 w-5 text-arbitra-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconPath }}"></path></svg>
                                         </div>
-                                        <h4 class="text-sm font-bold text-arbitra-gray uppercase tracking-widest mb-3">{{ $stat['label'] }}</h4>
-                                        <h3 class="text-3xl font-extrabold text-white tracking-tight leading-none">{{ $stat['value'] }}</h3>
+                                        <h4 class="text-sm font-bold text-arbitra-gray uppercase tracking-widest mb-3">{{ data_get($stat, 'label') }}</h4>
+                                        <h3 class="text-3xl font-extrabold text-white tracking-tight leading-none">{{ data_get($stat, 'value') }}</h3>
                                     </div>
                                 </div>
                             @endforeach
