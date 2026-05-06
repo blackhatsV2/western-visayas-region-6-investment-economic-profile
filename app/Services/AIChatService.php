@@ -27,20 +27,34 @@ class AIChatService
 
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={$this->geminiKey}";
 
-        $response = Http::post($url, [
-            'model' => 'models/gemini-embedding-001',
-            'content' => [
-                'parts' => [
-                    ['text' => $text]
-                ]
-            ]
-        ]);
+        $maxRetries = 3;
+        $retryDelay = 2; // seconds
 
-        if ($response->successful()) {
-            return $response->json('embedding.values', []);
+        for ($i = 0; $i < $maxRetries; $i++) {
+            $response = Http::post($url, [
+                'model' => 'models/gemini-embedding-001',
+                'content' => [
+                    'parts' => [
+                        ['text' => $text]
+                    ]
+                ]
+            ]);
+
+            if ($response->successful()) {
+                return $response->json('embedding.values', []);
+            }
+
+            if ($response->status() === 429) {
+                Log::warning("Gemini Embedding Rate Limit Hit. Retrying in {$retryDelay}s...");
+                sleep($retryDelay);
+                $retryDelay *= 2; // Exponential backoff
+                continue;
+            }
+
+            Log::error('Gemini Embedding Error: ' . $response->body());
+            break;
         }
 
-        Log::error('Gemini Embedding Error: ' . $response->body());
         return [];
     }
 
@@ -118,28 +132,42 @@ Context:
 Question: {$question}
 Answer:";
 
-        $response = Http::post($url, [
-            'contents' => [
-                [
-                    'role' => 'user',
-                    'parts' => [
-                        ['text' => $prompt]
-                    ]
-                ]
-            ],
-            'generationConfig' => [
-                'temperature' => 0.1, // Low temp for more factual/strict responses
-            ]
-        ]);
+        $maxRetries = 2;
+        $retryDelay = 3;
 
-        if ($response->successful()) {
-            $candidates = $response->json('candidates', []);
-            if (!empty($candidates)) {
-                return $candidates[0]['content']['parts'][0]['text'] ?? 'Sorry, I could not generate an answer.';
+        for ($i = 0; $i < $maxRetries; $i++) {
+            $response = Http::post($url, [
+                'contents' => [
+                    [
+                        'role' => 'user',
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.1, 
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $candidates = $response->json('candidates', []);
+                if (!empty($candidates)) {
+                    return $candidates[0]['content']['parts'][0]['text'] ?? 'Sorry, I could not generate an answer.';
+                }
             }
+
+            if ($response->status() === 429) {
+                Log::warning("Gemini Chat Rate Limit Hit. Retrying in {$retryDelay}s...");
+                sleep($retryDelay);
+                $retryDelay *= 2;
+                continue;
+            }
+
+            Log::error('Gemini Chat Error: ' . $response->body());
+            break;
         }
 
-        Log::error('Gemini Chat Error: ' . $response->body());
         return "Sorry, I encountered an error while trying to answer your question. Please try again later.";
     }
 }

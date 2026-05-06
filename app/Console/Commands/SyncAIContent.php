@@ -57,6 +57,9 @@ class SyncAIContent extends Command
             } else {
                 $this->error("Failed to generate embedding for block ID: {$item->id}");
             }
+
+            // Throttling for Free Tier (Gemini Free has low RPM limits)
+            usleep(1500000); // 1.5 second delay between records
         }
 
         if (!empty($vectors)) {
