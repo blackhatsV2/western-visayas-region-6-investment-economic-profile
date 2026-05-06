@@ -106,7 +106,7 @@ class AIChatService
     {
         if (!$this->geminiKey) return "AI services are not configured.";
 
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$this->geminiKey}";
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$this->geminiKey}";
 
         $prompt = "You are an AI assistant for the Western Visayas Region 6 Investment Economic Profile. 
 Answer the user's question using ONLY the provided context below. Do not use outside knowledge. 

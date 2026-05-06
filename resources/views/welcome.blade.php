@@ -567,6 +567,7 @@
     @php
         // Dynamic Navigation Builder
         $navSections = $contents->whereNotIn('type', ['metadata', 'marquee', 'cta'])
+            ->filter(fn($item) => !in_array(strtolower(trim($item->section_title)), ['title page', 'cover page', 'intro', 'introduction', 'welcome']))
             ->sortBy('page_number')
             ->map(function($item) {
                 $slug = Str::slug($item->section_title);
@@ -1132,7 +1133,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-24 md:pt-28 pb-32 md:pb-20 px-4 md:px-8 md:pl-8">
+    <main class="pt-24 md:pt-28 pb-32 md:pb-20 px-4 md:px-8 lg:pl-64 transition-all duration-500">
         @if(isset($noContent) && $noContent)
             <div class="min-h-[60vh] flex flex-col items-center justify-center text-center">
                 <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-8 animate-pulse">
@@ -1296,6 +1297,7 @@
                                     xaxis: { categories: @json(data_get($content->content, 'categories', [])), labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
                                     yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
                                     colors: ['#10b981', '#FFFFFF', '#334155'],
+                                    dataLabels: { enabled: false },
                                     stroke: { width: 2, curve: 'smooth' },
                                     fill: { opacity: 0.9 },
                                     tooltip: { theme: 'dark' }
