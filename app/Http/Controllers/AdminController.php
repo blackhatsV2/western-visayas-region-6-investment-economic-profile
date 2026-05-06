@@ -7,6 +7,7 @@ use App\Models\ProjectContent;
 use App\Models\Inquiry;
 use App\Exports\ProjectContentExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Artisan;
 
 class AdminController extends Controller
 {
@@ -35,6 +36,7 @@ class AdminController extends Controller
         ]);
 
         $content->update($validated);
+        Artisan::call('ai:sync-content');
 
         return response()->json(['success' => true, 'content' => $content]);
     }
@@ -50,6 +52,7 @@ class AdminController extends Controller
         ]);
 
         $content = ProjectContent::create($validated);
+        Artisan::call('ai:sync-content');
 
         return response()->json(['success' => true, 'content' => $content]);
     }
@@ -111,6 +114,7 @@ class AdminController extends Controller
             $newContent->save();
         }
 
+        Artisan::call('ai:sync-content');
         return response()->json(['success' => true]);
     }
 
@@ -189,6 +193,7 @@ class AdminController extends Controller
             ProjectContent::where('year_range', $validated['year'])->whereNotIn('id', $existingIds)->delete();
         });
 
+        Artisan::call('ai:sync-content');
         return response()->json(['success' => true]);
     }
 }
