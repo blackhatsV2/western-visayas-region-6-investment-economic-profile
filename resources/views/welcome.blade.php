@@ -1291,7 +1291,7 @@
                                     series: @json(data_get($content->content, 'series', [])),
                                     chart: { type: '{{ data_get($content->content, 'chart_type', 'bar') }}', height: 400, fontFamily: 'Inter, sans-serif', toolbar: { show: false }, background: 'transparent' },
                                     theme: { mode: 'dark' },
-                                    plotOptions: { bar: { horizontal: {{ !empty(data_get($content->content, 'horizontal')) ? 'true' : 'false' }}, borderRadius: 2, columnWidth: '50%', distributed: {{ count(data_get($content->content, 'series', [])) <= 1 ? 'true' : 'false' }} } },
+                                    plotOptions: { bar: { horizontal: {{ !empty(data_get($content->content, 'horizontal')) ? 'true' : 'false' }}, borderRadius: 2, columnWidth: '50%', distributed: {{ count((array)data_get($content->content, 'series', [])) <= 1 ? 'true' : 'false' }} } },
                                     grid: { borderColor: 'rgba(255,255,255,0.05)' },
                                     xaxis: { categories: @json(data_get($content->content, 'categories', [])), labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
                                     yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
