@@ -93,6 +93,25 @@
     </style>
 </head>
 <body x-data="adminApp()" class="antialiased font-sans">
+    <!-- Global Loading Overlay -->
+    <div x-show="isProcessing" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+         style="display: none;"
+         x-cloak>
+        <div class="flex flex-col items-center gap-4">
+            <svg class="w-12 h-12 text-arbitra-emerald animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-white font-bold text-sm tracking-widest uppercase animate-pulse">Processing...</span>
+        </div>
+    </div>
     <nav class="fixed top-0 w-full z-40 bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-4">
         <div class="max-w-[1240px] mx-auto px-8 flex items-center justify-between">
             <div class="flex items-center gap-4">
@@ -1506,6 +1525,7 @@
 
         function adminApp() {
             return {
+                isProcessing: false,
                 showAddYear: false,
                 isCreatingYear: false,
                 showProfileEdit: false,
@@ -1609,6 +1629,7 @@
                 },
                 
                 async save(id, data) {
+                    this.isProcessing = true;
                     try {
                         const response = await fetch(`/admin/content/${id}`, {
                             method: 'PATCH',
@@ -1622,8 +1643,11 @@
                             Alpine.store('admin').setUnsaved(false);
                             alert('Section updated successfully!');
                             window.location.reload();
+                        } else {
+                            this.isProcessing = false;
                         }
                     } catch (e) {
+                        this.isProcessing = false;
                         alert('Error saving data');
                     }
                 },
@@ -1631,6 +1655,7 @@
                 async deleteSection(id) {
                     if (!confirm('Are you sure you want to delete this section? This cannot be undone.')) return;
                     
+                    this.isProcessing = true;
                     try {
                         const response = await fetch(`/admin/content/${id}`, {
                             method: 'DELETE',
@@ -1641,8 +1666,11 @@
                         if (response.ok) {
                             Alpine.store('admin').setUnsaved(false);
                             window.location.reload();
+                        } else {
+                            this.isProcessing = false;
                         }
                     } catch (e) {
+                        this.isProcessing = false;
                         alert('Error deleting section');
                     }
                 },
@@ -1650,6 +1678,7 @@
                 async confirmDeleteYear(year) {
                     if (!confirm(`CRITICAL WARNING: This will delete ALL data for the period ${year}. This action is permanent. Are you sure?`)) return;
                     
+                    this.isProcessing = true;
                     try {
                         const response = await fetch(`/admin/year/${year}`, {
                             method: 'DELETE',
@@ -1660,8 +1689,11 @@
                         if (response.ok) {
                             Alpine.store('admin').setUnsaved(false);
                             window.location.href = '/admin';
+                        } else {
+                            this.isProcessing = false;
                         }
                     } catch (e) {
+                        this.isProcessing = false;
                         alert('Error deleting year');
                     }
                 },
@@ -1669,6 +1701,7 @@
                 async createYear() {
                     if (!this.newYear) return;
                     this.isCreatingYear = true;
+                    this.isProcessing = true;
                     
                     let finalYear = this.newYear;
                     if (!finalYear.startsWith('As of ')) {
@@ -1695,10 +1728,12 @@
                                 const data = await response.json();
                                 alert(data.message || 'Error duplicating year');
                                 this.isCreatingYear = false;
+                                this.isProcessing = false;
                             }
                         } catch (e) {
                             alert('Error duplicating year');
                             this.isCreatingYear = false;
+                            this.isProcessing = false;
                         }
                     } else {
                         try {
@@ -1719,10 +1754,12 @@
                                 const data = await response.json();
                                 alert(data.message || 'Error creating skeleton year');
                                 this.isCreatingYear = false;
+                                this.isProcessing = false;
                             }
                         } catch (e) {
                             alert('Error creating skeleton year');
                             this.isCreatingYear = false;
+                            this.isProcessing = false;
                         }
                     }
                 },
@@ -1747,6 +1784,7 @@
                         metadata: { site_title: 'Western Visayas: Investment Profile', browser_tab_title: 'WV Region 6 Profile', logo_text: 'DTI Region 6' }
                     };
 
+                    this.isProcessing = true;
                     try {
                         const response = await fetch('/admin/content', {
                             method: 'POST',
@@ -1765,14 +1803,18 @@
                         if (response.ok) {
                             Alpine.store('admin').setUnsaved(false);
                             window.location.reload();
+                        } else {
+                            this.isProcessing = false;
                         }
                     } catch (e) {
+                        this.isProcessing = false;
                         alert('Error creating section');
                     }
                 },
 
                 async deleteInquiry(id) {
                     if (!confirm('Delete this inquiry record?')) return;
+                    this.isProcessing = true;
                     try {
                         const response = await fetch(`/admin/inquiry/${id}`, {
                             method: 'DELETE',
@@ -1781,8 +1823,13 @@
                         if (response.ok) {
                             Alpine.store('admin').setUnsaved(false);
                             window.location.reload();
+                        } else {
+                            this.isProcessing = false;
                         }
-                    } catch (e) { alert('Error deleting inquiry'); }
+                    } catch (e) {
+                        this.isProcessing = false;
+                        alert('Error deleting inquiry');
+                    }
                 }
             }
         }
