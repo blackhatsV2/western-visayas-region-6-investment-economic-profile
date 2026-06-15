@@ -600,6 +600,7 @@
 
 </head>
 <body x-data="app()" class="antialiased font-sans">
+    <x-global-loader />
     @php
         // Dynamic Navigation Builder
         $navSections = $contents->whereNotIn('type', ['metadata', 'marquee', 'cta'])

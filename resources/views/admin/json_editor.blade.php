@@ -62,25 +62,7 @@
     </style>
 </head>
 <body x-data="jsonApp()" class="antialiased font-sans">
-    <!-- Global Loading Overlay -->
-    <div x-show="saving" 
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
-         style="display: none;"
-         x-cloak>
-        <div class="flex flex-col items-center gap-4">
-            <svg class="w-12 h-12 text-arbitra-emerald animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span x-text="currentLoadingMessage" class="text-white font-bold text-sm tracking-widest uppercase animate-pulse">Saving Changes...</span>
-        </div>
-    </div>
+    <x-global-loader />
     <nav class="fixed top-0 w-full z-40 bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-4">
         <div class="max-w-[1240px] mx-auto px-8 flex items-center justify-between">
             <div class="flex items-center gap-4">
@@ -160,28 +142,13 @@
             return {
                 rawJson: @js(json_encode($jsonData, JSON_PRETTY_PRINT)),
                 saving: false,
-                loadingMessages: [
-                    'Saving Changes...',
-                    'Syncing with Database...',
-                    'Crunching the Numbers...',
-                    'Preparing your Data...',
-                    'Almost there...',
-                    'Just a moment...'
-                ],
-                currentLoadingMessage: 'Saving Changes...',
-                loadingInterval: null,
 
                 init() {
                     this.$watch('saving', (value) => {
                         if (value) {
-                            let msgIndex = 0;
-                            this.currentLoadingMessage = this.loadingMessages[0];
-                            this.loadingInterval = setInterval(() => {
-                                msgIndex = (msgIndex + 1) % this.loadingMessages.length;
-                                this.currentLoadingMessage = this.loadingMessages[msgIndex];
-                            }, 1800);
+                            window.dispatchEvent(new Event('show-global-loader'));
                         } else {
-                            if (this.loadingInterval) clearInterval(this.loadingInterval);
+                            window.dispatchEvent(new Event('hide-global-loader'));
                         }
                     });
                 },

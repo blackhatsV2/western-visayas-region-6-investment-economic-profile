@@ -40,6 +40,7 @@
     </style>
 </head>
 <body class="antialiased font-sans min-h-screen flex items-center justify-center p-6">
+    <x-global-loader />
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
         <div class="absolute -top-24 -left-24 w-96 h-96 bg-arbitra-emerald/10 rounded-full blur-[120px]"></div>
         <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-arbitra-emerald/5 rounded-full blur-[120px]"></div>
