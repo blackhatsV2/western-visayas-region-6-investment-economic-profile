@@ -1373,7 +1373,15 @@
     @endif
 
     <div x-show="showAddYear" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl px-6">
-        <div class="bg-arbitra-dark p-12 rounded-[2.5rem] border border-white/10 max-w-md w-full">
+        <div class="bg-arbitra-dark p-12 rounded-[2.5rem] border border-white/10 max-w-md w-full relative overflow-hidden">
+            <div x-show="isCreatingYear" class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 transition-all duration-300">
+                <svg class="animate-spin h-10 w-10 text-arbitra-emerald mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-arbitra-emerald font-black uppercase text-xs tracking-widest animate-pulse">Processing...</span>
+            </div>
+
             <h3 class="text-2xl font-black mb-6 italic uppercase tracking-tighter">Add New Profile Period</h3>
             
             <label class="admin-label">Profile Year (e.g., 2024, 2025) - "As of" will be included automatically</label>
@@ -1499,6 +1507,7 @@
         function adminApp() {
             return {
                 showAddYear: false,
+                isCreatingYear: false,
                 showProfileEdit: false,
                 newYear: '',
                 duplicateFromCurrent: true,
@@ -1659,6 +1668,7 @@
 
                 async createYear() {
                     if (!this.newYear) return;
+                    this.isCreatingYear = true;
                     
                     let finalYear = this.newYear;
                     if (!finalYear.startsWith('As of ')) {
@@ -1684,14 +1694,36 @@
                             } else {
                                 const data = await response.json();
                                 alert(data.message || 'Error duplicating year');
+                                this.isCreatingYear = false;
                             }
                         } catch (e) {
                             alert('Error duplicating year');
+                            this.isCreatingYear = false;
                         }
                     } else {
-                        // To simplify, we just redirect and let the "empty skeleton" logic handle the first section creation
-                        Alpine.store('admin').setUnsaved(false);
-                        window.location.href = `?year=${encodeURIComponent(finalYear)}`;
+                        try {
+                            const response = await fetch('/admin/year/skeleton', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    target_year: finalYear
+                                })
+                            });
+                            if (response.ok) {
+                                Alpine.store('admin').setUnsaved(false);
+                                window.location.href = `?year=${encodeURIComponent(finalYear)}`;
+                            } else {
+                                const data = await response.json();
+                                alert(data.message || 'Error creating skeleton year');
+                                this.isCreatingYear = false;
+                            }
+                        } catch (e) {
+                            alert('Error creating skeleton year');
+                            this.isCreatingYear = false;
+                        }
                     }
                 },
 

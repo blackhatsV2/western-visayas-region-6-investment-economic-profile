@@ -36,7 +36,7 @@ class AdminController extends Controller
         ]);
 
         $content->update($validated);
-        Artisan::call('ai:sync-content');
+        exec('php ' . base_path('artisan') . ' ai:sync-content > /dev/null 2>&1 &');
 
         return response()->json(['success' => true, 'content' => $content]);
     }
@@ -52,7 +52,7 @@ class AdminController extends Controller
         ]);
 
         $content = ProjectContent::create($validated);
-        Artisan::call('ai:sync-content');
+        exec('php ' . base_path('artisan') . ' ai:sync-content > /dev/null 2>&1 &');
 
         return response()->json(['success' => true, 'content' => $content]);
     }
@@ -114,7 +114,98 @@ class AdminController extends Controller
             $newContent->save();
         }
 
-        Artisan::call('ai:sync-content');
+        exec('php ' . base_path('artisan') . ' ai:sync-content > /dev/null 2>&1 &');
+        return response()->json(['success' => true]);
+    }
+
+    public function skeletonYear(Request $request)
+    {
+        $validated = $request->validate([
+            'target_year' => 'required|string',
+        ]);
+
+        $skeleton = [
+            [
+                'year_range' => $validated['target_year'],
+                'type' => 'metadata',
+                'section_title' => 'Site Settings',
+                'page_number' => 1,
+                'content' => ['site_title' => 'Western Visayas: Investment Profile', 'browser_tab_title' => 'WV Region 6 Profile', 'logo_text' => 'DTI Region 6'],
+                'source' => '',
+            ],
+            [
+                'year_range' => $validated['target_year'],
+                'type' => 'hero',
+                'section_title' => 'Hero Section',
+                'page_number' => 2,
+                'content' => [
+                    'title' => 'Why Invest in Western Visayas?',
+                    'description' => 'Replace this description with your AI generated text...',
+                    'highlight_stats' => [
+                        ['label' => 'Total Investment', 'value' => 'P0.00B']
+                    ],
+                    'modal_details' => [
+                        'blocks' => [
+                            ['type' => 'text_card', 'data' => ['text' => 'Replace this popup details section with data from AI.']]
+                        ]
+                    ]
+                ],
+                'source' => 'AI Generated Data',
+            ],
+            [
+                'year_range' => $validated['target_year'],
+                'type' => 'stats_grid',
+                'section_title' => 'Key Stats',
+                'page_number' => 3,
+                'content' => [
+                    'stats' => [
+                        ['label' => 'Placeholder Stat', 'value' => '0', 'blocks' => [['type' => 'text_card', 'data' => ['text' => 'Stat explanation']]]]
+                    ],
+                    'notable_info' => 'Note about stats'
+                ],
+                'source' => '',
+            ],
+            [
+                'year_range' => $validated['target_year'],
+                'type' => 'grid',
+                'section_title' => 'Industries',
+                'page_number' => 4,
+                'content' => [
+                    'items' => [
+                        ['name' => 'Industry 1', 'details' => 'Industry details', 'blocks' => [['type' => 'text_card', 'data' => ['text' => 'More industry popup details here']]]]
+                    ]
+                ],
+                'source' => '',
+            ],
+            [
+                'year_range' => $validated['target_year'],
+                'type' => 'chart',
+                'section_title' => 'Performance Chart',
+                'page_number' => 5,
+                'content' => [
+                    'chart_type' => 'bar',
+                    'series' => [['name' => 'Data Series 1', 'data' => [0, 0, 0]]],
+                    'categories' => ['Q1', 'Q2', 'Q3'],
+                    'notable_info' => 'Chart highlights'
+                ],
+                'source' => '',
+            ],
+            [
+                'year_range' => $validated['target_year'],
+                'type' => 'list',
+                'section_title' => 'Strategy List',
+                'page_number' => 6,
+                'content' => [
+                    'items' => ['Strategy 1', 'Strategy 2']
+                ],
+                'source' => '',
+            ]
+        ];
+
+        foreach ($skeleton as $item) {
+            ProjectContent::create($item);
+        }
+
         return response()->json(['success' => true]);
     }
 
@@ -193,7 +284,7 @@ class AdminController extends Controller
             ProjectContent::where('year_range', $validated['year'])->whereNotIn('id', $existingIds)->delete();
         });
 
-        Artisan::call('ai:sync-content');
+        exec('php ' . base_path('artisan') . ' ai:sync-content > /dev/null 2>&1 &');
         return response()->json(['success' => true]);
     }
 }

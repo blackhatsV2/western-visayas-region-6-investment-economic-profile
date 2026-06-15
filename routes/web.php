@@ -43,6 +43,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::delete('/year/{year}', [AdminController::class, 'destroyYear']);
     Route::delete('/inquiry/{inquiry}', [AdminController::class, 'destroyInquiry']);
     Route::post('/year/duplicate', [AdminController::class, 'duplicateYear']);
+    Route::post('/year/skeleton', [AdminController::class, 'skeletonYear']);
     Route::get('/json', [AdminController::class, 'jsonView']);
     Route::post('/json', [AdminController::class, 'updateFromJson']);
     Route::post('/profile', [AuthController::class, 'updateProfile']);
