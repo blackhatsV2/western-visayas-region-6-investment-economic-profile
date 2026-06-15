@@ -279,34 +279,179 @@
             .mobile-bottom-nav { display: none !important; }
             .mobile-scroll-hint { display: none !important; }
         }
-        /* Floating Sidebar Styles */
-        .sidebar-container {
+        /* ===== COLLAPSIBLE SIDEBAR ===== */
+        .sidebar-panel {
             position: fixed;
-            left: 1.5rem;
-            top: 50%;
-            transform: translateY(-50%) translateX(-120%);
+            left: 0;
+            top: 0;
+            bottom: 0;
             z-index: 200;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            pointer-events: none;
-            padding: 0.5rem;
-            background: rgba(10, 10, 10, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 2.5rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: visible;
+        }
+
+        /* Expanded state */
+        .sidebar-panel.is-expanded {
+            width: 200px;
+        }
+
+        /* Collapsed state */
+        .sidebar-panel.is-collapsed {
+            width: 3.25rem;
+        }
+
+        .sidebar-nav-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding: 5rem 0.5rem 1rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar-nav-list::-webkit-scrollbar { width: 0; }
+        .sidebar-nav-list { scrollbar-width: none; }
+
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            text-decoration: none;
+            position: relative;
+            padding: 0.45rem;
+            border-radius: 0.75rem;
+            transition: background 0.2s ease;
+            min-height: 2.5rem;
+        }
+
+        .sidebar-btn:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        
+        .sidebar-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            min-width: 2.25rem;
+            border-radius: 50%;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sidebar-btn:hover .sidebar-icon,
+        .sidebar-btn.active .sidebar-icon {
+            background: #10b981;
+            color: #000000;
+            transform: scale(1.1);
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
+        }
+        
+        .sidebar-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            line-height: 1.3;
+            /* Allow wrapping so sidebar stays narrow */
+            white-space: normal;
+            word-break: break-word;
+            overflow: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-panel.is-collapsed .sidebar-label {
             opacity: 0;
+            width: 0;
+            overflow: hidden;
+            pointer-events: none;
         }
 
-        .sidebar-container.is-visible {
-            transform: translateY(-50%) translateX(0);
+        .sidebar-panel.is-expanded .sidebar-label {
             opacity: 1;
-            pointer-events: auto;
         }
 
+        /* ---- Sidebar Toggle Chevron ---- */
+        .sidebar-toggle-btn {
+            position: absolute;
+            top: 50%;
+            right: -14px;
+            transform: translateY(-50%);
+            z-index: 210;
+            width: 28px;
+            height: 56px;
+            border-radius: 0 12px 12px 0;
+            background: #10b981;
+            color: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            box-shadow: 4px 0 20px rgba(16, 185, 129, 0.3), 0 0 0 1px rgba(16, 185, 129, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.1rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .sidebar-toggle-btn:hover {
+            width: 34px;
+            background: #34d399;
+            box-shadow: 6px 0 28px rgba(16, 185, 129, 0.5), 0 0 0 1px rgba(52, 211, 153, 0.8);
+        }
+
+        .sidebar-toggle-btn .chevron-icon {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-panel.is-collapsed .sidebar-toggle-btn .chevron-icon {
+            transform: rotate(0deg);
+        }
+
+        .sidebar-panel.is-expanded .sidebar-toggle-btn .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Collapsed: show a tooltip-like label on the toggle */
+        .sidebar-toggle-btn .toggle-label {
+            position: absolute;
+            left: calc(100% + 8px);
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            padding: 0.35rem 0.7rem;
+            border-radius: 0.5rem;
+            font-weight: 800;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateX(-4px);
+        }
+
+        .sidebar-panel.is-collapsed .sidebar-toggle-btn:hover .toggle-label {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* ---- Mobile sidebar (drawer) ---- */
         .mobile-sidebar-drawer {
             position: fixed;
             top: 0;
@@ -342,119 +487,10 @@
             opacity: 1;
             pointer-events: auto;
         }
-        
-        @media (min-width: 1024px) {
-            .sidebar-container { left: 1.5rem; }
-        }
-        
-        .sidebar-btn {
-            pointer-events: auto;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            position: relative;
-        }
-        
-        .sidebar-icon {
-            width: 2.75rem;
-            height: 2.75rem;
-            border-radius: 50%;
-            background: transparent;
-            color: rgba(255, 255, 255, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .sidebar-btn:hover .sidebar-icon,
-        .sidebar-btn.active .sidebar-icon {
-            background: #10b981;
-            color: #000000;
-            border-color: #10b981;
-            transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
-        }
-        
-        .sidebar-label {
-            padding: 0.5rem 1rem 0.5rem 0;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.7rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            white-space: nowrap;
-            display: none; /* Mobile */
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-        
-        @media (min-width: 1024px) {
-            .sidebar-label {
-                display: block; /* Desktop */
-                opacity: 1;
-                transform: translateX(0);
-            }
-            .sidebar-btn:hover .sidebar-icon {
-                background: #10b981;
-                color: #000000;
-                border-color: #10b981;
-                transform: scale(1.1);
-            }
-        }
-        
-        /* Mobile Tooltip */
-        .mobile-tooltip {
-            position: absolute;
-            left: 4rem;
-            background: #10b981;
-            color: #000000;
-            padding: 0.4rem 0.8rem;
-            border-radius: 0.5rem;
-            font-weight: 800;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 101;
-        }
-        
-        @media (max-width: 1023px) {
-            .sidebar-container { left: 1rem; }
-            .sidebar-icon { width: 2.5rem; height: 2.5rem; }
-        }
 
-        /* Desktop Sidebar Toggle (Integrated) */
-        .desktop-sidebar-toggle {
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 0.75rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-        }
-
-        .desktop-sidebar-toggle:hover {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: rgba(16, 185, 129, 0.3);
-            color: #10b981;
-        }
-
-        .desktop-sidebar-toggle.sidebar-hidden {
-            background: #10b981;
-            border-color: #10b981;
-            color: #000000;
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        /* Hide desktop sidebar on mobile */
+        @media (max-width: 767px) {
+            .sidebar-panel { display: none !important; }
         }
         /* Power Search Styles */
         .search-modal-backdrop {
@@ -998,23 +1034,11 @@
     </script>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-[400] bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-3 md:py-4">
+    <nav class="fixed top-0 w-full z-[400] bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-3 md:py-4 transition-all duration-500"
+         :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '200px' : '52px') : ''">
         <div class="max-w-[1240px] mx-auto px-4 md:px-8 flex items-center justify-between">
             <div class="flex items-center gap-3 md:gap-4">
-                <!-- Desktop Sidebar Toggle -->
-                <button class="desktop-sidebar-toggle hidden md:flex" 
-                        :class="{ 'sidebar-hidden': !desktopSidebarOpen }"
-                        @click="desktopSidebarOpen = !desktopSidebarOpen"
-                        title="Toggle Navigation">
-                    <svg x-show="desktopSidebarOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h7"></path>
-                    </svg>
-                    <svg x-show="!desktopSidebarOpen" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-
-                <!-- Sidebar Burger (Mobile Only) -->
+                <!-- Mobile Sidebar Burger -->
                 <button @click="mobileSidebarOpen = !mobileSidebarOpen" class="flex md:hidden flex-col items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl transition-all active:scale-95">
                     <svg x-show="!mobileSidebarOpen" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     <svg x-show="mobileSidebarOpen" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -1133,7 +1157,8 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-24 md:pt-28 pb-32 md:pb-20 px-4 md:px-8 lg:pl-64 transition-all duration-500">
+    <main class="pt-24 md:pt-28 pb-32 md:pb-20 px-4 md:px-8 transition-all duration-500"
+          :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '214px' : '66px') : ''">
         @if(isset($noContent) && $noContent)
             <div class="min-h-[60vh] flex flex-col items-center justify-center text-center">
                 <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-8 animate-pulse">
@@ -1391,7 +1416,8 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-arbitra-black border-t border-white/5 pt-12 md:pt-20 pb-10 px-4 md:px-8">
+    <footer class="bg-arbitra-black border-t border-white/5 pt-12 md:pt-20 pb-10 px-4 md:px-8 transition-all duration-500"
+            :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '214px' : '66px') : ''">
         <div class="max-w-[1240px] mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
                 <!-- Brand -->
@@ -1914,8 +1940,9 @@
     </div>
 
     <!-- Desktop Sidebar Navigation -->
-    <div class="sidebar-container hidden md:flex" :class="{ 'is-visible': desktopSidebarOpen }"
-         x-data="{ activeTooltip: null, activeSection: 'hero' }"
+    <div class="sidebar-panel hidden md:flex" 
+         :class="desktopSidebarOpen ? 'is-expanded' : 'is-collapsed'"
+         x-data="{ activeSection: 'hero' }"
          @scroll.window.throttle.100ms="
             const sections = ['hero', 'profile', 'economy', 'drivers', 'infrastructure', 'logistics', 'industries', 'action'];
             for (const id of sections) {
@@ -1923,18 +1950,34 @@
                 if (el && el.getBoundingClientRect().top <= 200) activeSection = id;
             }
          ">
-        @foreach($sidebarNav as $nav)
-            <a href="#{{ $nav['id'] }}" 
-               class="sidebar-btn group" 
-               :class="{ 'active': activeSection === '{{ $nav['id'] }}' }">
-                <div class="sidebar-icon">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $nav['icon'] }}"></path>
-                    </svg>
-                </div>
-                <span class="sidebar-label">{{ $nav['name'] }}</span>
-            </a>
-        @endforeach
+        <!-- Chevron Toggle Button -->
+        <button class="sidebar-toggle-btn"
+                @click="desktopSidebarOpen = !desktopSidebarOpen"
+                :title="desktopSidebarOpen ? 'Collapse menu' : 'Expand menu'">
+            <span class="chevron-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </span>
+            <span class="toggle-label" x-text="'Open Menu'"></span>
+        </button>
+
+        <!-- Nav Items -->
+        <div class="sidebar-nav-list">
+            @foreach($sidebarNav as $nav)
+                <a href="#{{ $nav['id'] }}" 
+                   class="sidebar-btn group" 
+                   :class="{ 'active': activeSection === '{{ $nav['id'] }}' }"
+                   title="{{ $nav['name'] }}">
+                    <div class="sidebar-icon">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $nav['icon'] }}"></path>
+                        </svg>
+                    </div>
+                    <span class="sidebar-label">{{ $nav['name'] }}</span>
+                </a>
+            @endforeach
+        </div>
     </div>
 
     <!-- Mobile Retractable Sidebar -->
