@@ -5,7 +5,7 @@
 # Database Documentation
 
 ## 1. Overview
-The system relies on a relational database architecture. This document outlines the primary tables powering the application.
+The system relies on a relational database architecture. This document outlines the primary tables powering the application. The system leverages JSON columns for flexible data schemas required by different UI components.
 
 ## 2. Tables
 
@@ -23,7 +23,7 @@ Handles application administrators and authorized personnel.
 | `created_at` / `updated_at` | Timestamp | Nullable | Standard Laravel timestamps. |
 
 ### 2.2 `project_contents` Table
-The core table storing dynamic content sections for the economic profile pages and PDF generator.
+The core table storing dynamic content sections for the economic profile pages, AI context references, and PDF generator.
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
@@ -31,8 +31,8 @@ The core table storing dynamic content sections for the economic profile pages a
 | `page_number` | Integer | Not Null | Defines order flow of the presentation. |
 | `section_title` | String | Nullable | Human-readable title of the data section. |
 | `type` | String | Not Null | Differentiates the layout/component (hero, text, list, chart, stats_grid, table). |
-| `year_range` | String | Nullable | Applicable timeframe for statistics (e.g., '2021-2025', '2024'). |
-| `content` | JSON | Not Null | Structured data specific to the widget type. |
+| `year_range` | String | Nullable | Applicable timeframe for statistics (e.g., 'As of 2024'). |
+| `content` | JSON | Not Null | Structured data specific to the widget type. Cast to array in Laravel model. |
 | `source` | Text | Nullable | Citation metadata ensuring data credibility. |
 | `created_at` / `updated_at` | Timestamp | Nullable | Standard Laravel timestamps. |
 
@@ -46,4 +46,4 @@ Records messages from investors or the general public submitted through the cont
 | `email` | String | Not Null | Submitter's email. |
 | `contact` | String | Not Null | Submitter's phone or secondary contact details. |
 | `message` | Text | Not Null | The body/intent of the submission. |
-| `created_at` / `updated_at` | Timestamp | Nullable | Timestamps indicating when the message was received and potentially acted upon. |
+| `created_at` / `updated_at` | Timestamp | Nullable | Timestamps indicating when the message was received. |

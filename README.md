@@ -1,6 +1,14 @@
-# Western Visayas Industry Profile - Investment Funnel
+# Western Visayas Region 6 Investment & Economic Profile
 
-A premium, data-driven web application showcasing the investment potential and economic profile of Western Visayas (Region VI), Philippines. Built with Laravel, Tailwind CSS, and Alpine.js.
+A premium, data-driven web application showcasing the investment potential and economic profile of Western Visayas (Region VI), Philippines. Built with Laravel 12, Tailwind CSS, and powered by an AI conversational assistant.
+
+## 🚀 Core Capabilities
+
+1. **Public Information Portal**: View dynamic economic data, charts, and statistics for the region, filterable by year.
+2. **AI Assistant (RAG Chatbot)**: Ask an intelligent assistant questions about the regional economy. It uses Pinecone vector search and the Google Gemini API to formulate accurate answers based strictly on the profile's data.
+3. **PDF Export Generation**: Download a full, dynamically generated A4 PDF version of the economic profile for offline reading using `barryvdh/laravel-dompdf`.
+4. **Admin Content Management System (CMS)**: A secure backend providing standard CRUD, Bulk JSON Editing, and "Duplicate/Skeleton Year" tools to manage the region's data.
+5. **Investor Inquiry System**: A reCAPTCHA-secured contact form that routes prospective investors directly to regional administrators.
 
 ## 📚 Documentation
 
@@ -51,7 +59,7 @@ This project uses [Laravel Sail](https://laravel.com/docs/sail), a light-weight 
    ```bash
    cp .env.example .env
    ```
-   *Note: Sail automatically configures the database connection for you.*
+   *Note: Sail automatically configures the database connection. You MUST also add your `GEMINI_API_KEY`, `PINECONE_API_KEY`, `RECAPTCHA_SITE_KEY`, and `RECAPTCHA_SECRET_KEY`.*
 
 4. **Start the containers**:
    ```bash
@@ -91,6 +99,7 @@ Use this if you prefer running PHP and MySQL directly on your host machine.
 2. **Environment Setup**:
    - `cp .env.example .env`
    - Update your `.env` file with your local MySQL credentials (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).
+   - Add your API keys (`GEMINI_API_KEY`, `PINECONE_API_KEY`, `RECAPTCHA_*`).
 
 3. **Database Initialization**:
    ```bash
@@ -113,17 +122,15 @@ The app will be available at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
 ---
 
-## 📊 Data Management
+## 📊 Data Management & Admin Tools
 
-This project is highly data-driven. The content is managed through seeders:
-
-- **Seeder File**: `database/seeders/ProjectContentSeeder.php`
-- **Re-seeding**: If you update the seeder, run `php artisan db:seed --class=ProjectContentSeeder`.
+Administrators can access the backend via the secure `/portal-access-secret` route. The application supports standard CRUD operations, Bulk JSON Editing, and tools to Duplicate or Skeleton years for rapid content management.
 
 ## 🛠 Tech Stack
-- **Backend**: Laravel 12
-- **Frontend**: Tailwind CSS, Alpine.js, ApexCharts
-- **Maps**: Leaflet.js
+- **Backend**: Laravel 12 (PHP 8.2+)
+- **Frontend**: Tailwind CSS, Alpine.js, Blade Templates (Vite build)
+- **AI Integration**: Google Gemini API, Pinecone Vector DB
+- **PDF Engine**: `barryvdh/laravel-dompdf`
 - **Database**: MySQL
 
 ## 📄 License

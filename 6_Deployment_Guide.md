@@ -10,7 +10,8 @@ Before deploying the application, ensure the server meets the following requirem
 - A Database Management System like MySQL / MariaDB or SQLite
 - Web Server (Apache or Nginx)
 - Composer
-- Node.js & NPM (for frontend asset compilation)
+- Node.js & NPM (for frontend Vite compilation)
+- External API Accounts: Google reCAPTCHA, Google Gemini API, Pinecone Vector DB
 
 ## 2. Server Setup (Ubuntu / Debian Example)
 
@@ -36,10 +37,13 @@ Copy the `.env.example` file and configure your environment variables.
 ```bash
 cp .env.example .env
 ```
-Ensure you update the follow variables:
+Ensure you update the following critical variables:
 - `APP_ENV=production`
 - `APP_URL=https://your-domain.com`
 - `DB_*` (Database connection details)
+- `RECAPTCHA_SECRET_KEY` & `RECAPTCHA_SITE_KEY`
+- `GEMINI_API_KEY` (For AI Chat Generative model)
+- `PINECONE_API_KEY`, `PINECONE_INDEX`, `PINECONE_HOST` (For AI Chat Vector search)
 
 ### Step 5: Application Keys and Migrations
 Generate the app key and migrate database structures.
