@@ -191,7 +191,8 @@
             }
             .mobile-bottom-nav a.active,
             .mobile-bottom-nav button.active { color: #10b981; }
-            .mobile-bottom-nav a.active::before {
+            .mobile-bottom-nav a.active::before,
+            .mobile-bottom-nav button.active::before {
                 content: ''; position: absolute;
                 top: -0.35rem; left: 50%; transform: translateX(-50%);
                 width: 18px; height: 3px; background: #10b981;
@@ -285,7 +286,7 @@
             left: 0;
             top: 0;
             bottom: 0;
-            z-index: 200;
+            z-index: 500;
             display: flex;
             flex-direction: column;
             background: rgba(10, 10, 10, 0.85);
@@ -298,12 +299,12 @@
 
         /* Expanded state */
         .sidebar-panel.is-expanded {
-            width: 200px;
+            width: 260px;
         }
 
         /* Collapsed state */
         .sidebar-panel.is-collapsed {
-            width: 3.25rem;
+            width: 4rem;
         }
 
         .sidebar-nav-list {
@@ -311,7 +312,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
-            padding: 5rem 0.5rem 1rem;
+            padding: 5rem 1.25rem 1rem 0.75rem;
             overflow-y: auto;
             overflow-x: hidden;
         }
@@ -385,10 +386,10 @@
         .sidebar-toggle-btn {
             position: absolute;
             top: 50%;
-            right: -14px;
+            right: -24px;
             transform: translateY(-50%);
             z-index: 210;
-            width: 28px;
+            width: 24px;
             height: 56px;
             border-radius: 0 12px 12px 0;
             background: #10b981;
@@ -406,7 +407,8 @@
         }
 
         .sidebar-toggle-btn:hover {
-            width: 34px;
+            width: 28px;
+            right: -28px;
             background: #34d399;
             box-shadow: 6px 0 28px rgba(16, 185, 129, 0.5), 0 0 0 1px rgba(52, 211, 153, 0.8);
         }
@@ -599,7 +601,7 @@
     </style>
 
 </head>
-<body x-data="app()" class="antialiased font-sans">
+<body x-data="app()" @scroll.window.throttle.100ms="handleScroll()" class="antialiased font-sans">
     <x-global-loader />
     @php
         // Dynamic Navigation Builder
@@ -614,12 +616,25 @@
                 $icon = 'M4 6h16M4 12h16M4 18h7'; // Default
                 $title = strtolower($item->section_title);
                 
-                if ($item->type === 'hero') $icon = 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6';
-                elseif (str_contains($title, 'economy') || str_contains($title, 'gdp')) $icon = 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z';
-                elseif (str_contains($title, 'driver') || str_contains($title, 'priority')) $icon = 'M13 10V3L4 14h7v7l9-11h-7z';
-                elseif (str_contains($title, 'infra') || str_contains($title, 'airport') || str_contains($title, 'port')) $icon = 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4';
-                elseif (str_contains($title, 'logistic') || str_contains($title, 'transport')) $icon = 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9';
-                elseif (str_contains($title, 'industry')) $icon = 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.282a2 2 0 01-1.808 0l-.628-.282a6 6 0 00-3.86-.517l-2.387.477a2 2 0 00-1.022.547l-1.159 1.159a2 2 0 00-.547 1.022l-.477 2.387a2 2 0 00.547 1.022l1.159 1.159a2 2 0 001.022.547l2.159-.432-.628.282a2 2 0 011.808 0l.628.282a6 6 0 003.86.517z';
+                if ($item->type === 'hero') {
+                    $icon = 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6';
+                } elseif (str_contains($title, 'overview') || str_contains($title, 'regional') || str_contains($title, 'intro') || str_contains($title, 'welcome')) {
+                    $icon = 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7';
+                } elseif (str_contains($title, 'economy') || str_contains($title, 'gdp') || str_contains($title, 'growth') || str_contains($title, 'rate') || str_contains($title, 'capita')) {
+                    $icon = 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6';
+                } elseif (str_contains($title, 'establishment') || str_contains($title, 'business') || str_contains($title, 'registration') || str_contains($title, 'dti') || str_contains($title, 'corporate') || str_contains($title, 'operation')) {
+                    $icon = 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4';
+                } elseif (str_contains($title, 'employment') || str_contains($title, 'employee') || str_contains($title, 'job') || str_contains($title, 'labor')) {
+                    $icon = 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 005.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z';
+                } elseif (str_contains($title, 'driver') || str_contains($title, 'priority')) {
+                    $icon = 'M13 10V3L4 14h7v7l9-11h-7z';
+                } elseif (str_contains($title, 'infra') || str_contains($title, 'airport') || str_contains($title, 'port')) {
+                    $icon = 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4';
+                } elseif (str_contains($title, 'logistic') || str_contains($title, 'transport')) {
+                    $icon = 'M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-3-1a1 1 0 01-1 1H15';
+                } elseif (str_contains($title, 'industry') || str_contains($title, 'sectors') || str_contains($title, 'share')) {
+                    $icon = 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z';
+                }
                 
                 return [
                     'id' => $slug,
@@ -630,6 +645,9 @@
 
         $sidebarNav = $navSections->values()->toArray();
         $sidebarNav[] = ['id' => 'action', 'name' => 'Connect', 'icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'];
+
+        $economyNav = collect($sidebarNav)->first(fn($n) => str_contains(strtolower($n['id']), 'economy') || str_contains(strtolower($n['id']), 'gdp') || str_contains(strtolower($n['id']), 'domestic-product') || str_contains(strtolower($n['id']), 'share'));
+        $driversNav = collect($sidebarNav)->first(fn($n) => str_contains(strtolower($n['id']), 'driver') || str_contains(strtolower($n['id']), 'business') || str_contains(strtolower($n['id']), 'establishment'));
     @endphp
     <script>
         // Global Map Renderer for Blocks
@@ -675,7 +693,12 @@
             Alpine.data('app', () => ({
                 mobileSidebarOpen: false,
                 desktopSidebarOpen: true,
+                activeSection: 'hero',
+                activeTab: 'hero',
+                sidebarNavIds: @json(collect($sidebarNav)->pluck('id')),
                 modalOpen: false,
+                tooltipText: '',
+                tooltipStyle: { left: '0px', top: '0px', display: 'none' },
                 contactOpen: false,
                 selectedYear: '{{ $selectedYear }}',
                 policyOpen: false,
@@ -698,6 +721,8 @@
                     if (this.searchQuery) {
                         this.performSearch();
                     }
+                    
+                    this.handleScroll();
 
                     window.addEventListener('keydown', (e) => {
                         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -1029,6 +1054,51 @@
                         const el = document.getElementById(result.id);
                         if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }
+                },
+                handleScroll() {
+                    const sections = this.sidebarNavIds || [];
+                    for (const id of sections) {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            const rect = el.getBoundingClientRect();
+                            if (rect.top <= 200) {
+                                this.activeSection = id;
+                            }
+                        }
+                    }
+                    
+                    let activeMob = 'hero';
+                    const economyId = '{{ $economyNav['id'] ?? '' }}';
+                    const driversId = '{{ $driversNav['id'] ?? '' }}';
+                    
+                    const elEconomy = economyId ? document.getElementById(economyId) : null;
+                    const elDrivers = driversId ? document.getElementById(driversId) : null;
+                    const elAction = document.getElementById('action');
+                    
+                    if (elAction && elAction.getBoundingClientRect().top <= 200) {
+                        activeMob = 'action';
+                    } else if (elDrivers && elDrivers.getBoundingClientRect().top <= 200) {
+                        activeMob = 'drivers';
+                    } else if (elEconomy && elEconomy.getBoundingClientRect().top <= 200) {
+                        activeMob = 'economy';
+                    } else {
+                        activeMob = 'hero';
+                    }
+                    this.activeTab = activeMob;
+                },
+                showTooltip(event, text) {
+                    if (!this.desktopSidebarOpen) {
+                        const rect = event.currentTarget.getBoundingClientRect();
+                        this.tooltipText = text;
+                        this.tooltipStyle = {
+                            left: `${rect.right + 12}px`,
+                            top: `${rect.top + rect.height / 2}px`,
+                            display: 'block'
+                        };
+                    }
+                },
+                hideTooltip() {
+                    this.tooltipStyle = { display: 'none' };
                 }
             }));
         });
@@ -1036,7 +1106,7 @@
 
     <!-- Navigation -->
     <nav class="fixed top-0 w-full z-[400] bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-3 md:py-4 transition-all duration-500"
-         :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '200px' : '52px') : ''">
+         :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '260px' : '64px') : ''">
         <div class="max-w-[1240px] mx-auto px-4 md:px-8 flex items-center justify-between">
             <div class="flex items-center gap-3 md:gap-4">
                 <!-- Mobile Sidebar Burger -->
@@ -1061,11 +1131,18 @@
             <div class="flex items-center gap-2 md:gap-3">
                 @php 
                     $yearsList = collect($years);
-                    $shownYears = $yearsList->take(2); 
-                    $otherYears = $yearsList->slice(2);
+                    $selectedYearVal = $selectedYear;
                     
-                    // On mobile we show 1, so the 2nd year onwards should be in the dropdown
-                    $mobileDropYears = $yearsList->slice(1);
+                    // Sort selected year first in the list to guarantee it is always visible flat
+                    $sortedYears = $yearsList->sortBy(fn($y) => $y == $selectedYearVal ? 0 : 1)->values();
+                    
+                    // Desktop display:
+                    $shownYearsDesktop = $sortedYears->take(2);
+                    $otherYearsDesktop = $sortedYears->slice(2);
+                    
+                    // Mobile display:
+                    $shownYearsMobile = $sortedYears->take(1);
+                    $otherYearsMobile = $sortedYears->slice(1);
                 @endphp
                 <div class="flex items-center gap-1.5 md:gap-2 bg-white/5 px-1.5 md:px-2 py-1 md:py-1.5 rounded-full border border-white/5" x-data="{ moreOpen: false }">
                     <!-- Search Trigger -->
@@ -1077,14 +1154,27 @@
                         </svg>
                     </button>
                     
-                    @foreach($shownYears as $index => $year)
-                        <a href="?year={{ $year }}" 
-                           class="px-2 md:px-3 py-1 rounded-full text-[9px] md:text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'text-arbitra-gray hover:text-white' }} {{ $index >= 1 ? 'hidden md:block' : '' }}">
-                            {{ $year }}
-                        </a>
-                    @endforeach
+                    {{-- Desktop flat buttons --}}
+                    <div class="hidden md:flex items-center gap-1.5">
+                        @foreach($shownYearsDesktop as $year)
+                            <a href="?year={{ $year }}" 
+                               class="px-2 md:px-3 py-1 rounded-full text-[9px] md:text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'text-arbitra-gray hover:text-white' }}">
+                                {{ $year }}
+                            </a>
+                        @endforeach
+                    </div>
+
+                    {{-- Mobile flat button --}}
+                    <div class="md:hidden flex items-center">
+                        @foreach($shownYearsMobile as $year)
+                            <a href="?year={{ $year }}" 
+                               class="px-2 py-1 rounded-full text-[9px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'text-arbitra-gray hover:text-white' }}">
+                                {{ $year }}
+                            </a>
+                        @endforeach
+                    </div>
                     
-                    @if($mobileDropYears->count() > 0)
+                    @if($yearsList->count() > 1)
                     <div class="relative">
                         <button @click="moreOpen = !moreOpen" 
                                 class="px-1.5 md:px-2 py-1 text-arbitra-gray hover:text-white transition-all text-xs font-bold flex items-center gap-1 group"
@@ -1093,18 +1183,18 @@
                         </button>
                         <div x-show="moreOpen" @click.away="moreOpen = false" x-cloak
                              class="absolute top-10 right-0 bg-arbitra-dark border border-white/10 rounded-xl p-2 min-w-[100px] z-50 shadow-2xl">
-                            {{-- Desktop Dropdown (from 4th year onwards) --}}
+                            {{-- Desktop Dropdown --}}
                             <div class="hidden md:block">
-                                @foreach($otherYears as $year)
+                                @foreach($otherYearsDesktop as $year)
                                     <a href="?year={{ $year }}" 
                                        class="block px-4 py-2 rounded-lg text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'text-arbitra-gray hover:text-white hover:bg-white/5' }}">
                                         {{ $year }}
                                     </a>
                                 @endforeach
                             </div>
-                            {{-- Mobile Dropdown (from 2nd year onwards) --}}
+                            {{-- Mobile Dropdown --}}
                             <div class="md:hidden">
-                                @foreach($mobileDropYears as $year)
+                                @foreach($otherYearsMobile as $year)
                                     <a href="?year={{ $year }}" 
                                        class="block px-4 py-2 rounded-lg text-[10px] font-bold transition-all {{ $selectedYear == $year ? 'bg-arbitra-emerald text-arbitra-black' : 'text-arbitra-gray hover:text-white hover:bg-white/5' }}">
                                         {{ $year }}
@@ -1159,7 +1249,7 @@
 
     <!-- Main Content -->
     <main class="pt-24 md:pt-28 pb-32 md:pb-20 px-4 md:px-8 transition-all duration-500"
-          :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '214px' : '66px') : ''">
+          :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '276px' : '80px') : ''">
         @if(isset($noContent) && $noContent)
             <div class="min-h-[60vh] flex flex-col items-center justify-center text-center">
                 <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-8 animate-pulse">
@@ -1418,7 +1508,7 @@
 
     <!-- Footer -->
     <footer class="bg-arbitra-black border-t border-white/5 pt-12 md:pt-20 pb-10 px-4 md:px-8 transition-all duration-500"
-            :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '214px' : '66px') : ''">
+            :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '276px' : '80px') : ''">
         <div class="max-w-[1240px] mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
                 <!-- Brand -->
@@ -1908,25 +1998,16 @@
     </div>
 
     <!-- Mobile Bottom Navigation -->
-    <div class="mobile-bottom-nav" x-data="{ activeTab: 'hero' }"
-         @scroll.window.throttle.100ms="
-            const sections = ['hero', 'economy', 'drivers', 'action'];
-            let active = 'hero';
-            for (const id of sections) {
-                const el = document.getElementById(id);
-                if (el && el.getBoundingClientRect().top <= 200) active = id;
-            }
-            activeTab = active;
-         ">
+    <div class="mobile-bottom-nav">
         <a href="#hero" :class="{ 'active': activeTab === 'hero' }">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             <span>Home</span>
         </a>
-        <a href="#economy" :class="{ 'active': activeTab === 'economy' }">
+        <a href="#{{ $economyNav['id'] ?? 'economy' }}" :class="{ 'active': activeTab === 'economy' }">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
             <span>Stats</span>
         </a>
-        <a href="#drivers" :class="{ 'active': activeTab === 'drivers' }">
+        <a href="#{{ $driversNav['id'] ?? 'drivers' }}" :class="{ 'active': activeTab === 'drivers' }">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             <span>Drivers</span>
         </a>
@@ -1942,15 +2023,7 @@
 
     <!-- Desktop Sidebar Navigation -->
     <div class="sidebar-panel hidden md:flex" 
-         :class="desktopSidebarOpen ? 'is-expanded' : 'is-collapsed'"
-         x-data="{ activeSection: 'hero' }"
-         @scroll.window.throttle.100ms="
-            const sections = ['hero', 'profile', 'economy', 'drivers', 'infrastructure', 'logistics', 'industries', 'action'];
-            for (const id of sections) {
-                const el = document.getElementById(id);
-                if (el && el.getBoundingClientRect().top <= 200) activeSection = id;
-            }
-         ">
+         :class="desktopSidebarOpen ? 'is-expanded' : 'is-collapsed'">
         <!-- Chevron Toggle Button -->
         <button class="sidebar-toggle-btn"
                 @click="desktopSidebarOpen = !desktopSidebarOpen"
@@ -1966,10 +2039,13 @@
         <!-- Nav Items -->
         <div class="sidebar-nav-list">
             @foreach($sidebarNav as $nav)
+                @php $safeName = str_replace("'", "\\'", $nav['name']); @endphp
                 <a href="#{{ $nav['id'] }}" 
                    class="sidebar-btn group" 
                    :class="{ 'active': activeSection === '{{ $nav['id'] }}' }"
-                   title="{{ $nav['name'] }}">
+                   @mouseenter="showTooltip($event, '{{ $safeName }}')"
+                   @mouseleave="hideTooltip()"
+                   :title="desktopSidebarOpen ? '{{ $safeName }}' : ''">
                     <div class="sidebar-icon">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $nav['icon'] }}"></path>
@@ -2029,6 +2105,15 @@
             });
         }
     </script>
+
+    <!-- Collapsed Sidebar Icon Hover Tooltip -->
+    <div x-show="tooltipStyle.display === 'block'"
+         :style="{ left: tooltipStyle.left, top: tooltipStyle.top }"
+         style="transform: translateY(-50%);"
+         class="fixed z-[600] bg-arbitra-black/95 border border-arbitra-emerald/30 text-arbitra-emerald px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider pointer-events-none shadow-2xl transition-all"
+         x-text="tooltipText"
+         x-cloak>
+    </div>
 
     @include('components.ai-chat')
 </body>
