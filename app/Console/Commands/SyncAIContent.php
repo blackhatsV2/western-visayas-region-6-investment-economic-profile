@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\ProjectContent;
 use App\Services\AIChatService;
+use App\Exceptions\AIChatException;
 use Illuminate\Support\Arr;
 
 class SyncAIContent extends Command
@@ -41,21 +42,25 @@ class SyncAIContent extends Command
             
             $this->info("Embedding block ID: {$item->id}...");
             
-            $embedding = $chatService->getEmbedding($textChunk);
-            
-            if (!empty($embedding)) {
-                $vectors[] = [
-                    'id' => 'project_content_' . $item->id,
-                    'values' => $embedding,
-                    'metadata' => [
-                        'source' => 'region6_profile',
-                        'section_title' => $item->section_title ?? '',
-                        'type' => $item->type ?? '',
-                        'text' => $textChunk
-                    ]
-                ];
-            } else {
-                $this->error("Failed to generate embedding for block ID: {$item->id}");
+            try {
+                $embedding = $chatService->getEmbedding($textChunk);
+                
+                if (!empty($embedding)) {
+                    $vectors[] = [
+                        'id' => 'project_content_' . $item->id,
+                        'values' => $embedding,
+                        'metadata' => [
+                            'source' => 'region6_profile',
+                            'section_title' => $item->section_title ?? '',
+                            'type' => $item->type ?? '',
+                            'text' => $textChunk
+                        ]
+                    ];
+                } else {
+                    $this->error("Failed to generate embedding for block ID: {$item->id}");
+                }
+            } catch (AIChatException $e) {
+                $this->error("Failed to generate embedding for block ID: {$item->id}: " . $e->getMessage());
             }
 
             // Throttling for Free Tier (Gemini Free has low RPM limits)
@@ -68,10 +73,14 @@ class SyncAIContent extends Command
             $chunks = array_chunk($vectors, 50);
             $successCount = 0;
             foreach ($chunks as $chunk) {
-                if ($chatService->upsertToPinecone($chunk)) {
-                    $successCount++;
-                } else {
-                    $this->error('Failed to upsert a chunk.');
+                try {
+                    if ($chatService->upsertToPinecone($chunk)) {
+                        $successCount++;
+                    } else {
+                        $this->error('Failed to upsert a chunk.');
+                    }
+                } catch (AIChatException $e) {
+                    $this->error('Failed to upsert a chunk: ' . $e->getMessage());
                 }
             }
             $this->info("Sync complete! Inserted {$successCount} chunks of vectors.");

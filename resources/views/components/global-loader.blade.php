@@ -40,6 +40,7 @@
 
                 // Listen to form submissions
                 document.addEventListener('submit', (e) => {
+                    if (e.defaultPrevented) return;
                     if (!e.target.target || e.target.target !== '_blank') {
                         this.startLoading();
                     }

@@ -1752,7 +1752,7 @@
                     <h3 class="text-3xl font-extrabold text-white tracking-tighter mb-4 uppercase italic">Connect with Us</h3>
                     <p class="text-arbitra-gray mb-8 text-sm">Fill out the form below and the DTI Region 6 team will get back to you shortly.</p>
                     
-                    <form @submit.prevent="submitInquiry" class="space-y-6">
+                    <form @submit.prevent.stop="submitInquiry" class="space-y-6">
                         <div>
                             <label class="block text-[10px] font-black text-arbitra-emerald uppercase tracking-[0.2em] mb-2">Full Name</label>
                             <input type="text" x-model="contactForm.name" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-arbitra-emerald outline-none transition uppercase text-xs font-bold">

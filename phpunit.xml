@@ -31,5 +31,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="GEMINI_API_KEY" value="test-gemini-key"/>
+        <env name="PINECONE_API_KEY" value="test-pinecone-key"/>
+        <env name="PINECONE_HOST" value="https://my-index-xxx.svc.pinecone.io"/>
     </php>
 </phpunit>

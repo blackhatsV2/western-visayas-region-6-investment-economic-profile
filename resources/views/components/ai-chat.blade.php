@@ -41,7 +41,7 @@
         </div>
 
         <!-- Messages Area -->
-        <div class="flex-1 overflow-y-auto p-4 space-y-5" id="ai-chat-messages">
+        <div class="flex-1 overflow-y-auto p-4 space-y-5" id="ai-chat-messages" @click="handleChatClick($event)">
             <!-- Intro message -->
             <div class="flex justify-start">
                 <div class="bg-[#1e1e22] text-gray-300 border border-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] text-sm shadow-sm leading-relaxed">
@@ -52,8 +52,7 @@
             <template x-for="(msg, index) in messages" :key="index">
                 <div :class="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
                     <div :class="msg.role === 'user' ? 'bg-emerald-600 text-white rounded-2xl rounded-tr-sm' : 'bg-[#1e1e22] text-gray-200 border border-gray-800 rounded-2xl rounded-tl-sm'"
-                         class="px-4 py-3 max-w-[85%] text-sm shadow-sm whitespace-pre-wrap leading-relaxed" x-text="msg.content">
-                    </div>
+                         class="px-4 py-3 max-w-[85%] text-sm shadow-sm whitespace-pre-wrap leading-relaxed"><span x-show="msg.role === 'user'" x-text="msg.content"></span><span x-show="msg.role !== 'user'" x-html="formatContent(msg.content)"></span></div>
                 </div>
             </template>
             
@@ -68,7 +67,7 @@
 
         <!-- Input Area -->
         <div class="p-3 bg-[#111113] border-t border-gray-800 relative z-10 w-full">
-            <form @submit.prevent="sendMessage" class="relative flex items-center">
+            <form @submit.prevent.stop="sendMessage" class="relative flex items-center">
                 <input type="text" x-model="question" placeholder="Ask about Region 6..." 
                        class="w-full bg-[#18181b] text-white border border-gray-800/80 rounded-xl py-3.5 pl-4 pr-12 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/30 text-[13px] placeholder-gray-600 transition-all font-medium"
                        :disabled="isLoading"
@@ -98,6 +97,65 @@
             question: '',
             isLoading: false,
             messages: [],
+            
+            formatContent(content) {
+                if (!content) return '';
+                // Escape HTML first to prevent XSS
+                let escaped = content
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+
+                // Match markdown bold **text** -> <strong>text</strong>
+                escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+                // Match markdown links [Text](#anchor)
+                const markdownLinkRegex = /\[([^\]]+)\]\((#[a-z0-9\-]+)\)/gi;
+                return escaped.replace(markdownLinkRegex, (match, text, anchor) => {
+                    return `<a href="${anchor}" class="text-emerald-400 hover:text-emerald-300 font-bold underline decoration-dotted transition-colors">${text}</a>`;
+                });
+            },
+
+            handleChatClick(e) {
+                const anchor = e.target.closest('a');
+                if (anchor && anchor.getAttribute('href')?.startsWith('#')) {
+                    e.preventDefault();
+                    const targetId = anchor.getAttribute('href');
+                    this.goToSection(targetId);
+                }
+            },
+
+            goToSection(targetId) {
+                // Close the chat window
+                this.isOpen = false;
+                document.body.classList.remove('overflow-hidden');
+
+                // Find target element
+                const element = document.querySelector(targetId);
+                if (element) {
+                    // Scroll to the element
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    // Highlight the section
+                    element.classList.add('ring-4', 'ring-emerald-500/50', 'transition-all', 'duration-500');
+                    setTimeout(() => {
+                        element.classList.remove('ring-4', 'ring-emerald-500/50');
+                    }, 2500);
+
+                    // Check if the element itself or any child has modal content to pop up
+                    const clickableEl = element.hasAttribute('data-content') 
+                        ? element 
+                        : element.querySelector('[data-content]');
+                    
+                    if (clickableEl) {
+                        setTimeout(() => {
+                            clickableEl.click();
+                        }, 800);
+                    }
+                }
+            },
             
             toggleChat() {
                 this.isOpen = !this.isOpen;
@@ -148,11 +206,22 @@
                     if (response.ok) {
                         this.messages.push({ role: 'ai', content: data.answer });
                     } else {
-                        // Handle rate limit error 429
+                        // Handle rate limit error 429 (from Laravel route throttling)
                         if (response.status === 429) {
-                            this.messages.push({ role: 'ai', content: "🛑 I'm receiving too many questions right now to keep the free API quota safe. Please try again in exactly one minute!" });
+                            this.messages.push({ role: 'ai', content: "⏳ **Cooldown Active:** I'm receiving too many questions right now to keep the free API quota safe. Please wait a minute and try again!" });
                         } else {
-                            this.messages.push({ role: 'ai', content: data.error || "An error occurred while connecting to the AI service." });
+                            const errorType = data.error_type || 'generic';
+                            let message = "🔌 **Connection Error:** I encountered a hiccup while trying to generate your answer. Please try again in a moment.";
+                            
+                            if (errorType === 'quota') {
+                                message = "🛑 **Quota Limit Reached:** The daily limit for free AI questions has been reached. Please check back tomorrow!";
+                            } else if (errorType === 'busy_server') {
+                                message = "☕ **Busy Server:** Google's AI model is currently experiencing high demand. Please try again in a few seconds!";
+                            } else if (errorType === 'tokens') {
+                                message = "💬 **Question Too Long:** Your question exceeds the context limits. Please shorten it and try again.";
+                            }
+                            
+                            this.messages.push({ role: 'ai', content: message });
                         }
                     }
                 } catch (e) {

@@ -1,17 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\AIChatService;
+use App\Exceptions\AIChatException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 
 class ChatController extends Controller
 {
     /**
      * Handle the chat query input and return an AI response.
+     *
+     * @param \Illuminate\Http\Request $request The incoming HTTP request.
+     * @param \App\Services\AIChatService $chatService The AI chat service.
+     * @return \Illuminate\Http\JsonResponse The JSON response containing the answer.
      */
-    public function ask(Request $request, AIChatService $chatService)
+    public function ask(Request $request, AIChatService $chatService): JsonResponse
     {
         $request->validate([
             'question' => 'required|string|max:1000'
@@ -30,32 +38,36 @@ class ChatController extends Controller
             ]);
         }
 
-        // 1. Embed the question
-        $questionEmbedding = $chatService->getEmbedding($question);
-        
-        if (empty($questionEmbedding)) {
-            return response()->json(['error' => 'Failed to process question via AI. Please check API keys.'], 500);
-        }
+        try {
+            // 1. Get similar context from Pinecone using AIChatService
+            $context = $chatService->getContextForQuestion($question);
 
-        // 2. Query Pinecone
-        $matches = $chatService->queryPinecone($questionEmbedding, 3);
-        
-        $context = "";
-        foreach ($matches as $match) {
-            $context .= ($match['metadata']['text'] ?? '') . "\n\n";
-        }
+            // 2. Get Answer from Gemini using the context
+            $answer = $chatService->chatWithContext($question, $context);
 
-        // 3. Get Answer from Gemini
-        $answer = $chatService->chatWithContext($question, $context);
-
-        // Cache the response for 1 hour to save API quota on repeated similar queries
-        if ($answer !== "Sorry, I encountered an error while trying to answer your question. Please try again later." && $answer !== "AI services are not configured.") {
+            // Cache the response for 1 hour to save API quota on repeated similar queries
             Cache::put($cacheKey, $answer, now()->addHour());
-        }
 
-        return response()->json([
-            'answer' => $answer,
-            'cached' => false
-        ]);
+            return response()->json([
+                'answer' => $answer,
+                'cached' => false
+            ]);
+        } catch (AIChatException $e) {
+            $message = $e->getMessage();
+            $errorType = 'generic';
+
+            if (str_contains($message, 'Quota') || str_contains($message, 'quota')) {
+                $errorType = 'quota';
+            } elseif (str_contains($message, 'busy') || str_contains($message, 'demand') || str_contains($message, 'Unavailable') || str_contains($message, 'unavailable') || str_contains($message, 'busy_server')) {
+                $errorType = 'busy_server';
+            } elseif (str_contains($message, 'token') || str_contains($message, 'Token')) {
+                $errorType = 'tokens';
+            }
+
+            return response()->json([
+                'error' => $message,
+                'error_type' => $errorType
+            ], 500);
+        }
     }
 }
