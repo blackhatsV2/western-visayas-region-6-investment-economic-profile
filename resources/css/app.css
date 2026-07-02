@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
     --arbitra-black: 241, 245, 249; /* #F1F5F9 (formal slate background) */
     --arbitra-dark: 255, 255, 255;  /* #FFFFFF (solid white background for cards/nav) */

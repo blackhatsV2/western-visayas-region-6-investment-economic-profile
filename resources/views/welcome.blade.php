@@ -20,8 +20,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Leaflet Map -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="{{ asset('leaflet.css') }}"/>
+    <script src="{{ asset('leaflet.js') }}"></script>
     <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
     
     <script>
@@ -761,6 +761,10 @@
     <script>
         // Global Map Renderer for Blocks
         window.renderModalMap = function(containerId, data) {
+            if (typeof window.L === 'undefined') {
+                setTimeout(() => { window.renderModalMap(containerId, data); }, 100);
+                return;
+            }
             const mapContainer = document.getElementById(containerId);
             const points = Array.isArray(data) ? data : (data.items || []);
             if (!mapContainer || points.length === 0) return;
@@ -770,7 +774,9 @@
             
             window.currentModalMap = L.map(containerId).setView([points[0].lat, points[0].lng], 8);
             
-            setTimeout(() => { window.currentModalMap.invalidateSize(); }, 200);
+            setTimeout(() => { if (window.currentModalMap) window.currentModalMap.invalidateSize(); }, 100);
+            setTimeout(() => { if (window.currentModalMap) window.currentModalMap.invalidateSize(); }, 300);
+            setTimeout(() => { if (window.currentModalMap) window.currentModalMap.invalidateSize(); }, 600);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap',
@@ -908,9 +914,15 @@
                         this.updateScrollLock();
                         if (value) {
                             setTimeout(() => { this.initMap(); }, 100); 
-                        } else if (this.map) {
-                            this.map.remove();
-                            this.map = null;
+                        } else {
+                            if (this.map) {
+                                this.map.remove();
+                                this.map = null;
+                            }
+                            if (window.currentModalMap) {
+                                window.currentModalMap.remove();
+                                window.currentModalMap = null;
+                            }
                         }
                     });
                     this.$watch('contactOpen', () => this.updateScrollLock());
@@ -957,13 +969,19 @@
                     }
                 },
                 renderMapInstance(containerId, points) {
+                    if (typeof window.L === 'undefined') {
+                        setTimeout(() => { this.renderMapInstance(containerId, points); }, 100);
+                        return;
+                    }
                     const mapContainer = document.getElementById(containerId);
                     if (!mapContainer || !points || points.length === 0) return;
 
                     if (this.map) { this.map.remove(); }
                     this.map = L.map(containerId).setView([points[0].lat, points[0].lng], 8);
                     
-                    setTimeout(() => { this.map.invalidateSize(); }, 200);
+                    setTimeout(() => { if (this.map) this.map.invalidateSize(); }, 100);
+                    setTimeout(() => { if (this.map) this.map.invalidateSize(); }, 300);
+                    setTimeout(() => { if (this.map) this.map.invalidateSize(); }, 600);
 
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; OpenStreetMap',
@@ -1863,8 +1881,8 @@
                             <div class="space-y-4">
                                 <!-- Map Block rendering -->
                                 <template x-if="block.type === 'map'">
-                                    <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8" x-init="$nextTick(() => { if(window.renderModalMap) window.renderModalMap('leaflet-map-' + index, block.data) })">
-                                        <div :id="'leaflet-map-' + index" class="w-full h-full bg-arbitra-dark"></div>
+                                    <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8">
+                                        <div :id="'leaflet-map-' + index" class="w-full h-full bg-arbitra-dark" x-init="$nextTick(() => { if(window.renderModalMap) window.renderModalMap('leaflet-map-' + index, block.data) })"></div>
                                     </div>
                                 </template>
 
@@ -1919,7 +1937,7 @@
                             <!-- Leaflet Map Container (Fixed Position) -->
                             <template x-if="modalContent['Map Points']">
                                 <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8">
-                                    <div id="leaflet-map" class="w-full h-full bg-arbitra-dark"></div>
+                                    <div id="leaflet-map" class="w-full h-full bg-arbitra-dark" x-init="$nextTick(() => { renderMapInstance('leaflet-map', modalContent['Map Points']) })"></div>
                                 </div>
                             </template>
 

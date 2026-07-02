@@ -16,11 +16,11 @@
          x-transition:leave="transition ease-in duration-200 transform origin-bottom-right"
          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
          x-transition:leave-end="opacity-0 scale-50 translate-y-4"
-         class="absolute bottom-full mb-6 right-0 w-[calc(100vw-2rem)] sm:w-[380px] bg-white dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[500px] max-h-[75vh] z-[1000]"
+         class="absolute bottom-full mb-6 right-0 w-[calc(100vw-2rem)] sm:w-[380px] bg-arbitra-dark dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[500px] max-h-[75vh] z-[1000]"
          style="display: none; transform-origin: bottom right;">
         
         <!-- Header -->
-        <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-[#141416] dark:to-[#1c1c1f] p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-800 relative">
+        <div class="bg-gradient-to-r from-slate-50 to-slate-100/80 dark:from-[#141416] dark:to-[#1c1c1f] p-4 flex justify-between items-center border-b border-slate-200/80 dark:border-gray-800 relative">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
@@ -33,7 +33,7 @@
                     </div>
                 </div>
             </div>
-            <button @click="toggleChat" class="w-8 h-8 rounded-full bg-gray-200/50 dark:bg-white/5 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-slate-800 dark:hover:text-white transition-colors">
+            <button @click="toggleChat" class="w-8 h-8 rounded-full bg-slate-200/50 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-800 dark:hover:text-white transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
@@ -44,20 +44,20 @@
         <div class="flex-1 overflow-y-auto p-4 space-y-5" id="ai-chat-messages" @click="handleChatClick($event)">
             <!-- Intro message -->
             <div class="flex justify-start">
-                <div class="bg-gray-100 dark:bg-[#1e1e22] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] text-sm shadow-sm leading-relaxed">
+                <div class="bg-slate-100/80 dark:bg-[#1e1e22] text-slate-800 dark:text-gray-300 border border-slate-200/60 dark:border-gray-800/80 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] text-sm shadow-sm leading-relaxed">
                     Hello! I'm the Region 6 AI Assistant. I can answer questions about the investment and economic profile using only the data found in this project.<br><br>What would you like to know?
                 </div>
             </div>
 
             <template x-for="(msg, index) in messages" :key="index">
                 <div :class="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
-                    <div :class="msg.role === 'user' ? 'bg-emerald-600 text-white rounded-2xl rounded-tr-sm' : 'bg-gray-100 dark:bg-[#1e1e22] text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-800 rounded-2xl rounded-tl-sm'"
+                    <div :class="msg.role === 'user' ? 'bg-emerald-600 text-[#ffffff] rounded-2xl rounded-tr-sm' : 'bg-slate-100/80 dark:bg-[#1e1e22] text-slate-800 dark:text-gray-200 border border-slate-200/60 dark:border-gray-800/80 rounded-2xl rounded-tl-sm'"
                          class="px-4 py-3 max-w-[85%] text-sm shadow-sm whitespace-pre-wrap leading-relaxed"><span x-show="msg.role === 'user'" x-text="msg.content"></span><span x-show="msg.role !== 'user'" x-html="formatContent(msg.content)"></span></div>
                 </div>
             </template>
             
             <div x-show="isLoading" class="flex justify-start">
-                <div class="bg-gray-100 dark:bg-[#1e1e22] border border-gray-200 dark:border-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 min-w-[60px] flex items-center justify-center gap-1.5 h-[46px]">
+                <div class="bg-slate-100/80 dark:bg-[#1e1e22] border border-slate-200/60 dark:border-gray-800/80 rounded-2xl rounded-tl-sm px-4 py-3 min-w-[60px] flex items-center justify-center gap-1.5 h-[46px]">
                     <div class="w-1.5 h-1.5 rounded-full bg-emerald-500/60 animate-bounce" style="animation-delay: 0s"></div>
                     <div class="w-1.5 h-1.5 rounded-full bg-emerald-500/60 animate-bounce" style="animation-delay: 0.2s"></div>
                     <div class="w-1.5 h-1.5 rounded-full bg-emerald-500/60 animate-bounce" style="animation-delay: 0.4s"></div>
@@ -66,10 +66,10 @@
         </div>
 
         <!-- Input Area -->
-        <div class="p-3 bg-gray-50 dark:bg-[#111113] border-t border-gray-200 dark:border-gray-800 relative z-10 w-full">
+        <div class="p-3 bg-slate-50 dark:bg-[#111113] border-t border-slate-200/80 dark:border-gray-800 relative z-10 w-full">
             <form @submit.prevent.stop="sendMessage" class="relative flex items-center">
                 <input type="text" x-model="question" placeholder="Ask about Region 6..." 
-                       class="w-full bg-white dark:bg-[#18181b] text-slate-800 dark:text-white border border-gray-200 dark:border-gray-800/80 rounded-xl py-3.5 pl-4 pr-12 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/30 text-[13px] placeholder-gray-400 dark:placeholder-gray-600 transition-all font-medium"
+                       class="w-full bg-arbitra-dark dark:bg-[#18181b] text-slate-800 dark:text-white border border-slate-200 dark:border-gray-800/80 rounded-xl py-3.5 pl-4 pr-12 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/30 text-[13px] placeholder-slate-400 dark:placeholder-gray-600 transition-all font-medium"
                        :disabled="isLoading"
                        autocomplete="off">
                 <button type="submit" 
@@ -81,9 +81,9 @@
                 </button>
             </form>
             <div class="w-full flex justify-center mt-2 pb-0.5">
-                <div class="px-2 py-0.5 bg-yellow-500/10 rounded border border-yellow-500/20 inline-flex items-center gap-1.5">
-                    <div class="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
-                    <span class="text-[9.5px] font-bold text-yellow-500/90 uppercase tracking-widest">Strictly limited to site content</span>
+                <div class="px-2 py-0.5 bg-amber-500/10 dark:bg-yellow-500/10 rounded border border-amber-500/20 dark:border-yellow-500/20 inline-flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-yellow-500"></div>
+                    <span class="text-[9.5px] font-bold text-amber-800 dark:text-yellow-500/90 uppercase tracking-widest">Strictly limited to site content</span>
                 </div>
             </div>
         </div>
@@ -114,7 +114,7 @@
                 // Match markdown links [Text](#anchor)
                 const markdownLinkRegex = /\[([^\]]+)\]\((#[a-z0-9\-]+)\)/gi;
                 return escaped.replace(markdownLinkRegex, (match, text, anchor) => {
-                    return `<a href="${anchor}" class="text-emerald-400 hover:text-emerald-300 font-bold underline decoration-dotted transition-colors">${text}</a>`;
+                    return `<a href="${anchor}" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-bold underline decoration-dotted transition-colors">${text}</a>`;
                 });
             },
 
