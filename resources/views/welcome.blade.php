@@ -1250,7 +1250,7 @@
     </script>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-[400] bg-arbitra-dark border-b border-white/5 py-3 md:py-4 transition-all duration-500"
+    <nav class="fixed top-0 w-full z-[400] bg-arbitra-dark py-3 md:py-4 transition-all duration-500"
          :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '260px' : '64px') : ''">
         <div class="max-w-[1240px] mx-auto px-4 md:px-8 flex items-center justify-between">
             <div class="flex items-center gap-3 md:gap-4">
@@ -1265,12 +1265,6 @@
                 <h1 class="text-[9px] md:text-sm font-black tracking-tight uppercase block max-w-[120px] md:max-w-none leading-tight">{{ isset($meta) && !empty(data_get($meta->content, 'site_title')) ? data_get($meta->content, 'site_title') : 'Western Visayas: Investment and Economic Profile' }}</h1>
             </div>
             
-            <!-- Desktop Nav -->
-            <div class="hidden md:flex items-center gap-6 bg-white/5 px-6 py-2 rounded-full border border-white/5 overflow-x-auto max-w-[400px] no-scrollbar">
-                @foreach(collect($sidebarNav)->take(5) as $nav)
-                    <a href="#{{ $nav['id'] }}" class="nav-link text-[10px] font-black uppercase tracking-widest whitespace-nowrap">{{ strtoupper($nav['name']) }}</a>
-                @endforeach
-            </div>
             
             <!-- Right Side Actions -->
             <div class="flex items-center gap-2 md:gap-3">
@@ -1464,7 +1458,7 @@
                                         {{ data_get($content->content, 'description', '') }}
                                     </p>
                                 </div>
-                                <div class="pt-8 mt-auto border-t border-white/5">
+                                <div class="pt-8 mt-auto">
                                     <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block mb-1">Source</span>
                                     <p class="text-xs text-arbitra-emerald font-bold">{{ $content->source ?? 'DTI Region 6' }}</p>
                                 </div>
@@ -1492,7 +1486,7 @@
                     <div x-data="{ hovered: false }" 
                          @mouseenter="hovered = true" 
                          @mouseleave="hovered = false"
-                         class="relative overflow-hidden whitespace-nowrap py-10 border-y border-white/5 transition duration-500">
+                         class="relative overflow-hidden whitespace-nowrap py-10 transition duration-500">
                         <div class="inline-block animate-marquee transition-all duration-500" :class="hovered ? 'scale-[1.1] text-arbitra-emerald' : ''">
                             @php $firms = data_get($content->content, 'items', []); @endphp
                             @foreach(array_merge($firms, $firms, $firms) as $firm)
@@ -1505,7 +1499,7 @@
 
                 @elseif($content->type === 'stats_grid')
                     <section id="{{ $sectionId }}" class="scroll-mt-32 pb-20 mb-20">
-                        <div class="section-header border-b border-white/5 pb-4 mb-10 justify-between items-end">
+                        <div class="section-header pb-4 mb-10 justify-between items-end">
                             <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
                             <div class="hidden md:block text-right">
                                 <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block">Source</span>
@@ -1563,7 +1557,7 @@
                                     {{ data_get($content->content, 'modal_text', 'Detailed statistical analysis of the regional performance.') }}
                                 </p>
                             </div>
-                            <div class="pt-8 border-t border-white/5">
+                            <div class="pt-8">
                                 <span class="text-[10px] font-bold text-arbitra-gray block mb-2 uppercase tracking-widest">Source</span>
                                 <p class="text-xs text-arbitra-emerald font-bold italic">{{ $content->source ?? 'DTI Region 6' }}</p>
                             </div>
@@ -1599,7 +1593,7 @@
 
                 @elseif($content->type === 'grid')
                     <section id="{{ $sectionId }}" class="scroll-mt-32 pb-20 mb-20">
-                        <div class="section-header border-b border-white/5 pb-4 mb-10 justify-between items-end">
+                        <div class="section-header pb-4 mb-10 justify-between items-end">
                             <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
                             <div class="hidden md:block text-right">
                                 <span class="text-[10px] font-bold text-arbitra-gray uppercase tracking-widest block">Source</span>
@@ -1628,7 +1622,7 @@
 
                 @elseif($content->type === 'list')
                     <section id="{{ $sectionId }}" class="scroll-mt-32 pb-20 mb-20">
-                        <div class="section-header border-b border-white/5 pb-4 mb-10">
+                        <div class="section-header pb-4 mb-10">
                             <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1680,7 +1674,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-arbitra-black border-t border-white/5 pt-12 md:pt-20 pb-10 px-4 md:px-8 transition-all duration-500"
+    <footer class="bg-arbitra-black pt-12 md:pt-20 pb-10 px-4 md:px-8 transition-all duration-500"
             :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '276px' : '80px') : ''">
         <div class="max-w-[1240px] mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
@@ -1734,7 +1728,7 @@
             </div>
 
             <!-- Bottom Footer -->
-            <div class="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
                 <p class="text-arbitra-gray text-[10px] font-bold uppercase tracking-widest">
                     &copy; {{ date('Y') }} DTI REGION 6. ALL RIGHTS RESERVED.
                 </p>
@@ -1879,7 +1873,7 @@
                                     <div class="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-arbitra-emerald/30 transition-all group">
                                         <!-- Title -->
                                         <template x-if="block.data.title">
-                                            <h4 class="text-sm font-black uppercase tracking-[0.2em] text-arbitra-emerald mb-6 pb-4 border-b border-white/5" x-text="block.data.title"></h4>
+                                            <h4 class="text-sm font-black uppercase tracking-[0.2em] text-arbitra-emerald mb-6 pb-4" x-text="block.data.title"></h4>
                                         </template>
                                         
                                         <!-- Bullet Points -->
@@ -1971,7 +1965,7 @@
             </div>
             
             <!-- Fixed Footer -->
-            <div class="shrink-0 p-6 md:px-16 md:py-8 border-t border-white/5 flex justify-end bg-arbitra-dark">
+            <div class="shrink-0 p-6 md:px-16 md:py-8 flex justify-end bg-arbitra-dark">
                 <button @click="modalOpen = false" class="bg-arbitra-emerald text-arbitra-black font-extrabold px-10 py-3 rounded-full hover:brightness-110 transition uppercase text-sm tracking-widest">
                     GO BACK
                 </button>
@@ -2107,7 +2101,7 @@
                 </section>
             </div>
             
-            <div class="mt-10 pt-8 border-t border-white/5 flex justify-end">
+            <div class="mt-10 pt-8 flex justify-end">
                 <button @click="policyOpen = false" class="bg-arbitra-emerald text-arbitra-black font-extrabold px-10 py-3 rounded-full hover:brightness-110 transition uppercase text-xs tracking-widest">
                     CLOSE
                 </button>
@@ -2162,7 +2156,7 @@
                 </section>
             </div>
             
-            <div class="mt-10 pt-8 border-t border-white/5 flex justify-end">
+            <div class="mt-10 pt-8 flex justify-end">
                 <button @click="termsOpen = false" class="bg-arbitra-emerald text-arbitra-black font-extrabold px-10 py-3 rounded-full hover:brightness-110 transition uppercase text-xs tracking-widest">
                     CLOSE
                 </button>
