@@ -1,5 +1,65 @@
 @import 'tailwindcss';
 
+:root {
+    --arbitra-black: 241, 245, 249; /* #F1F5F9 (formal slate background) */
+    --arbitra-dark: 255, 255, 255;  /* #FFFFFF (solid white background for cards/nav) */
+    --arbitra-gray: 100, 116, 139;  /* Slate-500 text-muted */
+    --text-white: 15, 23, 42;       /* Slate-900 primary text */
+    
+    --body-bg: #F1F5F9;
+    --body-text: #334155;
+    
+    --bento-bg: #FFFFFF;
+    --bento-border: #E2E8F0;
+    --bento-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.02);
+    --bento-hover-border: rgba(16, 185, 129, 0.5);
+    --bento-hover-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+    
+    --pop-bg: rgba(16, 185, 129, 0.05);
+    --pop-border: rgba(16, 185, 129, 0.15);
+    --pop-hover-bg: #10b981;
+    --pop-hover-text: #FFFFFF;
+    
+    --scrollbar-track: #E2E8F0;
+    --scrollbar-thumb: #CBD5E1;
+    --scrollbar-thumb-border: #E2E8F0;
+    
+    --map-tile-filter: none;
+    --map-popup-bg: #FFFFFF;
+    --map-popup-text: #0F172A;
+    --map-popup-border: #E2E8F0;
+}
+
+html.dark {
+    --arbitra-black: 10, 10, 10;     /* #0A0A0A dark background */
+    --arbitra-dark: 15, 23, 42;     /* #0F172A Slate-900 cards/nav bg */
+    --arbitra-gray: 148, 163, 184;  /* Slate-400 text-muted */
+    --text-white: 255, 255, 255;    /* White text */
+    
+    --body-bg: #0A0A0A;
+    --body-text: #E2E8F0;
+    
+    --bento-bg: #0F172A;
+    --bento-border: rgba(255, 255, 255, 0.08);
+    --bento-shadow: none;
+    --bento-hover-border: rgba(16, 185, 129, 0.6);
+    --bento-hover-shadow: none;
+    
+    --pop-bg: rgba(16, 185, 129, 0.1);
+    --pop-border: rgba(16, 185, 129, 0.2);
+    --pop-hover-bg: #10b981;
+    --pop-hover-text: #000000;
+    
+    --scrollbar-track: #0B0B0B;
+    --scrollbar-thumb: #1C1C1C;
+    --scrollbar-thumb-border: #2C2C2C;
+    
+    --map-tile-filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+    --map-popup-bg: #0F172A;
+    --map-popup-text: #FFFFFF;
+    --map-popup-border: rgba(255, 255, 255, 0.1);
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';

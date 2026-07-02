@@ -25,18 +25,29 @@
     <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
     
     <script>
+        // Check local storage or default to light theme
+        if (localStorage.getItem('color-theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                     },
                     colors: {
+                        white: 'rgb(var(--text-white))',
                         arbitra: {
-                            black: '#000000',
-                            dark: '#0A0A0A',
+                            black: 'rgb(var(--arbitra-black))',
+                            dark: 'rgb(var(--arbitra-dark))',
                             emerald: '#10b981',
-                            gray: '#888888',
+                            gray: 'rgb(var(--arbitra-gray))',
                         }
                     },
                     borderRadius: {
@@ -48,32 +59,100 @@
     </script>
     
     <style>
+        :root {
+            --arbitra-black: 241, 245, 249; /* #F1F5F9 (formal slate background) */
+            --arbitra-dark: 255, 255, 255;  /* #FFFFFF (solid white background for cards/nav) */
+            --arbitra-gray: 100, 116, 139;  /* Slate-500 text-muted */
+            --text-white: 15, 23, 42;       /* Slate-900 primary text */
+            
+            --body-bg: #F1F5F9;
+            --body-text: #334155;
+            
+            --bento-bg: #FFFFFF;
+            --bento-border: #E2E8F0;
+            --bento-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.02);
+            --bento-hover-border: rgba(16, 185, 129, 0.5);
+            --bento-hover-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+            
+            --pop-bg: rgba(16, 185, 129, 0.05);
+            --pop-border: rgba(16, 185, 129, 0.15);
+            --pop-hover-bg: #10b981;
+            --pop-hover-text: #FFFFFF;
+            
+            --scrollbar-track: #E2E8F0;
+            --scrollbar-thumb: #CBD5E1;
+            --scrollbar-thumb-border: #E2E8F0;
+            
+            --map-tile-filter: none;
+            --map-popup-bg: #FFFFFF;
+            --map-popup-text: #0F172A;
+            --map-popup-border: #E2E8F0;
+
+            --sidebar-btn-hover: rgba(15, 23, 42, 0.04);
+            --sidebar-icon-color: #64748B;
+            --sidebar-label-color: #334155;
+        }
+
+        html.dark {
+            --arbitra-black: 10, 10, 10;     /* #0A0A0A dark background */
+            --arbitra-dark: 15, 23, 42;     /* #0F172A Slate-900 cards/nav bg */
+            --arbitra-gray: 148, 163, 184;  /* Slate-400 text-muted */
+            --text-white: 255, 255, 255;    /* White text */
+            
+            --body-bg: #0A0A0A;
+            --body-text: #E2E8F0;
+            
+            --bento-bg: #0F172A;
+            --bento-border: rgba(255, 255, 255, 0.08);
+            --bento-shadow: none;
+            --bento-hover-border: rgba(16, 185, 129, 0.6);
+            --bento-hover-shadow: none;
+            
+            --pop-bg: rgba(16, 185, 129, 0.1);
+            --pop-border: rgba(16, 185, 129, 0.2);
+            --pop-hover-bg: #10b981;
+            --pop-hover-text: #000000;
+            
+            --scrollbar-track: #0B0B0B;
+            --scrollbar-thumb: #1C1C1C;
+            --scrollbar-thumb-border: #2C2C2C;
+            
+            --map-tile-filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+            --map-popup-bg: #0F172A;
+            --map-popup-text: #FFFFFF;
+            --map-popup-border: rgba(255, 255, 255, 0.1);
+
+            --sidebar-btn-hover: rgba(255, 255, 255, 0.04);
+            --sidebar-icon-color: rgba(255, 255, 255, 0.35);
+            --sidebar-label-color: rgba(255, 255, 255, 0.7);
+        }
+
         body { 
-            background-color: #000000; 
-            color: #FFFFFF; 
+            background-color: var(--body-bg); 
+            color: var(--body-text); 
             font-size: 14px;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         [x-cloak] { display: none !important; }
         
         .bento-card {
-            background: rgba(28, 28, 30, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bento-bg);
+            border-radius: 1rem;
+            border: 1px solid var(--bento-border);
+            box-shadow: var(--bento-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
         @media (min-width: 768px) {
-            .bento-card { border-radius: 2rem; }
+            .bento-card { border-radius: 1.25rem; }
         }
         
         .bento-card:hover {
-            border-color: rgba(16, 185, 129, 0.6);
+            border-color: var(--bento-hover-border);
             transform: translateY(-4px);
-            box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 40px -20px var(--bento-hover-shadow);
         }
         
         /* Mobile touch - no hover transform */
@@ -88,7 +167,7 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: rgba(16, 185, 129, 0.1);
+            background: var(--pop-bg);
             color: #10b981;
             display: flex;
             align-items: center;
@@ -96,12 +175,12 @@
             font-weight: 800;
             font-size: 20px;
             transition: all 0.3s ease;
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--pop-border);
         }
         
         .bento-card:hover .pop-indicator {
-            background: #10b981;
-            color: #000000;
+            background: var(--pop-hover-bg);
+            color: var(--pop-hover-text);
             transform: rotate(90deg);
         }
 
@@ -112,8 +191,8 @@
         
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0B0B0B; }
-        ::-webkit-scrollbar-thumb { background: #1C1C1C; border-radius: 3px; border: 1px solid #2C2C2C; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; border: 1px solid var(--scrollbar-thumb-border); }
         
         .emerald-text { color: #10b981; }
         
@@ -144,17 +223,17 @@
         }
         
         .nav-link:hover, .nav-link.active {
-            color: #FFFFFF;
+            color: rgb(var(--text-white));
         }
         
-        /* Dark Mode Map Tiles */
+        /* Dark/Light Mode Map Tiles */
         .map-tiles {
-            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+            filter: var(--map-tile-filter);
         }
         .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-            background-color: #0A0A0A;
-            color: #FFFFFF;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--map-popup-bg);
+            color: var(--map-popup-text);
+            border: 1px solid var(--map-popup-border);
         }
         /* ===== MOBILE APP EXPERIENCE ===== */
         @media (max-width: 767px) {
@@ -283,18 +362,20 @@
         /* ===== COLLAPSIBLE SIDEBAR ===== */
         .sidebar-panel {
             position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
+            left: 1rem;
+            top: 6.5rem;
             z-index: 500;
             display: flex;
             flex-direction: column;
-            background: rgba(10, 10, 10, 0.85);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            background: var(--bento-bg);
+            border: 1px solid var(--bento-border);
+            border-radius: 1.25rem;
+            box-shadow: var(--bento-shadow);
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: visible;
+            height: auto;
+            max-height: calc(100vh - 8.5rem);
+            overscroll-behavior: contain;
         }
 
         /* Expanded state */
@@ -306,16 +387,22 @@
         .sidebar-panel.is-collapsed {
             width: 4rem;
         }
+        .sidebar-panel.is-collapsed .sidebar-nav-list {
+            padding: 1.25rem 0.75rem;
+        }
 
         .sidebar-nav-list {
             flex: 1;
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
-            padding: 5rem 1.25rem 1rem 0.75rem;
+            padding: 1.25rem 1.25rem 1.25rem 1.75rem;
             overflow-y: auto;
             overflow-x: hidden;
+            overscroll-behavior: contain;
+            position: relative;
         }
+
 
         .sidebar-nav-list::-webkit-scrollbar { width: 0; }
         .sidebar-nav-list { scrollbar-width: none; }
@@ -330,10 +417,32 @@
             border-radius: 0.75rem;
             transition: background 0.2s ease;
             min-height: 2.5rem;
+            z-index: 10;
+        }
+        .sidebar-btn::before {
+            content: '';
+            position: absolute;
+            left: -0.5rem;
+            top: 0.5rem;
+            bottom: 0.5rem;
+            width: 3px;
+            background: transparent;
+            border-radius: 9999px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scaleY(0);
+            z-index: 12;
+        }
+        .sidebar-panel.is-collapsed .sidebar-btn::before {
+            display: none;
+        }
+        .sidebar-btn.active::before {
+            background: #10b981;
+            transform: scaleY(1);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
         }
 
         .sidebar-btn:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: var(--sidebar-btn-hover);
         }
         
         .sidebar-icon {
@@ -342,7 +451,7 @@
             min-width: 2.25rem;
             border-radius: 50%;
             background: transparent;
-            color: rgba(255, 255, 255, 0.35);
+            color: var(--sidebar-icon-color);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -358,7 +467,7 @@
         }
         
         .sidebar-label {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--sidebar-label-color);
             font-size: 0.65rem;
             font-weight: 800;
             text-transform: uppercase;
@@ -689,11 +798,29 @@
             }
         };
 
+        window.myCharts = window.myCharts || [];
+        window.updateChartsTheme = function(isDark) {
+            window.myCharts.forEach(function(item) {
+                let colors = isDark 
+                    ? ['#10b981', '#FFFFFF', '#334155'] 
+                    : ['#10b981', '#0F172A', '#E2E8F0'];
+                item.chart.updateOptions({
+                    theme: { mode: isDark ? 'dark' : 'light' },
+                    tooltip: { theme: isDark ? 'dark' : 'light' },
+                    grid: { borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+                    xaxis: { labels: { style: { colors: isDark ? '#94a3b8' : '#475569' } } },
+                    yaxis: { labels: { style: { colors: isDark ? '#94a3b8' : '#475569' } } },
+                    colors: colors
+                });
+            });
+        };
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('app', () => ({
                 mobileSidebarOpen: false,
                 desktopSidebarOpen: true,
                 activeSection: 'hero',
+                scrollProgressPercent: 0,
                 activeTab: 'hero',
                 sidebarNavIds: @json(collect($sidebarNav)->pluck('id')),
                 modalOpen: false,
@@ -715,6 +842,20 @@
                 selectedIndex: 0,
                 highlightMarker: null,
                 map: null,
+                darkTheme: document.documentElement.classList.contains('dark'),
+                toggleTheme() {
+                    if (document.documentElement.classList.contains('dark')) {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('color-theme', 'light');
+                        this.darkTheme = false;
+                        if (window.updateChartsTheme) window.updateChartsTheme(false);
+                    } else {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('color-theme', 'dark');
+                        this.darkTheme = true;
+                        if (window.updateChartsTheme) window.updateChartsTheme(true);
+                    }
+                },
                 init() {
                     this.buildSearchIndex();
                     
@@ -1056,6 +1197,10 @@
                     }
                 },
                 handleScroll() {
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                    this.scrollProgressPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+
                     const sections = this.sidebarNavIds || [];
                     for (const id of sections) {
                         const el = document.getElementById(id);
@@ -1105,12 +1250,12 @@
     </script>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-[400] bg-arbitra-black/80 backdrop-blur-xl border-b border-white/5 py-3 md:py-4 transition-all duration-500"
+    <nav class="fixed top-0 w-full z-[400] bg-arbitra-dark border-b border-white/5 py-3 md:py-4 transition-all duration-500"
          :style="window.innerWidth >= 768 ? 'padding-left: ' + (desktopSidebarOpen ? '260px' : '64px') : ''">
         <div class="max-w-[1240px] mx-auto px-4 md:px-8 flex items-center justify-between">
             <div class="flex items-center gap-3 md:gap-4">
                 <!-- Mobile Sidebar Burger -->
-                <button @click="mobileSidebarOpen = !mobileSidebarOpen" class="flex md:hidden flex-col items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl transition-all active:scale-95">
+                <button @click="mobileSidebarOpen = !mobileSidebarOpen" class="flex md:hidden flex-col items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 transition-all active:scale-95">
                     <svg x-show="!mobileSidebarOpen" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     <svg x-show="mobileSidebarOpen" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
@@ -1206,7 +1351,7 @@
                     @endif
                 </div>
 
-                <!-- Mobile Actions (PDF/Connect) -->
+                <!-- Mobile Actions (PDF/Connect/Theme) -->
                 <div class="flex md:hidden items-center gap-2">
                     <a href="/download-profile/{{ rawurlencode($selectedYear) }}" 
                        class="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-arbitra-gray"
@@ -1215,6 +1360,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </a>
+                    <button @click="toggleTheme()" 
+                            class="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-arbitra-gray"
+                            title="Toggle Theme">
+                        <svg x-show="darkTheme" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path>
+                        </svg>
+                        <svg x-show="!darkTheme" class="w-4 h-4 text-arbitra-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
                     <button @click="contactOpen = true; contactSuccess = false" class="bg-arbitra-emerald text-arbitra-black p-2 rounded-full hover:scale-105 transition active:scale-95">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                     </button>
@@ -1222,6 +1377,17 @@
 
                 <!-- Desktop Tools -->
                 <div class="hidden md:flex items-center gap-3">
+                    <button @click="toggleTheme()" 
+                            class="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-arbitra-gray hover:text-arbitra-emerald hover:border-arbitra-emerald/50 transition-all active:scale-95"
+                            title="Toggle Theme">
+                        <svg x-show="darkTheme" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path>
+                        </svg>
+                        <svg x-show="!darkTheme" class="w-5 h-5 text-arbitra-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+
                     <div class="relative group">
                         <a href="/download-profile/{{ rawurlencode($selectedYear) }}" 
                            class="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-arbitra-gray hover:text-arbitra-emerald hover:border-arbitra-emerald/50 transition-all"
@@ -1338,7 +1504,7 @@
                     </div>
 
                 @elseif($content->type === 'stats_grid')
-                    <section id="{{ $sectionId }}" class="scroll-mt-32 border-b border-white/5 pb-20 mb-20">
+                    <section id="{{ $sectionId }}" class="scroll-mt-32 pb-20 mb-20">
                         <div class="section-header border-b border-white/5 pb-4 mb-10 justify-between items-end">
                             <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
                             <div class="hidden md:block text-right">
@@ -1376,7 +1542,7 @@
                     </section>
 
                 @elseif($content->type === 'chart')
-                    <section id="{{ $sectionId }}" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-20 border-b border-white/5 pb-20 scroll-mt-32">
+                    <section id="{{ $sectionId }}" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-20 pb-20 scroll-mt-32">
                         <div class="lg:col-span-2 bento-card p-6 md:p-12">
                             <div class="flex items-center justify-between mb-12">
                                 <div>
@@ -1390,7 +1556,7 @@
                             </div>
                             <div id="chart-{{ $content->id }}" class="w-full"></div>
                         </div>
-                        <div class="bento-card p-6 md:p-10 flex flex-col justify-between bg-gradient-to-br from-arbitra-dark to-[#151515]">
+                        <div class="bento-card p-6 md:p-10 flex flex-col justify-between bg-gradient-to-br from-arbitra-dark to-arbitra-black">
                             <div>
                                 <h3 class="text-sm font-bold text-arbitra-gray uppercase tracking-[0.2em] mb-8">INSIGHTS</h3>
                                 <p class="text-base text-white/80 leading-relaxed font-medium">
@@ -1404,28 +1570,35 @@
                         </div>
                         <script>
                             document.addEventListener('DOMContentLoaded', function () {
+                                var isDarkTheme = document.documentElement.classList.contains('dark');
                                 var options = {
                                     series: @json(data_get($content->content, 'series', [])),
                                     chart: { type: '{{ data_get($content->content, 'chart_type', 'bar') }}', height: 400, fontFamily: 'Inter, sans-serif', toolbar: { show: false }, background: 'transparent' },
-                                    theme: { mode: 'dark' },
+                                    theme: { mode: isDarkTheme ? 'dark' : 'light' },
                                     plotOptions: { bar: { horizontal: {{ !empty(data_get($content->content, 'horizontal')) ? 'true' : 'false' }}, borderRadius: 2, columnWidth: '50%', distributed: {{ count((array)data_get($content->content, 'series', [])) <= 1 ? 'true' : 'false' }} } },
-                                    grid: { borderColor: 'rgba(255,255,255,0.05)' },
-                                    xaxis: { categories: @json(data_get($content->content, 'categories', [])), labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
-                                    yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '11px' } } },
-                                    colors: ['#10b981', '#FFFFFF', '#334155'],
+                                    grid: { borderColor: isDarkTheme ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+                                    xaxis: { categories: @json(data_get($content->content, 'categories', [])), labels: { style: { colors: isDarkTheme ? '#94a3b8' : '#475569', fontSize: '11px' } } },
+                                    yaxis: { labels: { style: { colors: isDarkTheme ? '#94a3b8' : '#475569', fontSize: '11px' } } },
+                                    colors: isDarkTheme ? ['#10b981', '#FFFFFF', '#334155'] : ['#10b981', '#0F172A', '#E2E8F0'],
                                     dataLabels: { enabled: false },
                                     stroke: { width: 2, curve: 'smooth' },
                                     fill: { opacity: 0.9 },
-                                    tooltip: { theme: 'dark' }
+                                    tooltip: { theme: isDarkTheme ? 'dark' : 'light' }
                                 };
                                 var chart = new ApexCharts(document.querySelector("#chart-{{ $content->id }}"), options);
                                 chart.render();
+                                
+                                window.myCharts = window.myCharts || [];
+                                window.myCharts.push({
+                                    id: "#chart-{{ $content->id }}",
+                                    chart: chart
+                                });
                             });
                         </script>
                     </section>
 
                 @elseif($content->type === 'grid')
-                    <section id="{{ $sectionId }}" class="scroll-mt-32 border-b border-white/5 pb-20 mb-20">
+                    <section id="{{ $sectionId }}" class="scroll-mt-32 pb-20 mb-20">
                         <div class="section-header border-b border-white/5 pb-4 mb-10 justify-between items-end">
                             <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
                             <div class="hidden md:block text-right">
@@ -1454,7 +1627,7 @@
                     </section>
 
                 @elseif($content->type === 'list')
-                    <section id="{{ $sectionId }}" class="scroll-mt-32 pb-20 mb-20 border-b border-white/5">
+                    <section id="{{ $sectionId }}" class="scroll-mt-32 pb-20 mb-20">
                         <div class="section-header border-b border-white/5 pb-4 mb-10">
                             <h2 class="font-black uppercase tracking-tight">{{ $content->section_title }}</h2>
                         </div>
@@ -1672,7 +1845,7 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
         
-        <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="modalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/60" @click="modalOpen = false"></div>
         
         <div class="relative bg-arbitra-dark max-w-2xl w-full rounded-t-[2rem] md:rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden max-h-[85vh] flex flex-col"
              x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
@@ -1826,7 +1999,7 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
         
-        <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="contactOpen = false"></div>
+        <div class="absolute inset-0 bg-black/60" @click="contactOpen = false"></div>
         
         <div class="relative bg-arbitra-dark max-w-lg w-full p-8 md:p-12 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] max-h-[90vh] overflow-y-auto"
              x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
@@ -1898,7 +2071,7 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
         
-        <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="policyOpen = false"></div>
+        <div class="absolute inset-0 bg-black/60" @click="policyOpen = false"></div>
         
         <div class="relative bg-arbitra-dark max-w-3xl w-full p-8 md:p-12 lg:p-16 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] max-h-[90vh] overflow-y-auto"
              x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
@@ -1953,7 +2126,7 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
         
-        <div class="absolute inset-0 bg-arbitra-black/98 backdrop-blur-3xl" @click="termsOpen = false"></div>
+        <div class="absolute inset-0 bg-black/60" @click="termsOpen = false"></div>
         
         <div class="relative bg-arbitra-dark max-w-3xl w-full p-8 md:p-12 lg:p-16 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] max-h-[90vh] overflow-y-auto"
              x-transition:enter="transition ease-out duration-500 transform scale-95 opacity-0"
@@ -2038,6 +2211,13 @@
 
         <!-- Nav Items -->
         <div class="sidebar-nav-list">
+            <!-- Dynamic Scroll Progress Line -->
+            <div class="absolute left-[1.25rem] top-6 bottom-6 w-[2px] bg-slate-200 dark:bg-white/10 pointer-events-none rounded transition-all duration-300"
+                 :class="desktopSidebarOpen ? 'opacity-100' : 'opacity-0'"
+                 style="background-color: var(--bento-border)">
+                <div class="w-full bg-arbitra-emerald absolute top-0 left-0 transition-all duration-75 rounded"
+                     :style="'height: ' + scrollProgressPercent + '%'"></div>
+            </div>
             @foreach($sidebarNav as $nav)
                 @php $safeName = str_replace("'", "\\'", $nav['name']); @endphp
                 <a href="#{{ $nav['id'] }}" 
