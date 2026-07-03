@@ -794,7 +794,7 @@
             points.forEach(point => {
                 L.marker([point.lat, point.lng], {icon: emeraldIcon})
                     .addTo(window.currentModalMap)
-                    .bindPopup(`<b style="color:#FFFFFF; font-size: 13px; text-transform: uppercase;">${point.label}</b>`);
+                    .bindPopup(`<b style="color:var(--map-popup-text); font-size: 13px; text-transform: uppercase;">${point.label}</b>`);
                 
                 bounds.push([point.lat, point.lng]);
             });
@@ -999,7 +999,7 @@
                     points.forEach(point => {
                         const m = L.marker([point.lat, point.lng], {icon: emeraldIcon})
                             .addTo(this.map)
-                            .bindPopup(`<b style="color:#FFFFFF; font-size: 13px; text-transform: uppercase;">${point.label}</b>`);
+                            .bindPopup(`<b style="color:var(--map-popup-text); font-size: 13px; text-transform: uppercase;">${point.label}</b>`);
                         
                         // Auto-open popup if this is the highlighted marker
                         if (this.highlightMarker && point.label.toLowerCase().includes(this.highlightMarker.toLowerCase())) {
@@ -1620,8 +1620,12 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             @foreach((data_get($content->content, 'items', [])) as $item)
-                                @php $hasModal = !empty(data_get($item, 'modal_details')); @endphp
-                                <div @if($hasModal) data-content="{{ json_encode(data_get($item, 'modal_details')) }}" data-title="{{ data_get($item, 'name') }}" @click="openFromEl($el)" @endif
+                                @php 
+                                    $hasModal = !empty(data_get($item, 'modal_details'));
+                                    $cardId = Str::slug(data_get($item, 'name', ''));
+                                @endphp
+                                <div id="{{ $cardId }}"
+                                     @if($hasModal) data-content="{{ json_encode(data_get($item, 'modal_details')) }}" data-title="{{ data_get($item, 'name') }}" @click="openFromEl($el)" @endif
                                      class="bento-card p-6 md:p-10 flex flex-col justify-between group {{ $hasModal ? 'cursor-pointer' : '' }}">
                                     <div class="flex justify-between items-start mb-6">
                                         <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-arbitra-emerald/50 group-hover:bg-arbitra-emerald/10 transition-all">
@@ -1929,15 +1933,10 @@
                     <!-- Legacy Fallback for dictionaries -->
                     <template x-if="!Array.isArray(modalContent)">
                          <div class="space-y-12">
-                            <div class="bg-arbitra-emerald/10 border border-arbitra-emerald/20 p-6 rounded-2xl">
-                                 <h4 class="text-sm font-black text-arbitra-emerald uppercase tracking-widest mb-2">Legacy Content Mode</h4>
-                                 <p class="text-sm text-white/70">This popup is still using the legacy format. Edit it in the dashboard to convert it to the new block system.</p>
-                            </div>
-                            
                             <!-- Leaflet Map Container (Fixed Position) -->
                             <template x-if="modalContent['Map Points']">
                                 <div class="w-full h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 mb-8">
-                                    <div id="leaflet-map" class="w-full h-full bg-arbitra-dark" x-init="$nextTick(() => { renderMapInstance('leaflet-map', modalContent['Map Points']) })"></div>
+                                    <div id="leaflet-map" class="w-full h-full bg-arbitra-dark" x-init="$nextTick(() => { if(window.renderModalMap) window.renderModalMap('leaflet-map', modalContent['Map Points']); })"></div>
                                 </div>
                             </template>
 

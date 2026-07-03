@@ -132,8 +132,11 @@
                 this.isOpen = false;
                 document.body.classList.remove('overflow-hidden');
 
-                // Find target element
-                const element = document.querySelector(targetId);
+                // Use getElementById — querySelector('#152-ports') throws DOMException
+                // because CSS selectors cannot start with a digit.
+                const rawId = targetId.startsWith('#') ? targetId.slice(1) : targetId;
+                const element = document.getElementById(rawId);
+
                 if (element) {
                     // Scroll to the element
                     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -144,14 +147,12 @@
                         element.classList.remove('ring-4', 'ring-emerald-500/50');
                     }, 2500);
 
-                    // Check if the element itself or any child has modal content to pop up
-                    const clickableEl = element.hasAttribute('data-content') 
-                        ? element 
-                        : element.querySelector('[data-content]');
-                    
-                    if (clickableEl) {
+                    // Only open a modal popup if the targeted element itself is a clickable card.
+                    // Do NOT auto-open the first child card — that would open the wrong popup
+                    // (e.g. airports when the user asked about ports).
+                    if (element.hasAttribute('data-content')) {
                         setTimeout(() => {
-                            clickableEl.click();
+                            element.click();
                         }, 800);
                     }
                 }

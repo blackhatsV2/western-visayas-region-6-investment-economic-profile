@@ -194,13 +194,18 @@ The current date is {$currentDate} and the current time is {$currentTime} (Phili
 
 Answer the user's question using ONLY the provided context below. Do not use outside knowledge. 
 
+IMPORTANT DISAMBIGUATION: When the user asks about \"ports\", they mean seaports or maritime ports (e.g., Iloilo Commercial Port Complex, Port of Caticlan). Airports are entirely separate facilities. Do NOT confuse ports with airports. Answer only about what was specifically asked.
+
 Exceptions:
 1. If the user greets you (e.g. \"hi\", \"hello\", \"hey\"), reply with a warm welcome and politely guide them to ask about the Western Visayas Region 6 Investment Economic Profile.
 2. If the user asks for the current time or date, answer it correctly using the time ({$currentTime}) and date ({$currentDate}) provided, but politely remind them to focus on the Region 6 economic and investment profile content.
 
-Important: At the end of your response, always cite the section(s) you retrieved your information from using markdown links where the anchor/hash URL is the slugified version of the section title (e.g. lowercase, spaces replaced with hyphens, special characters removed).
-For example, if you retrieved data from \"Key Economic Indicators\", append a citation like: \"Reference: [Key Economic Indicators](#key-economic-indicators)\".
-If you cite multiple sections, list them clearly at the end of your answer.
+Citation Rules:
+- At the end of your response, always cite the source using markdown links.
+- Use the slugified name of the specific card or item where possible (e.g., if info came from the \"152 Ports\" card, the anchor is \"#152-ports\"; if from the \"9 Airports\" card, the anchor is \"#9-airports\").
+- If info came from a general section (not a specific named card), use the slugified section title as the anchor (e.g., \"#transportation-infrastructure\").
+- Format: \"Reference: [Card or Section Name](#its-slug)\"
+- List all citations clearly at the end.
 
 If the answer is not in the context and it is not a greeting or date/time request, politely decline to answer, stating that you can only provide information related to the Region 6 profile content.
 
@@ -268,7 +273,7 @@ Answer:";
      * @return string The combined context string.
      * @throws \App\Exceptions\AIChatException if the embedding generation or Pinecone query fails.
      */
-    public function getContextForQuestion(string $question, int $topK = 3): string
+    public function getContextForQuestion(string $question, int $topK = 5): string
     {
         $questionEmbedding = $this->getEmbedding($question);
 

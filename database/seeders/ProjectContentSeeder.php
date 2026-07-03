@@ -357,15 +357,15 @@ class ProjectContentSeeder extends Seeder
                             'details' => '6 CAAP-operated, 3 Private (Sipalay, Sicogon, Semirara).',
                             'modal_details' => [
                                 'Map Points' => [
-                                    ['label' => 'Iloilo International Airport', 'lat' => 10.83, 'lng' => 122.54],
-                                    ['label' => 'Bacolod-Silay Airport', 'lat' => 10.77, 'lng' => 123.01],
-                                    ['label' => 'Kalibo International Airport', 'lat' => 11.69, 'lng' => 122.38],
-                                    ['label' => 'Roxas Airport', 'lat' => 11.60, 'lng' => 122.75],
-                                    ['label' => 'Antique Airport', 'lat' => 10.74, 'lng' => 121.93],
-                                    ['label' => 'Godofredo P. Ramos Airport (Caticlan)', 'lat' => 11.92, 'lng' => 121.95],
-                                    ['label' => 'Sipalay Airport', 'lat' => 9.78, 'lng' => 122.46],
-                                    ['label' => 'Sicogon Airport', 'lat' => 11.45, 'lng' => 123.25],
-                                    ['label' => 'Semirara Airport', 'lat' => 12.05, 'lng' => 121.37],
+                                    ['label' => 'Iloilo International Airport', 'lat' => 10.8330, 'lng' => 122.4936],
+                                    ['label' => 'Bacolod-Silay Airport', 'lat' => 10.7764, 'lng' => 123.0145],
+                                    ['label' => 'Kalibo International Airport', 'lat' => 11.6793, 'lng' => 122.3759],
+                                    ['label' => 'Roxas Airport (Capiz)', 'lat' => 11.5977, 'lng' => 122.7516],
+                                    ['label' => 'San Jose Airport (Antique)', 'lat' => 10.7660, 'lng' => 121.9309],
+                                    ['label' => 'Godofredo P. Ramos Airport (Caticlan)', 'lat' => 11.9246, 'lng' => 121.9530],
+                                    ['label' => 'Sipalay Airport', 'lat' => 9.7567, 'lng' => 122.4114],
+                                    ['label' => 'Sicogon Airport', 'lat' => 11.4333, 'lng' => 123.2500],
+                                    ['label' => 'Semirara Airport', 'lat' => 12.0638, 'lng' => 121.3742],
                                 ]
                             ]
                         ],
@@ -374,22 +374,53 @@ class ProjectContentSeeder extends Seeder
                             'details' => '49 Fishing, 69 Private Commercial, 23 Public, 11 Feeder.',
                             'modal_details' => [
                                 'Map Points' => [
-                                    ['label' => 'Iloilo Commercial Port Complex', 'lat' => 10.70, 'lng' => 122.57],
-                                    ['label' => 'Port of Dumangas', 'lat' => 10.81, 'lng' => 122.71],
-                                    ['label' => 'Port of Estancia', 'lat' => 11.45, 'lng' => 123.15],
-                                    ['label' => 'Port of Culasi (Roxas)', 'lat' => 11.61, 'lng' => 122.72],
-                                    ['label' => 'Port of Caticlan', 'lat' => 11.93, 'lng' => 121.95],
-                                    ['label' => 'Port of San Jose (Antique)', 'lat' => 10.74, 'lng' => 121.93],
-                                    ['label' => 'Jordan Wharf (Guimaras)', 'lat' => 10.66, 'lng' => 122.58],
-                                    ['label' => 'Bacolod Real Estate Development Corp. (BREDCO) Port', 'lat' => 10.67, 'lng' => 122.94],
-                                    ['label' => 'Banago Port (Bacolod)', 'lat' => 10.69, 'lng' => 122.95],
-                                    ['label' => 'Pulupandan Port', 'lat' => 10.52, 'lng' => 122.79],
+                                    // Iloilo Province – Public & Major Ports
+                                    ['label' => 'Iloilo Commercial Port Complex', 'lat' => 10.6936, 'lng' => 122.5724],
+                                    ['label' => 'Port of Dumangas', 'lat' => 10.8225, 'lng' => 122.7124],
+                                    ['label' => 'Port of Estancia', 'lat' => 11.4535, 'lng' => 123.1521],
+                                    ['label' => 'Port of San Joaquin (Iloilo)', 'lat' => 10.6015, 'lng' => 122.1319],
+                                    ['label' => 'Port of Batad (Iloilo)', 'lat' => 11.1897, 'lng' => 123.0199],
+                                    ['label' => 'Port of Sara (Iloilo)', 'lat' => 11.2651, 'lng' => 122.9167],
+                                    ['label' => 'Port of Concepcion (Iloilo)', 'lat' => 11.1981, 'lng' => 123.1308],
+                                    ['label' => 'Ortiz Wharf (Iloilo City)', 'lat' => 10.7002, 'lng' => 122.5683],
+                                    // Capiz Province
+                                    ['label' => 'Port of Culasi – Roxas City', 'lat' => 11.5875, 'lng' => 122.7547],
+                                    ['label' => 'Port of Pilar (Capiz)', 'lat' => 11.4973, 'lng' => 122.5817],
+                                    ['label' => 'Port of Dao (Capiz)', 'lat' => 11.3944, 'lng' => 122.6803],
+                                    ['label' => 'Port of Mambusao (Capiz)', 'lat' => 11.4131, 'lng' => 122.5822],
+                                    // Aklan Province
+                                    ['label' => 'Port of Caticlan', 'lat' => 11.9351, 'lng' => 121.9390],
+                                    ['label' => 'Port of Kalibo (Aklan)', 'lat' => 11.6946, 'lng' => 122.3571],
+                                    ['label' => 'Port of New Washington (Aklan)', 'lat' => 11.6468, 'lng' => 122.4307],
+                                    ['label' => 'Port of Altavas (Aklan)', 'lat' => 11.5716, 'lng' => 122.4980],
+                                    // Antique Province
+                                    ['label' => 'Port of San Jose (Antique)', 'lat' => 10.7552, 'lng' => 121.9330],
+                                    ['label' => 'Port of Libertad (Antique)', 'lat' => 11.3869, 'lng' => 121.9621],
+                                    ['label' => 'Port of Culasi (Antique)', 'lat' => 11.4289, 'lng' => 121.9066],
+                                    ['label' => 'Port of Pandan (Antique)', 'lat' => 11.7344, 'lng' => 122.0968],
+                                    // Guimaras Province
+                                    ['label' => 'Jordan Wharf (Guimaras)', 'lat' => 10.6645, 'lng' => 122.5823],
+                                    ['label' => 'Buenavista Port (Guimaras)', 'lat' => 10.8427, 'lng' => 122.6720],
+                                    ['label' => 'Nueva Valencia Port (Guimaras)', 'lat' => 10.5700, 'lng' => 122.6363],
+                                    ['label' => 'San Lorenzo Port (Guimaras)', 'lat' => 10.6879, 'lng' => 122.6285],
+                                    // Negros Occidental Province
+                                    ['label' => 'BREDCO Port (Bacolod City)', 'lat' => 10.6713, 'lng' => 122.9403],
+                                    ['label' => 'Banago Port (Bacolod City)', 'lat' => 10.6921, 'lng' => 122.9518],
+                                    ['label' => 'Pulupandan Port', 'lat' => 10.5199, 'lng' => 122.7981],
+                                    ['label' => 'Port of Escalante', 'lat' => 10.8421, 'lng' => 123.5011],
+                                    ['label' => 'Port of Sagay', 'lat' => 10.8945, 'lng' => 123.4177],
+                                    ['label' => 'Port of Cadiz', 'lat' => 10.9597, 'lng' => 123.3032],
+                                    ['label' => 'Port of Victorias', 'lat' => 10.9005, 'lng' => 123.0704],
+                                    ['label' => 'Port of Manapla', 'lat' => 10.9506, 'lng' => 123.1209],
+                                    ['label' => 'Port of Sipalay', 'lat' => 9.7557, 'lng' => 122.4113],
+                                    ['label' => 'Port of Hinobaan', 'lat' => 9.5265, 'lng' => 122.3283],
+                                    ['label' => 'Port of Kabankalan', 'lat' => 9.9897, 'lng' => 122.8156],
                                 ]
                             ]
                         ]
                     ]
                 ],
-                'source' => 'CAAP / Wikipedia / WV RSET'
+                'source' => 'PPA / CAAP / Wikipedia / WV RSET'
             ],
             // [Page 20] Telecom
             [
